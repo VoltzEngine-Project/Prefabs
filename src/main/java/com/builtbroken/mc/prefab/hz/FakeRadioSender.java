@@ -4,6 +4,7 @@ import com.builtbroken.mc.api.map.radio.IRadioWaveReceiver;
 import com.builtbroken.mc.api.map.radio.IRadioWaveSender;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.region.Cube;
+import com.builtbroken.mc.lib.world.radio.RadioRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -34,6 +35,12 @@ public class FakeRadioSender implements IRadioWaveSender
         {
             //player.addChatComponentMessage(new ChatComponentText("Received message with header " + header + " on band " + hz + "hz with data " + data));
         }
+    }
+
+    @Override
+    public void sendRadioMessage(float hz, String header, Object... data)
+    {
+        RadioRegistry.popMessage(world(), this, hz, header, data);
     }
 
     @Override
