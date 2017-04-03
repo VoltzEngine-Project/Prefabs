@@ -1,6 +1,6 @@
 package com.builtbroken.mc.prefab.tile.module;
 
-import com.builtbroken.mc.api.tile.IInventoryProvider;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.api.tile.ITileModuleProvider;
 import com.builtbroken.mc.api.tile.node.ITileModule;
 import com.builtbroken.mc.prefab.inventory.ExternalInventory;

@@ -1,6 +1,6 @@
 package com.builtbroken.mc.prefab.tile.traits
 
-import com.builtbroken.mc.api.tile.IInventoryProvider
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider
 import com.builtbroken.mc.prefab.tile.module.TileModuleInventory
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.{ISidedInventory, IInventory}

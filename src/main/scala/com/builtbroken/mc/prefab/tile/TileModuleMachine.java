@@ -3,7 +3,7 @@ package com.builtbroken.mc.prefab.tile;
 import com.builtbroken.mc.api.ISave;
 import com.builtbroken.mc.api.energy.IEnergyBufferProvider;
 import com.builtbroken.mc.api.tile.ConnectionType;
-import com.builtbroken.mc.api.tile.IInventoryProvider;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.api.tile.ITileConnection;
 import com.builtbroken.mc.api.tile.node.ITileModule;
 import com.builtbroken.mc.prefab.energy.EnergyBuffer;

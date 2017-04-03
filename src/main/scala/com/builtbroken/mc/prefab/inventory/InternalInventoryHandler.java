@@ -9,7 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-import com.builtbroken.mc.api.tile.IExtendedStorage;
+import com.builtbroken.mc.api.tile.access.IExtendedStorage;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.imp.transform.vector.Location;
 

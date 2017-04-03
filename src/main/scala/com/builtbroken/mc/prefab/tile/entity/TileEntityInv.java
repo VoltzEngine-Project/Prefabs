@@ -1,7 +1,7 @@
 package com.builtbroken.mc.prefab.tile.entity;
 
 import com.builtbroken.mc.api.ISave;
-import com.builtbroken.mc.api.tile.IInventoryProvider;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;

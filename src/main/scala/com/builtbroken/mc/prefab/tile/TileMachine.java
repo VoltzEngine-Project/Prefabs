@@ -1,6 +1,6 @@
 package com.builtbroken.mc.prefab.tile;
 
-import com.builtbroken.mc.api.tile.IRotation;
+import com.builtbroken.mc.api.tile.access.IRotation;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
