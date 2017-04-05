@@ -2,8 +2,11 @@ package com.builtbroken.mc.prefab.tile.listeners;
 
 import com.builtbroken.mc.api.tile.listeners.IBlockListener;
 import com.builtbroken.mc.api.tile.listeners.IPlacementListener;
+import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
+import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.lib.helper.BlockUtility;
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
@@ -20,6 +23,21 @@ public class RotatableListener extends TileListener implements IPlacementListene
         if (!setMeta(rotation, 3))
         {
             Engine.logger().error("Failed to set rotation for block at " + x() + "x," + y() + "y," + z() + "z,");
+        }
+    }
+
+    public static class Builder implements ITileEventListenerBuilder
+    {
+        @Override
+        public ITileEventListener createListener(Block block)
+        {
+            return new RotatableListener();
+        }
+
+        @Override
+        public String getListenerKey()
+        {
+            return "rotation";
         }
     }
 }
