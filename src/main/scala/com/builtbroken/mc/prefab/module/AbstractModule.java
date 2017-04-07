@@ -63,8 +63,14 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     @Override
     public void save(ItemStack stack)
     {
+        //Clear old data
+        stack.setTagCompound(null);
+
+        //Collect new data
         NBTTagCompound tagCompound = new NBTTagCompound();
         save(tagCompound);
+
+        //Add save tag if allowed
         if(saveTag())
         {
             tagCompound.setString(ModuleBuilder.SAVE_ID, getSaveID());
