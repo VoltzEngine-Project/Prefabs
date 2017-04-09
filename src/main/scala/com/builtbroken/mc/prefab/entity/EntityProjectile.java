@@ -349,7 +349,7 @@ public class EntityProjectile extends Entity implements IProjectile
 
     protected void onImpactEntity(Entity entityHit, float velocity, MovingObjectPosition hit)
     {
-        onImpactEntity(entityHit, getVelocity(), hit);
+        onImpactEntity(entityHit, getVelocity());
     }
 
     protected void onImpactEntity(Entity entityHit, float velocity)
