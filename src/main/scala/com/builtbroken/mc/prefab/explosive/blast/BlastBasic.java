@@ -8,9 +8,9 @@ import com.builtbroken.mc.api.event.blast.BlastEventDestroyBlock;
 import com.builtbroken.mc.api.explosive.IExplosive;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.imp.transform.sorting.Vector3DistanceComparator;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
 import com.builtbroken.mc.prefab.entity.selector.EntityDistanceSelector;
 import net.minecraft.block.Block;
@@ -86,8 +86,12 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
 
         //Start path finder
         profile.startSection("Pathfinder");
-        list.add(new BlockEdit(this, Blocks.air, 0));
-        triggerPathFinder(map, new BlockEdit(this.world, this.x, this.y, this.z), energy);
+        BlockEdit edit = new BlockEdit(this, Blocks.air, 0);
+        if (edit.getHardness() >= 0)
+        {
+            list.add(edit);
+        }
+        triggerPathFinder(map, edit, energy);
         profile.endSection("Pathfinder");
 
         //Add map keys to block list

@@ -201,42 +201,42 @@ public class EntityProjectile extends Entity implements IProjectile
             }
 
             //Do raytrace TODO move to prefab entity for reuse
-            Vec3 vec31 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            Vec3 vec3 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-            MovingObjectPosition movingobjectposition = this.worldObj.func_147447_a(vec31, vec3, false, true, false);
-            vec31 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            vec3 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            Vec3 rayStart = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+            Vec3 rayEnd = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            MovingObjectPosition rayHit = this.worldObj.func_147447_a(rayStart, rayEnd, false, true, false);
 
-            if (movingobjectposition != null)
+            //Reset data to do entity ray trace
+            rayStart = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+            rayEnd = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            if (rayHit != null)
             {
-                vec3 = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+                rayEnd = Vec3.createVectorHelper(rayHit.hitVec.xCoord, rayHit.hitVec.yCoord, rayHit.hitVec.zCoord);
             }
 
             //Handle entity collision boxes
             Entity entity = null;
             List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
-            double d0 = 0.0D;
-            int i;
-            float f1;
+            double distanceToHit = 0.0D;
+            float hitBoxSizeScale;
 
-            for (i = 0; i < list.size(); ++i)
+            for (int i = 0; i < list.size(); ++i)
             {
-                Entity entity1 = (Entity) list.get(i);
+                Entity checkEntity = (Entity) list.get(i);
 
-                if (entity1.canBeCollidedWith() && (entity1 != this.shootingEntity || this.ticksInAir >= 5))
+                if (shouldCollideWith(checkEntity) && (checkEntity != this.shootingEntity || this.ticksInAir >= 5))
                 {
-                    f1 = 0.3F;
-                    AxisAlignedBB axisalignedbb1 = entity1.boundingBox.expand((double) f1, (double) f1, (double) f1);
-                    MovingObjectPosition movingobjectposition1 = axisalignedbb1.calculateIntercept(vec31, vec3);
+                    hitBoxSizeScale = 0.3F;
+                    AxisAlignedBB hitBox = checkEntity.boundingBox.expand((double) hitBoxSizeScale, (double) hitBoxSizeScale, (double) hitBoxSizeScale);
+                    MovingObjectPosition entityRayHit = hitBox.calculateIntercept(rayStart, rayEnd);
 
-                    if (movingobjectposition1 != null)
+                    if (entityRayHit != null)
                     {
-                        double d1 = vec31.distanceTo(movingobjectposition1.hitVec);
+                        double distance = rayStart.distanceTo(entityRayHit.hitVec);
 
-                        if (d1 < d0 || d0 == 0.0D)
+                        if (distance < distanceToHit || distanceToHit == 0.0D)
                         {
-                            entity = entity1;
-                            d0 = d1;
+                            entity = checkEntity;
+                            distanceToHit = distance;
                         }
                     }
                 }
@@ -245,23 +245,36 @@ public class EntityProjectile extends Entity implements IProjectile
             //If we collided with an entity, set hit to entity
             if (entity != null)
             {
-                movingobjectposition = new MovingObjectPosition(entity);
+                rayHit = new MovingObjectPosition(entity);
             }
 
-            if (movingobjectposition != null)
+            if (rayHit != null && rayHit.typeOfHit != MovingObjectPosition.MovingObjectType.MISS)
             {
                 //Handle entity hit
-                if (movingobjectposition.entityHit != null)
+                if (rayHit.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY)
                 {
-                    handleEntityCollision(movingobjectposition, movingobjectposition.entityHit);
+                    handleEntityCollision(rayHit, rayHit.entityHit);
                 }
                 else //Handle block hit
                 {
-                    handleBlockCollision(movingobjectposition);
+                    handleBlockCollision(rayHit);
                 }
             }
             updateMotion();
         }
+    }
+
+    /**
+     * Called to see if collision checks should be ignored on the
+     * entity.
+     *
+     * @param entity
+     * @return true to collide, false to ignore
+     */
+    protected boolean shouldCollideWith(Entity entity)
+    {
+        //TODO add listener support
+        return entity.canBeCollidedWith();
     }
 
     protected void handleBlockCollision(MovingObjectPosition movingobjectposition)
@@ -289,15 +302,27 @@ public class EntityProjectile extends Entity implements IProjectile
         {
             this.inBlockID.onEntityCollidedWithBlock(this.worldObj, this.xTile, this.yTile, this.zTile, this);
         }
-        onImpactTile();
+        onImpactTile(movingobjectposition);
     }
 
     /**
-     * Called when the projectile impacts a tile. Used
-     * data stored in entity to get tile data.
+     * Deprecated due to precision issues with hit position
      */
+    @Deprecated
     protected void onImpactTile()
     {
+    }
+
+    /**
+     * Called when the projectile impacts a tile.
+     * Data about the hit is stored in the entity
+     * include location, block, and meta
+     *
+     * @param hit - exact hit position
+     */
+    protected void onImpactTile(MovingObjectPosition hit)
+    {
+        onImpactTile();
     }
 
     /**
@@ -308,7 +333,7 @@ public class EntityProjectile extends Entity implements IProjectile
      */
     protected void handleEntityCollision(MovingObjectPosition movingobjectposition, Entity entityHit)
     {
-        onImpactEntity(entityHit, getVelocity());
+        onImpactEntity(entityHit, getVelocity(), movingobjectposition);
     }
 
     /**
@@ -322,9 +347,14 @@ public class EntityProjectile extends Entity implements IProjectile
     }
 
 
+    protected void onImpactEntity(Entity entityHit, float velocity, MovingObjectPosition hit)
+    {
+        onImpactEntity(entityHit, getVelocity(), hit);
+    }
+
     protected void onImpactEntity(Entity entityHit, float velocity)
     {
-        if(!worldObj.isRemote)
+        if (!worldObj.isRemote)
         {
             int damage = MathHelper.ceiling_double_int((double) velocity * 2);
 

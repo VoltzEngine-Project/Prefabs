@@ -63,26 +63,47 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     @Override
     public void save(ItemStack stack)
     {
-        //Clear old data
-        stack.setTagCompound(null);
+        if (resetTagOnSave())
+        {
+            //Clear old data
+            stack.setTagCompound(null);
+        }
 
         //Collect new data
         NBTTagCompound tagCompound = new NBTTagCompound();
         save(tagCompound);
 
         //Add save tag if allowed
-        if(saveTag())
+        if (saveTag())
         {
             tagCompound.setString(ModuleBuilder.SAVE_ID, getSaveID());
         }
 
         //Only save to item if we have data to save
-        if(!tagCompound.hasNoTags())
+        if (!tagCompound.hasNoTags())
         {
             stack.setTagCompound(tagCompound);
         }
     }
 
+    /**
+     * Checks if the tag of the item
+     * should be reset each save with
+     * a fresh save tag.
+     *
+     * @return true to reset
+     */
+    protected boolean resetTagOnSave()
+    {
+        return true;
+    }
+
+    /**
+     * Called to check if the save tag ID
+     * should be saved to the items NBT
+     *
+     * @return
+     */
     protected boolean saveTag()
     {
         return true;
@@ -97,7 +118,7 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     }
 
     /** Does the same thing as {@link #toStack()} */
-    public final ItemStack save()
+    public ItemStack save()
     {
         ItemStack stack = item.copy();
         save(stack);
