@@ -963,12 +963,12 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
 
     public boolean isClient()
     {
-        return world().isRemote;
+        return world() != null && world().isRemote;
     }
 
     public boolean isServer()
     {
-        return !world().isRemote;
+        return world() != null && !world().isRemote;
     }
 
     //==========================
