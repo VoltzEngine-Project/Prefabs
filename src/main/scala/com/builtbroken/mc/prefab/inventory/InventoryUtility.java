@@ -849,7 +849,7 @@ public class InventoryUtility
     {
         //TODO fire drop events if not already done by forge
         //TODO add banned item filtering, prevent creative mode only items from being dropped
-        if (!world.isRemote && itemStack != null)
+        if (world != null && !world.isRemote && itemStack != null)
         {
             double randomX = 0;
             double randomY = 0;
