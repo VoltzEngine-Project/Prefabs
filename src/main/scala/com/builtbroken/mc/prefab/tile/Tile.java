@@ -104,7 +104,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     public Class<? extends ItemBlock> itemBlock = ItemBlock.class;
 
     /** Collision box for this tile, also used for selection and any other size value for the block */
-    protected Cube bounds = new Cube(0, 0, 0, 1, 1, 1);
+    protected Cube bounds = Cube.FULL;
 
     //Icon vars
     /** Map of icons by name */
