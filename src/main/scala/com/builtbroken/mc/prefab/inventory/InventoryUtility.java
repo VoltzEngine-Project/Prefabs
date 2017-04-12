@@ -3,13 +3,13 @@ package com.builtbroken.mc.prefab.inventory;
 import com.builtbroken.jlib.data.vector.IPos3D;
 import com.builtbroken.jlib.lang.StringHelpers;
 import com.builtbroken.jlib.type.Pair;
+import com.builtbroken.mc.api.IInventoryFilter;
 import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.lib.helper.DummyPlayer;
-import com.builtbroken.mc.lib.helper.NBTUtility;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
-import com.builtbroken.mc.api.IInventoryFilter;
+import com.builtbroken.mc.lib.helper.DummyPlayer;
+import com.builtbroken.mc.lib.helper.NBTUtility;
 import com.builtbroken.mc.prefab.items.ItemStackWrapper;
 import com.google.common.collect.Table;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
@@ -784,9 +784,9 @@ public class InventoryUtility
         return null;
     }
 
-    public static void dropBlockAsItem(World world, Pos position)
+    public static List<EntityItem> dropBlockAsItem(World world, Pos position)
     {
-        dropBlockAsItem(world, position.xi(), position.yi(), position.zi(), false);
+        return dropBlockAsItem(world, position.xi(), position.yi(), position.zi(), false);
     }
 
     /**
@@ -799,8 +799,9 @@ public class InventoryUtility
      * @param z
      * @param destroy - will break the block
      */
-    public static void dropBlockAsItem(World world, int x, int y, int z, boolean destroy)
+    public static List<EntityItem> dropBlockAsItem(World world, int x, int y, int z, boolean destroy)
     {
+        List<EntityItem> entities = new ArrayList();
         if (!world.isRemote)
         {
             Block block = world.getBlock(x, y, z);
@@ -812,7 +813,11 @@ public class InventoryUtility
 
                 for (ItemStack itemStack : items)
                 {
-                    dropItemStack(world, new Pos(x, y, z), itemStack, 10);
+                    EntityItem entityItem = dropItemStack(world, new Pos(x, y, z), itemStack, 10);
+                    if (entityItem != null)
+                    {
+                        entities.add(entityItem);
+                    }
                 }
             }
             if (destroy)
@@ -820,32 +825,33 @@ public class InventoryUtility
                 world.setBlockToAir(x, y, z);
             }
         }
+        return entities;
     }
 
-    public static void dropItemStack(IWorldPosition position, ItemStack itemStack)
+    public static EntityItem dropItemStack(IWorldPosition position, ItemStack itemStack)
     {
-        dropItemStack(position.world(), position.x(), position.y(), position.z(), itemStack, 10, 0f);
+        return dropItemStack(position.world(), position.x(), position.y(), position.z(), itemStack, 10, 0f);
     }
 
     /**
      * Drops an item stack on the floor.
      */
-    public static void dropItemStack(World world, IPos3D position, ItemStack itemStack)
+    public static EntityItem dropItemStack(World world, IPos3D position, ItemStack itemStack)
     {
-        dropItemStack(world, position, itemStack, 10);
+        return dropItemStack(world, position, itemStack, 10);
     }
 
-    public static void dropItemStack(World world, IPos3D position, ItemStack itemStack, int delay)
+    public static EntityItem dropItemStack(World world, IPos3D position, ItemStack itemStack, int delay)
     {
-        dropItemStack(world, position, itemStack, delay, 0f);
+        return dropItemStack(world, position, itemStack, delay, 0f);
     }
 
-    public static void dropItemStack(World world, IPos3D position, ItemStack itemStack, int delay, float randomAmount)
+    public static EntityItem dropItemStack(World world, IPos3D position, ItemStack itemStack, int delay, float randomAmount)
     {
-        dropItemStack(world, position.x(), position.y(), position.z(), itemStack, delay, randomAmount);
+        return dropItemStack(world, position.x(), position.y(), position.z(), itemStack, delay, randomAmount);
     }
 
-    public static void dropItemStack(World world, double x, double y, double z, ItemStack itemStack, int delay, float randomAmount)
+    public static EntityItem dropItemStack(World world, double x, double y, double z, ItemStack itemStack, int delay, float randomAmount)
     {
         //TODO fire drop events if not already done by forge
         //TODO add banned item filtering, prevent creative mode only items from being dropped
@@ -878,7 +884,9 @@ public class InventoryUtility
 
             entityitem.delayBeforeCanPickup = delay;
             world.spawnEntityInWorld(entityitem);
+            return entityitem;
         }
+        return null;
     }
 
     /**
