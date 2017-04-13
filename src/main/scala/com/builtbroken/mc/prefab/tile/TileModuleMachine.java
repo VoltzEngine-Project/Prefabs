@@ -1,11 +1,13 @@
 package com.builtbroken.mc.prefab.tile;
 
 import com.builtbroken.mc.api.ISave;
+import com.builtbroken.mc.api.energy.IEnergyBuffer;
 import com.builtbroken.mc.api.energy.IEnergyBufferProvider;
 import com.builtbroken.mc.api.tile.ConnectionType;
 import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.api.tile.ITileConnection;
 import com.builtbroken.mc.api.tile.node.ITileModule;
+import com.builtbroken.mc.mods.rf.RFEnergyHandler;
 import com.builtbroken.mc.prefab.energy.EnergyBuffer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
@@ -131,6 +133,61 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
     public boolean hasConnection(ConnectionType type, ForgeDirection side)
     {
         return false;
+    }
+
+
+    public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate)
+    {
+        IEnergyBuffer buffer = getEnergyBuffer(from);
+        if (buffer != null)
+        {
+            int received = buffer.addEnergyToStorage(RFEnergyHandler.INSTANCE.toUEEnergy(maxReceive), !simulate);
+            return RFEnergyHandler.INSTANCE.fromUE(received);
+        }
+        return 0;
+    }
+
+    public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate)
+    {
+        IEnergyBuffer buffer = getEnergyBuffer(from);
+        if (buffer != null)
+        {
+            int extracted = buffer.removeEnergyFromStorage(RFEnergyHandler.INSTANCE.toUEEnergy(maxExtract), !simulate);
+            return RFEnergyHandler.INSTANCE.fromUE(extracted);
+        }
+        return 0;
+    }
+
+    public int getEnergyStored(ForgeDirection from)
+    {
+        IEnergyBuffer buffer = getEnergyBuffer(from);
+        if (buffer != null)
+        {
+            return RFEnergyHandler.INSTANCE.fromUE(buffer.getEnergyStored());
+        }
+        return 0;
+    }
+
+    public int getMaxEnergyStored(ForgeDirection from)
+    {
+        return RFEnergyHandler.INSTANCE.fromUE(getEnergyBufferSize());
+    }
+
+    public boolean canConnectEnergy(ForgeDirection from)
+    {
+        if (this instanceof ITileConnection)
+        {
+            TileEntity connector = toPos().add(from.getOpposite()).getTileEntity(world());
+            if (this.canConnect(connector, ConnectionType.RF_POWER, from))
+            {
+                return true;
+            }
+            else if (this.canConnect(connector, ConnectionType.POWER, from))
+            {
+                return true;
+            }
+        }
+        return true;
     }
 
     public int getEnergyBufferSize()

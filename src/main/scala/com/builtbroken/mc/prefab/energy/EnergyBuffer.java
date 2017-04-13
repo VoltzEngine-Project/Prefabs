@@ -48,7 +48,7 @@ public class EnergyBuffer implements IEnergyBuffer
     @Override
     public int removeEnergyFromStorage(int energy, boolean doAction)
     {
-        if (energy > 0)
+        if (energy > 0 && energyStorage > 0)
         {
             if (energy >= maxStorage)
             {
