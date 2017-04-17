@@ -10,7 +10,7 @@ import com.builtbroken.mc.api.tile.multiblock.IMultiTileHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.IPacketIDReceiver;
 import com.builtbroken.mc.core.network.IPacketReceiver;
-import com.builtbroken.mc.core.network.packet.AbstractPacket;
+import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.core.registry.implement.IRegistryInit;
 import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.lib.helper.WrenchUtility;
@@ -1337,7 +1337,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         return canHandlePackets() ? Engine.instance.packetHandler.toMCPacket(getDescPacket()) : null;
     }
 
-    public AbstractPacket getDescPacket()
+    public IPacket getDescPacket()
     {
         return null;
     }
@@ -1366,7 +1366,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      *
      * @param packet - packet to send
      */
-    public void sendPacket(AbstractPacket packet)
+    public void sendPacket(IPacket packet)
     {
         sendPacket(packet, 64);
     }
@@ -1377,7 +1377,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      * @param packet   - packet to send
      * @param distance - distance in blocks to search for players
      */
-    public void sendPacket(AbstractPacket packet, double distance)
+    public void sendPacket(IPacket packet, double distance)
     {
         if (world() != null && isServer() && canHandlePackets())
         {
@@ -1385,7 +1385,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         }
     }
 
-    public void sendPacketToServer(AbstractPacket packet)
+    public void sendPacketToServer(IPacket packet)
     {
         if (world() != null && isClient() && canHandlePackets())
         {
@@ -1393,7 +1393,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         }
     }
 
-    public void sendPacketToGuiUsers(AbstractPacket packet)
+    public void sendPacketToGuiUsers(IPacket packet)
     {
         if (isServer() && canHandlePackets())
         {

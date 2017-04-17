@@ -84,4 +84,10 @@ public abstract class TileListener implements ITileEventListener
         }
         return false;
     }
+
+    @Override
+    public String getListenerKey()
+    {
+        return "";
+    }
 }

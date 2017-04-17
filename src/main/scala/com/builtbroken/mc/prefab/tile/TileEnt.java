@@ -2,7 +2,7 @@ package com.builtbroken.mc.prefab.tile;
 
 import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.core.network.packet.AbstractPacket;
+import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.core.network.packet.PacketTile;
 import com.builtbroken.mc.core.network.packet.PacketType;
 import com.builtbroken.mc.imp.transform.vector.Location;
@@ -106,7 +106,7 @@ public class TileEnt extends Tile
     }
 
     @Override
-    public AbstractPacket getDescPacket()
+    public IPacket getDescPacket()
     {
         try
         {

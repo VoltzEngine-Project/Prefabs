@@ -1,13 +1,12 @@
 package com.builtbroken.mc.prefab.entity;
 
-import com.builtbroken.jlib.data.vector.IPos3D;
 import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.IPacketIDReceiver;
 import com.builtbroken.mc.core.network.packet.PacketEntity;
 import com.builtbroken.mc.core.network.packet.PacketType;
-import com.builtbroken.mc.lib.helper.DamageUtility;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.helper.DamageUtility;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -21,7 +20,7 @@ import net.minecraft.world.World;
  * Base entity class to be shared by most entities
  * Created by robert on 1/24/2015.
  */
-public abstract class EntityBase extends Entity implements IPacketIDReceiver, IWorldPosition, IPos3D
+public abstract class EntityBase extends Entity implements IPacketIDReceiver, IWorldPosition
 {
     /** Does the entity have HP to take damage. */
     protected boolean hasHealth = false;

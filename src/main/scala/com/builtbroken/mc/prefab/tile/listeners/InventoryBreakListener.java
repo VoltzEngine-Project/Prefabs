@@ -3,7 +3,7 @@ package com.builtbroken.mc.prefab.tile.listeners;
 import com.builtbroken.mc.api.tile.listeners.IBlockListener;
 import com.builtbroken.mc.api.tile.listeners.IDestroyedListener;
 import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
-import com.builtbroken.mc.framework.logic.imp.ITileNodeHost;
+import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.prefab.inventory.InventoryIterator;
 import com.builtbroken.mc.prefab.inventory.InventoryUtility;
 import net.minecraft.block.Block;
