@@ -784,6 +784,16 @@ public class InventoryUtility
         return null;
     }
 
+    public static List<EntityItem> dropBlockAsItem(IWorldPosition position)
+    {
+        return dropBlockAsItem(position.world(), position.xi(), position.yi(), position.zi(), false);
+    }
+
+    public static List<EntityItem> dropBlockAsItem(IWorldPosition position, boolean destroy)
+    {
+        return dropBlockAsItem(position.world(), position.xi(), position.yi(), position.zi(), destroy);
+    }
+
     public static List<EntityItem> dropBlockAsItem(World world, Pos position)
     {
         return dropBlockAsItem(world, position.xi(), position.yi(), position.zi(), false);
