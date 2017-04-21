@@ -10,6 +10,9 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/5/2017.
@@ -24,6 +27,14 @@ public class RotatableListener extends TileListener implements IPlacementListene
         {
             Engine.logger().error("Failed to set rotation for block at " + x() + "x," + y() + "y," + z() + "z,");
         }
+    }
+
+    @Override
+    public List<String> getListenerKeys()
+    {
+        List<String> list = new ArrayList();
+        list.add("placement");
+        return list;
     }
 
     public static class Builder implements ITileEventListenerBuilder
