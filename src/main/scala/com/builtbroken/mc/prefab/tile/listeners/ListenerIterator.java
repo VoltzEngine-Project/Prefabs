@@ -139,7 +139,7 @@ public class ListenerIterator implements Iterator<ITileEventListener>, Iterable<
             else if (index == 1)
             {
                 TileEntity tile = getTileEntity();
-                if (tile instanceof ITileNodeHost)
+                if (tile instanceof ITileNodeHost && ((ITileNodeHost) tile).getTileNode() instanceof ITileEventListener)
                 {
                     re = (ITileEventListener) ((ITileNodeHost) tile).getTileNode();
                 }
