@@ -30,7 +30,7 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
         super(slots);
         this.host = inv;
     }
-    
+
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack)
     {
