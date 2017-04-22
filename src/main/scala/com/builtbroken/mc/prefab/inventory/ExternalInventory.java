@@ -30,12 +30,7 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
         super(slots);
         this.host = inv;
     }
-
-    protected TileEntity tile()
-    {
-        return (TileEntity) host;
-    }
-
+    
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack)
     {
@@ -79,7 +74,7 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
     {
         if (host instanceof TileEntity)
         {
-            tile().markDirty();
+            ((TileEntity)host).markDirty();
         }
     }
 

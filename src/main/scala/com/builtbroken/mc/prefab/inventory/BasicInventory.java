@@ -31,6 +31,8 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     /** Map of the inventory */
     protected HashMap<Integer, ItemStack> inventoryMap = new HashMap();
 
+    public String inventoryName = "container.inventory.basic";
+
     public BasicInventory(int slots)
     {
         this.slots = slots;
@@ -146,7 +148,13 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     @Override
     public String getInventoryName()
     {
-        return "container.inventory.basic";
+        return inventoryName;
+    }
+
+    public BasicInventory setInventoryName(String name)
+    {
+        this.inventoryName = name;
+        return this;
     }
 
     @Override

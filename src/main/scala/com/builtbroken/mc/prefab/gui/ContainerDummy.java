@@ -1,10 +1,9 @@
 package com.builtbroken.mc.prefab.gui;
 
+import com.builtbroken.mc.api.tile.IPlayerUsing;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntity;
-import com.builtbroken.mc.api.tile.IPlayerUsing;
 
 /**
  * Allows the use of a tile inventory without the need for a container class.
@@ -13,19 +12,19 @@ import com.builtbroken.mc.api.tile.IPlayerUsing;
  */
 public class ContainerDummy extends Container
 {
-	protected TileEntity tile;
+	public Object tile;
 
 	public ContainerDummy()
 	{
 
 	}
 
-	public ContainerDummy(TileEntity tile)
+	public ContainerDummy(Object tile)
 	{
 		this.tile = tile;
 	}
 
-	public ContainerDummy(EntityPlayer player, TileEntity tile)
+	public ContainerDummy(EntityPlayer player, Object tile)
 	{
 		this(tile);
 
