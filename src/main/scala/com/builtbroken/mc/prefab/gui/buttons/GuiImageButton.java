@@ -91,9 +91,21 @@ public class GuiImageButton extends GuiButton2
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, u + (field_146123_n ? width : 0), v, this.width, this.height);
+            if (supportsDisabledState() && !enabled)
+            {
+                this.drawTexturedModalRect(this.xPosition, this.yPosition, u + width * 2, v, this.width, this.height);
+            }
+            else
+            {
+                this.drawTexturedModalRect(this.xPosition, this.yPosition, u + (field_146123_n ? width : 0), v, this.width, this.height);
+            }
             //this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB()); TODO add hot key to enable button id debug
             this.mouseDragged(mc, mouseX, mouseY);
         }
+    }
+
+    public boolean supportsDisabledState()
+    {
+        return false;
     }
 }
