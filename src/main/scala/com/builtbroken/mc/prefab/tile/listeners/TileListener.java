@@ -1,6 +1,7 @@
 package com.builtbroken.mc.prefab.tile.listeners;
 
 import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -72,6 +73,19 @@ public abstract class TileListener implements ITileEventListener
         else if (blockAccess != null)
         {
             return blockAccess.getTileEntity(x, y, z);
+        }
+        return null;
+    }
+
+    protected Block getBlock()
+    {
+        if (world != null)
+        {
+            return world.getBlock(x, y, z);
+        }
+        else if (blockAccess != null)
+        {
+            return blockAccess.getBlock(x, y, z);
         }
         return null;
     }
