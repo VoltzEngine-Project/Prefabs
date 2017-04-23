@@ -3,22 +3,23 @@ package com.builtbroken.mc.prefab.tile;
 import com.builtbroken.jlib.data.vector.IPos3D;
 import com.builtbroken.jlib.data.vector.Pos3D;
 import com.builtbroken.mc.api.IWorldPosition;
+import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.api.event.tile.TileEvent;
 import com.builtbroken.mc.api.items.ISimpleItemRenderer;
 import com.builtbroken.mc.api.tile.IPlayerUsing;
+import com.builtbroken.mc.api.tile.ITile;
 import com.builtbroken.mc.api.tile.multiblock.IMultiTileHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.IPacketIDReceiver;
 import com.builtbroken.mc.core.network.IPacketReceiver;
-import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.core.registry.implement.IRegistryInit;
+import com.builtbroken.mc.imp.transform.region.Cube;
+import com.builtbroken.mc.imp.transform.vector.Location;
+import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.lib.helper.WrenchUtility;
 import com.builtbroken.mc.lib.render.block.BlockRenderHandler;
 import com.builtbroken.mc.lib.render.block.RenderTileDummy;
-import com.builtbroken.mc.imp.transform.region.Cube;
-import com.builtbroken.mc.imp.transform.vector.Location;
-import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.prefab.tile.entity.TileEntityBase;
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -73,7 +74,7 @@ import java.util.*;
  * <p>
  * Created by Robert(DarkGuardsman) on 1/4/2015.
  */
-public abstract class Tile extends TileEntityBase implements IWorldPosition, IPlayerUsing, IRegistryInit
+public abstract class Tile extends TileEntityBase implements IWorldPosition, IPlayerUsing, IRegistryInit, ITile
 {
     //Static block vars, never use in your tile
     /** STATIC BLOCK, block for this tile. Will not be initialized in each tile */
@@ -148,6 +149,24 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     public Tile()
     {
 
+    }
+
+    @Override
+    public String uniqueContentID()
+    {
+        return name;
+    }
+
+    @Override
+    public String contentType()
+    {
+        return "tile";
+    }
+
+    @Override
+    public String modID()
+    {
+        return "null";
     }
 
     /**

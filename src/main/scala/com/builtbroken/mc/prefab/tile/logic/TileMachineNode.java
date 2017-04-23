@@ -23,6 +23,11 @@ public abstract class TileMachineNode<I extends IInventory> extends TileNode imp
     protected I inventory_module;
     protected EnergyBuffer energyBuffer;
 
+    public TileMachineNode(String id, String mod)
+    {
+        super(id, mod);
+    }
+
     //==================================
     //====== Inventory redirects =======
     //==================================
