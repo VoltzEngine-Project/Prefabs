@@ -34,11 +34,10 @@ public class ContainerBase extends Container
 	@Override
 	public void onContainerClosed(EntityPlayer entityplayer)
 	{
-		if (inventory instanceof IPlayerUsing)
+		if (inventory instanceof IPlayerUsing && entityplayer.openContainer != this)
 		{
 			((IPlayerUsing) inventory).getPlayersUsing().remove(entityplayer);
 		}
-
 		super.onContainerClosed(entityplayer);
 	}
 

@@ -82,7 +82,7 @@ public class GuiImageButton extends GuiButton2
     {
         if (this.visible)
         {
-            mc.getTextureManager().bindTexture(textureOverride == null ? SharedAssets.GUI_COMPONENTS : textureOverride);
+            mc.getTextureManager().bindTexture(textureOverride == null ? getTexture() : textureOverride);
 
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -102,6 +102,11 @@ public class GuiImageButton extends GuiButton2
             //this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB()); TODO add hot key to enable button id debug
             this.mouseDragged(mc, mouseX, mouseY);
         }
+    }
+
+    public ResourceLocation getTexture()
+    {
+        return SharedAssets.GUI_COMPONENTS;
     }
 
     public boolean supportsDisabledState()
