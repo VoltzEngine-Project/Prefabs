@@ -26,6 +26,19 @@ public class GuiImageButton extends GuiButton2
     }
 
     /**
+     * Updates the UV location of the
+     * button on the texture sheet
+     *
+     * @param u
+     * @param v
+     */
+    public void setUV(int u, int v)
+    {
+        this.u = u;
+        this.v = v;
+    }
+
+    /**
      * Creates a new save button
      *
      * @param id
@@ -91,17 +104,28 @@ public class GuiImageButton extends GuiButton2
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            if (supportsDisabledState() && !enabled)
-            {
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, u + width * 2, v, this.width, this.height);
-            }
-            else
-            {
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, u + (field_146123_n ? width : 0), v, this.width, this.height);
-            }
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, u + getURenderModifier(), v + getVRenderModifier(), this.width, this.height);
             //this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB()); TODO add hot key to enable button id debug
             this.mouseDragged(mc, mouseX, mouseY);
         }
+    }
+
+    protected int getURenderModifier()
+    {
+        if (supportsDisabledState() && !enabled)
+        {
+            return width * 2;
+        }
+        else if (field_146123_n) //Hover state
+        {
+            return width;
+        }
+        return 0;
+    }
+
+    protected int getVRenderModifier()
+    {
+        return 0;
     }
 
     public ResourceLocation getTexture()

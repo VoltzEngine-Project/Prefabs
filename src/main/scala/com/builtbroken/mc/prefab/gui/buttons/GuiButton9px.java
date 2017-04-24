@@ -4,6 +4,13 @@ import com.builtbroken.mc.client.SharedAssets;
 import net.minecraft.util.ResourceLocation;
 
 /**
+ * Small 9px by 9px button used in place of larger buttons and text based buttons.
+ * <p>
+ * These buttons are imaged based but can easily be setup with text as well. However, do to the size only 1 to 2 chars can fit on the button.
+ * It is advised to use these for images/icon buttons only.
+ * <p>
+ * Example uses of these button are close icon, save icon, on/off icon, simple option settings, and check box icons
+ *
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/23/2017.
  */
@@ -37,6 +44,36 @@ public class GuiButton9px extends GuiImageButton
     public static GuiButton9px newBlankButton(int id, int x, int y)
     {
         return new GuiButton9px(id, x, y, 0, 0);
+    }
+
+    public static GuiButton9px newXButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 1, 0);
+    }
+
+    public static GuiButton9px newUpButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 6, 0);
+    }
+
+    public static GuiButton9px newDownButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 7, 0);
+    }
+
+    public static GuiButton9px newLeftButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 8, 0);
+    }
+
+    public static GuiButton9px newRightButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 9, 0);
+    }
+
+    public void setTexturePos(int row, int col)
+    {
+        setUV(row * 9, col * 9 * 3);
     }
 
     public ResourceLocation getTexture()
