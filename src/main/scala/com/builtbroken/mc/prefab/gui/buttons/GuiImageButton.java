@@ -2,6 +2,7 @@ package com.builtbroken.mc.prefab.gui.buttons;
 
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.prefab.gui.GuiButton2;
+import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.ResourceLocation;
@@ -13,7 +14,7 @@ import org.lwjgl.opengl.GL11;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/25/2016.
  */
-public class GuiImageButton extends GuiButton2
+public class GuiImageButton extends GuiComponent
 {
     private int u, v;
     private ResourceLocation textureOverride;

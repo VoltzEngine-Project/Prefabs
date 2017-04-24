@@ -10,7 +10,7 @@ import net.minecraft.client.gui.GuiButton;
  * Created by robert on 4/23/2015.
  * TODO need a class name
  */
-public class GuiButton2 extends GuiButton
+public class GuiButton2<E extends GuiButton2> extends GuiButton
 {
     public static final Point DEFAULT_SIZE = new Point(200, 20);
 
@@ -34,21 +34,50 @@ public class GuiButton2 extends GuiButton
         super(id, x, y, width, height, key);
     }
 
-    public GuiButton2 enable()
+    public E setHeight(int height)
+    {
+        this.height = height;
+        return (E) this;
+    }
+
+    public E setWidth(int width)
+    {
+        this.width = width;
+        return (E) this;
+    }
+
+    public E enable()
     {
         this.enabled = true;
-        return this;
+        return (E) this;
     }
 
-    public GuiButton2 disable()
+    public E disable()
     {
         this.enabled = false;
-        return this;
+        return (E) this;
     }
 
-    public GuiButton2 setEnabled(boolean enabled)
+    public E setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-        return this;
+        return (E) this;
+    }
+
+    public boolean visible()
+    {
+        return visible;
+    }
+
+    public E show()
+    {
+        this.visible = true;
+        return (E) this;
+    }
+
+    public E hide()
+    {
+        this.visible = false;
+        return (E) this;
     }
 }
