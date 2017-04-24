@@ -18,7 +18,7 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
     public static final int barU = 16;
     public static final int barV = 0;
     public static final int barWidth = 9;
-    public static final int barHeight = 0;
+    public static final int barHeight = 139;
 
     public int currentScroll = 0;
 
@@ -35,13 +35,13 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
         this.maxScroll = maxScroll;
         upButton = GuiButton9px.newUpButton(0, x, y);
         downButton = GuiButton9px.newDownButton(1, x, y + 9);
-        setHeight(height - 18);
+        setHeight(height);
     }
 
     public GuiScrollBar setHeight(int height)
     {
-        setHeight(height);
-        middleHeight = height - (getTopHeight() + getBotHeight());
+        super.setHeight(height);
+        middleHeight = height - (getTopHeight() + getBotHeight()) - 18;
         totalSize = getTopHeight() + middleHeight + getBotHeight();
         updatePositions();
         return this;
@@ -66,16 +66,21 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
         //Render background for scroll bar
         Render2DHelper.renderWithRepeatVertical(xPosition, yPosition + 9, barU, barV, barWidth, barHeight, getTopHeight(), getBotHeight(), middleHeight);
 
-        //Render scroll bar
-        float scrollBar = (float) currentScroll / (float) maxScroll;
-        float heightP = Math.min(1f, 1f / (float) maxScroll);
-        int height = (int) (heightP * totalSize);
-        int yPos = Math.max((int) (scrollBar * totalSize) - height + yPosition, yPosition);
+        if (maxScroll > 0)
+        {
+            //Render scroll bar
+            int maxScroll = this.maxScroll + 1;
+            float heightP = Math.min(1f, 1f / (float) maxScroll);
+            int barHeight = (int) (heightP * totalSize);
 
-        //Set color to red and render scroll bar
-        float c = 80f / 255f;
-        GL11.glColor4f(c, c, c, 1.0F);
-        drawTexturedModalRect(xPosition, yPos, barU, barV, barWidth, 2 + height);
+            float barPercent = (float) (currentScroll + 1) / (float) maxScroll;
+            int yPos = Math.max((int) (barPercent * this.totalSize) - barHeight + yPosition, yPosition);
+
+            //Set color to red and render scroll bar
+            float c = 180f / 255f;
+            GL11.glColor4f(c, c, c, 1.0F);
+            drawTexturedModalRect(xPosition + 1, yPos + 9, barU + 1, barV, barWidth - 2, 2 + barHeight);
+        }
 
         upButton.drawButton(mc, mouseX, mouseY);
         downButton.drawButton(mc, mouseX, mouseY);
@@ -138,7 +143,7 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
                 }
                 if (currentScroll > maxScroll)
                 {
-                    currentScroll = maxScroll;
+                    currentScroll = maxScroll - 1;
                     return true; //Trigger button press event
                 }
                 if (currentScroll == maxScroll)
