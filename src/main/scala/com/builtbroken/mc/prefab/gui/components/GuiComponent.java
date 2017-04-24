@@ -120,7 +120,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton2<E>
      * click or mouse wheel movement. As
      * left click is already used.
      */
-    public boolean handleMouseInput()
+    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY)
     {
         return false;
     }

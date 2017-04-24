@@ -1,6 +1,7 @@
 package com.builtbroken.mc.prefab.gui;
 
 import com.builtbroken.mc.imp.transform.vector.Point;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
 /**
@@ -32,6 +33,17 @@ public class GuiButton2<E extends GuiButton2> extends GuiButton
     public GuiButton2(int id, int x, int y, int width, int height, String key)
     {
         super(id, x, y, width, height, key);
+    }
+
+    @Override
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
+    {
+        return this.enabled && visible() && isMouseInside(mouseX, mouseY);
+    }
+
+    public boolean isMouseInside(int mouseX, int mouseY)
+    {
+        return mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
     }
 
     public E setHeight(int height)

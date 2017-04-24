@@ -2,10 +2,13 @@ package com.builtbroken.mc.prefab.gui.components;
 
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.client.helpers.Render2DHelper;
+import com.builtbroken.mc.prefab.gui.GuiContainerBase;
 import com.builtbroken.mc.prefab.gui.buttons.GuiButton9px;
+import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -84,6 +87,30 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
 
         upButton.drawButton(mc, mouseX, mouseY);
         downButton.drawButton(mc, mouseX, mouseY);
+    }
+
+    @Override
+    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY)
+    {
+        if (isMouseInside(mouseX, mouseY))
+        {
+            int scroll = Mouse.getEventDWheel();
+            if (scroll != 0)
+            {
+                currentScroll -= Math.min(Math.max(scroll, -1), 1);
+                currentScroll = Math.max(0, Math.min(maxScroll, currentScroll));
+                if(mc.currentScreen instanceof GuiScreenBase)
+                {
+                    ((GuiScreenBase)mc.currentScreen).actionPerformed(this);
+                }
+                else  if(mc.currentScreen instanceof GuiContainerBase)
+                {
+                    ((GuiContainerBase)mc.currentScreen).actionPerformedCallback(this);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -2,8 +2,11 @@ package com.builtbroken.mc.prefab.gui.screen;
 
 import com.builtbroken.mc.imp.transform.region.Rectangle;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,20 +28,29 @@ public class GuiScreenBase extends GuiScreen
         this.fields.clear();
         tooltips.clear();
     }
+
     @Override
     public void handleMouseInput()
     {
+        int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
         for (Object o : buttonList)
         {
             if (o instanceof GuiComponent)
             {
-                if (((GuiComponent) o).handleMouseInput())
+                if (((GuiComponent) o).handleMouseInput(Minecraft.getMinecraft(), i, j))
                 {
                     return;
                 }
             }
         }
         super.handleMouseInput();
+    }
+
+    @Override
+    public void actionPerformed(GuiButton button)
+    {
+        super.actionPerformed(button);
     }
 
     @Override

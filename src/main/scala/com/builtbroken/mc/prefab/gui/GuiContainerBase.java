@@ -10,6 +10,7 @@ import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.lib.render.RenderUtility;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -70,6 +71,11 @@ public class GuiContainerBase extends GuiContainer
         this.buttonList.clear();
         this.fields.clear();
         this.tooltips.clear();
+    }
+
+    public void actionPerformedCallback(GuiButton button)
+    {
+        actionPerformed(button);
     }
 
     /**
@@ -140,11 +146,13 @@ public class GuiContainerBase extends GuiContainer
     @Override
     public void handleMouseInput()
     {
+        int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
+        int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
         for (Object o : buttonList)
         {
             if (o instanceof GuiComponent)
             {
-                if (((GuiComponent) o).handleMouseInput())
+                if (((GuiComponent) o).handleMouseInput(Minecraft.getMinecraft(), i, j))
                 {
                     return;
                 }
