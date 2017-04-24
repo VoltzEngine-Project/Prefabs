@@ -18,7 +18,7 @@ public class GuiButton9px extends GuiImageButton
 {
     public GuiButton9px(int id, int x, int y, int row, int col)
     {
-        super(id, x, y, 9, 9, row * 9, col * 9 * 3); //Each col is 3 buttons wide (normal, hover, disable)
+        super(id, x, y, 9, 9, col * 9 * 3, row * 9); //Each col is 3 buttons wide (normal, hover, disable)
     }
 
     public static GuiButton9px newOnButton(int id, int x, int y)
