@@ -68,6 +68,7 @@ public class GuiContainerBase extends GuiContainer
         super.initGui();
         this.buttonList.clear();
         this.fields.clear();
+        this.tooltips.clear();
     }
 
     /**
