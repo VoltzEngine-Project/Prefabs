@@ -112,4 +112,16 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton2<E>
     {
         return false;
     }
+
+    /**
+     * Called to handle mouse input logic.
+     * <p>
+     * Designed to be used to capture right
+     * click or mouse wheel movement. As
+     * left click is already used.
+     */
+    public boolean handleMouseInput()
+    {
+        return false;
+    }
 }

@@ -5,10 +5,11 @@ import com.builtbroken.jlib.data.science.units.UnitDisplay;
 import com.builtbroken.jlib.data.science.units.UnitDisplay.Unit;
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.lib.helper.LanguageUtility;
-import com.builtbroken.mc.lib.render.RenderUtility;
 import com.builtbroken.mc.imp.transform.region.Rectangle;
 import com.builtbroken.mc.imp.transform.vector.Point;
+import com.builtbroken.mc.lib.helper.LanguageUtility;
+import com.builtbroken.mc.lib.render.RenderUtility;
+import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -134,6 +135,22 @@ public class GuiContainerBase extends GuiContainer
     {
         Keyboard.enableRepeatEvents(false);
         super.onGuiClosed();
+    }
+
+    @Override
+    public void handleMouseInput()
+    {
+        for (Object o : buttonList)
+        {
+            if (o instanceof GuiComponent)
+            {
+                if (((GuiComponent) o).handleMouseInput())
+                {
+                    return;
+                }
+            }
+        }
+        super.handleMouseInput();
     }
 
     @Override
