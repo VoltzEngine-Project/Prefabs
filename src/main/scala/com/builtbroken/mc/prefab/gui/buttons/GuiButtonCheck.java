@@ -6,7 +6,7 @@ package com.builtbroken.mc.prefab.gui.buttons;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/24/2017.
  */
-public class GuiButtonCheck extends GuiButton9px
+public class GuiButtonCheck extends GuiButton9px<GuiButtonCheck>
 {
     protected boolean checked;
     protected int type;

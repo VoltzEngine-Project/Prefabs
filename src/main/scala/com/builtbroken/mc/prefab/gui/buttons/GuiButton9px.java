@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/23/2017.
  */
-public class GuiButton9px extends GuiImageButton
+public class GuiButton9px<E extends GuiButton9px> extends GuiImageButton<E>
 {
     public GuiButton9px(int id, int x, int y, int row, int col)
     {
@@ -76,6 +76,7 @@ public class GuiButton9px extends GuiImageButton
         setUV(row * 9, col * 9 * 3);
     }
 
+    @Override
     public ResourceLocation getTexture()
     {
         return SharedAssets.GUI_BUTTON_9PX;

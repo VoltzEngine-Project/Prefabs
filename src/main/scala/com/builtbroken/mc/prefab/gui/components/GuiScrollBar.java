@@ -6,16 +6,18 @@ import com.builtbroken.mc.prefab.gui.GuiContainerBase;
 import com.builtbroken.mc.prefab.gui.buttons.GuiButton9px;
 import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
 
 /**
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/24/2017.
  */
-public class GuiScrollBar extends GuiComponent<GuiScrollBar>
+public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
 {
     //Constants for rendering
     public static final int barU = 16;
@@ -23,7 +25,12 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
     public static final int barWidth = 9;
     public static final int barHeight = 139;
 
-    public int currentScroll = 0;
+    public static final int sbarU = 26;
+    public static final int sbarV = 0;
+    public static final int sbarWidth = 7;
+    public static final int sbarHeight = 138;
+
+    private int currentScroll = 0;
 
     private int maxScroll;
     private int middleHeight;
@@ -34,40 +41,53 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
 
     public GuiScrollBar(int id, int x, int y, int height, int maxScroll)
     {
-        super(id, x, y, 9, height, "");
+        super(id, x, y, barWidth, height, "");
         this.maxScroll = maxScroll;
-        upButton = GuiButton9px.newUpButton(0, x, y);
-        downButton = GuiButton9px.newDownButton(1, x, y + 9);
+        upButton = add(GuiButton9px.newUpButton(0, x, y));
+        downButton = add(GuiButton9px.newDownButton(1, x, y + barWidth));
         setHeight(height);
     }
 
+    @Override
     public GuiScrollBar setHeight(int height)
     {
-        super.setHeight(height);
-        middleHeight = height - (getTopHeight() + getBotHeight()) - 18;
+        super.setHeight(Math.max(height, 40 + 18)); //Min size is 40 plus button size
+        middleHeight = height - (getTopHeight() + getBotHeight()) - barWidth * 2; //Mid height is equal to height minus size of caps & buttons
         totalSize = getTopHeight() + middleHeight + getBotHeight();
-        updatePositions();
+        return this;
+    }
+
+    @Override
+    public GuiScrollBar setWidth(int w)
+    {
+        //Right now size change for width is not supported
+        //TODO implement size change
         return this;
     }
 
     public void setMaxScroll(int maxScroll)
     {
         this.maxScroll = Math.max(0, maxScroll);
-    }
-
-    protected void updatePositions()
-    {
-        upButton.xPosition = xPosition;
-        upButton.yPosition = yPosition;
-        downButton.xPosition = xPosition;
-        downButton.yPosition = yPosition + height - 9;
+        updatePositions();
     }
 
     @Override
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void updatePositions()
+    {
+        super.updatePositions();
+        upButton.xPosition = xPosition;
+        upButton.yPosition = yPosition;
+        downButton.xPosition = xPosition;
+        downButton.yPosition = yPosition + height - barWidth;
+    }
+
+    @Override
+    protected void drawBackground(Minecraft mc, int mouseX, int mouseY)
     {
         //Render background for scroll bar
-        Render2DHelper.renderWithRepeatVertical(xPosition, yPosition + 9, barU, barV, barWidth, barHeight, getTopHeight(), getBotHeight(), middleHeight);
+        Color color = new Color(144, 144, 144);
+        GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, 1.0F);
+        Render2DHelper.renderWithRepeatVertical(xPosition, yPosition + barWidth, barU, barV, barWidth, barHeight, getTopHeight(), getBotHeight(), middleHeight);
 
         if (maxScroll > 0)
         {
@@ -76,17 +96,14 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
             float heightP = Math.min(1f, 1f / (float) maxScroll);
             int barHeight = (int) (heightP * totalSize);
 
-            float barPercent = (float) (currentScroll + 1) / (float) maxScroll;
+            float barPercent = (float) (getCurrentScroll() + 1) / (float) maxScroll;
             int yPos = Math.max((int) (barPercent * this.totalSize) - barHeight + yPosition, yPosition);
 
             //Set color to red and render scroll bar
-            float c = 180f / 255f;
-            GL11.glColor4f(c, c, c, 1.0F);
-            drawTexturedModalRect(xPosition + 1, yPos + 9, barU + 1, barV, barWidth - 2, 2 + barHeight);
+            color = new Color(119, 119, 119);
+            GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, 1.0F);
+            Render2DHelper.renderWithRepeatVertical(xPosition + 1, yPos + 9, sbarU, sbarV, sbarWidth, sbarHeight, 4, 4, barHeight - 8);
         }
-
-        upButton.drawButton(mc, mouseX, mouseY);
-        downButton.drawButton(mc, mouseX, mouseY);
     }
 
     @Override
@@ -97,15 +114,15 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
             int scroll = Mouse.getEventDWheel();
             if (scroll != 0)
             {
-                currentScroll -= Math.min(Math.max(scroll, -1), 1);
-                currentScroll = Math.max(0, Math.min(maxScroll, currentScroll));
-                if(mc.currentScreen instanceof GuiScreenBase)
+                setCurrentScroll(getCurrentScroll() - Math.min(Math.max(scroll, -1), 1));
+                setCurrentScroll(Math.max(0, Math.min(maxScroll, getCurrentScroll())));
+                if (mc.currentScreen instanceof GuiScreenBase)
                 {
-                    ((GuiScreenBase)mc.currentScreen).actionPerformed(this);
+                    ((GuiScreenBase) mc.currentScreen).actionPerformed(this);
                 }
-                else  if(mc.currentScreen instanceof GuiContainerBase)
+                else if (mc.currentScreen instanceof GuiContainerBase)
                 {
-                    ((GuiContainerBase)mc.currentScreen).actionPerformedCallback(this);
+                    ((GuiContainerBase) mc.currentScreen).actionPerformedCallback(this);
                 }
                 return true;
             }
@@ -130,70 +147,49 @@ public class GuiScrollBar extends GuiComponent<GuiScrollBar>
     }
 
     @Override
-    public void mouseReleased(int mouseX, int mouseY)
+    public void actionPerformed(GuiButton button)
     {
-        super.mouseReleased(mouseX, mouseY);
-        upButton.mouseReleased(mouseX, mouseY);
-        downButton.mouseReleased(mouseX, mouseY);
-    }
-
-    @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
-    {
-        if (super.mousePressed(mc, mouseX, mouseY))
+        if (button.id == 0)
         {
-            if (upButton.mousePressed(mc, mouseX, mouseY))
+            if (getCurrentScroll() > 0)
             {
-                if (currentScroll > 0)
-                {
-                    currentScroll--;
-                    downButton.enable();
-                    return true; //Trigger button press event
-                }
-                if (currentScroll < 0)
-                {
-                    currentScroll = 0;
-                    return true; //Trigger button press event
-                }
-                if (currentScroll == 0)
-                {
-                    upButton.disable();
-                }
+                setCurrentScroll(getCurrentScroll() - 1);
+                downButton.enable();
             }
-            else if (downButton.mousePressed(mc, mouseX, mouseY))
+            if (getCurrentScroll() < 0)
             {
-                if (currentScroll < maxScroll)
-                {
-                    currentScroll++;
-                    upButton.enable();
-                    return true; //Trigger button press event
-                }
-                if (currentScroll > maxScroll)
-                {
-                    currentScroll = maxScroll - 1;
-                    return true; //Trigger button press event
-                }
-                if (currentScroll == maxScroll)
-                {
-                    downButton.disable();
-                }
+                setCurrentScroll(0);
+            }
+            if (getCurrentScroll() == 0)
+            {
+                upButton.disable();
             }
         }
-        return false;
+        else if (button.id == 1)
+        {
+            if (getCurrentScroll() < maxScroll)
+            {
+                setCurrentScroll(getCurrentScroll() + 1);
+                upButton.enable();
+            }
+            if (getCurrentScroll() > maxScroll)
+            {
+                setCurrentScroll(maxScroll - 1);
+            }
+            if (getCurrentScroll() == maxScroll)
+            {
+                downButton.disable();
+            }
+        }
     }
 
-    @Override
-    public void func_146111_b(int mouseX, int mouseY)
+    public int getCurrentScroll()
     {
-        super.func_146111_b(mouseX, mouseY);
-        upButton.func_146111_b(mouseX, mouseY);
-        downButton.func_146111_b(mouseX, mouseY);
+        return currentScroll;
     }
 
-    @Override
-    public void func_146113_a(SoundHandler handler)
+    public void setCurrentScroll(int currentScroll)
     {
-        upButton.func_146113_a(handler);
-        downButton.func_146113_a(handler);
+        this.currentScroll = currentScroll;
     }
 }

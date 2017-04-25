@@ -1,8 +1,11 @@
 package com.builtbroken.mc.prefab.gui;
 
 import com.builtbroken.mc.imp.transform.vector.Point;
+import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.util.ResourceLocation;
+
+import java.awt.*;
 
 /**
  * Wrapper/Utility version of the default MC button
@@ -11,7 +14,7 @@ import net.minecraft.client.gui.GuiButton;
  * Created by robert on 4/23/2015.
  * TODO need a class name
  */
-public class GuiButton2<E extends GuiButton2> extends GuiButton
+public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
 {
     public static final Point DEFAULT_SIZE = new Point(200, 20);
 
@@ -36,60 +39,37 @@ public class GuiButton2<E extends GuiButton2> extends GuiButton
     }
 
     @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
-        return this.enabled && visible() && isMouseInside(mouseX, mouseY);
+        int hoverState = this.getHoverState(this.field_146123_n);
+        this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + hoverState * 20, this.width / 2, this.height);
+        this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + hoverState * 20, this.width / 2, this.height);
+
+        int color = 14737632;
+
+        if (packedFGColour != 0)
+        {
+            color = packedFGColour;
+        }
+        else if (!this.enabled)
+        {
+            color = 10526880;
+        }
+        else if (this.field_146123_n)
+        {
+            color = 16777120;
+        }
+        this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, color);
+
+        if (enableDebug)
+        {
+            this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB());
+        }
     }
 
-    public boolean isMouseInside(int mouseX, int mouseY)
+    @Override
+    public ResourceLocation getTexture()
     {
-        return mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
-    }
-
-    public E setHeight(int height)
-    {
-        this.height = height;
-        return (E) this;
-    }
-
-    public E setWidth(int width)
-    {
-        this.width = width;
-        return (E) this;
-    }
-
-    public E enable()
-    {
-        this.enabled = true;
-        return (E) this;
-    }
-
-    public E disable()
-    {
-        this.enabled = false;
-        return (E) this;
-    }
-
-    public E setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-        return (E) this;
-    }
-
-    public boolean visible()
-    {
-        return visible;
-    }
-
-    public E show()
-    {
-        this.visible = true;
-        return (E) this;
-    }
-
-    public E hide()
-    {
-        this.visible = false;
-        return (E) this;
+        return buttonTextures;
     }
 }

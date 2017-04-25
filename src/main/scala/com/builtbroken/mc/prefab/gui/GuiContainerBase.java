@@ -91,6 +91,19 @@ public class GuiContainerBase extends GuiContainer
         return button;
     }
 
+    /**
+     * Adds a button to the GUI
+     *
+     * @param button
+     * @param <E>
+     * @return
+     */
+    protected <E extends GuiComponent> E add(E button)
+    {
+        buttonList.add(button);
+        return button;
+    }
+
     protected void drawString(String str, int x, int y, int color)
     {
         fontRendererObj.drawString(str, x, y, color);

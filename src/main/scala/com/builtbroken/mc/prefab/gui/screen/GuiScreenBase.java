@@ -47,6 +47,20 @@ public class GuiScreenBase extends GuiScreen
         super.handleMouseInput();
     }
 
+    /**
+     * Called to add a component to the GUI
+     *
+     * @param component
+     * @param <E>
+     * @return
+     */
+    protected <E extends GuiComponent> E add(E component)
+    {
+        buttonList.add(component);
+        component.host = this;
+        return component;
+    }
+
     @Override
     public void actionPerformed(GuiButton button)
     {
