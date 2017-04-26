@@ -47,6 +47,22 @@ public class GuiScreenBase extends GuiScreen
         super.handleMouseInput();
     }
 
+    @Override
+    protected void keyTyped(char c, int i)
+    {
+        for (Object o : buttonList)
+        {
+            if (o instanceof GuiComponent)
+            {
+                if (((GuiComponent) o).keyTyped(c, i))
+                {
+                    return;
+                }
+            }
+        }
+        super.keyTyped(c, i);
+    }
+
     /**
      * Called to add a component to the GUI
      *

@@ -204,6 +204,11 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         return false;
     }
 
+    public boolean keyTyped(char c, int id)
+    {
+        return false;
+    }
+
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
     {

@@ -110,6 +110,19 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
+    public boolean keyTyped(char c, int i)
+    {
+        for (GuiComponent component : getComponents())
+        {
+            if (component.keyTyped(c, i))
+            {
+                return true;
+            }
+        }
+        return super.keyTyped(c, i);
+    }
+
+    @Override
     public void func_146111_b(int mouseX, int mouseY)
     {
         super.func_146111_b(mouseX, mouseY);
