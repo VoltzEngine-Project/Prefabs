@@ -4,9 +4,9 @@ import com.builtbroken.jlib.data.vector.IPos2D;
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.prefab.gui.GuiButton2;
+import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -31,7 +31,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     private GuiComponentContainer parentComponent;
     private IPos2D relativePosition;
-    private GuiScreen host;
+    private GuiScreenBase host;
 
     public GuiComponent(int id, IPos2D point)
     {
@@ -156,12 +156,12 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     protected void update(Minecraft mc, int mouseX, int mouseY)
     {
-        this.field_146123_n = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+        this.field_146123_n = isMouseInside(mouseX, mouseY);
     }
 
     protected int getU()
     {
-        if (supportsDisabledState() && !enabled) //disabled state
+        if (supportsDisabledState() && !isEnabled()) //disabled state
         {
             return width * 2;
         }
@@ -207,7 +207,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
     {
-        return this.enabled && visible() && isMouseInside(mouseX, mouseY);
+        return this.isEnabled() && visible() && isMouseInside(mouseX, mouseY);
     }
 
     public boolean isMouseInside(int mouseX, int mouseY)
@@ -253,6 +253,11 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     {
         this.enabled = enabled;
         return (E) this;
+    }
+
+    public boolean isEnabled()
+    {
+        return enabled && (getParentComponent() == null || getParentComponent().isEnabled());
     }
 
     public boolean visible()
@@ -318,7 +323,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      *
      * @return host, or parent's host
      */
-    public GuiScreen getHost()
+    public GuiScreenBase getHost()
     {
         if (getParentComponent() != null)
         {
@@ -327,9 +332,24 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         return host;
     }
 
-    public E setHost(GuiScreen host)
+    public E setHost(GuiScreenBase host)
     {
         this.host = host;
         return (E) this;
+    }
+
+    public void drawString(int x, int y, String s)
+    {
+        drawString(x, y, s, DEFAULT_STRING_COLOR);
+    }
+
+    public void drawString(int x, int y, String s, Color color)
+    {
+        drawString(Minecraft.getMinecraft().fontRenderer, s, x, y, color != null ? color.getRGB() : DEFAULT_STRING_COLOR);
+    }
+
+    public void drawString(int x, int y, String s, int color)
+    {
+        drawString(Minecraft.getMinecraft().fontRenderer, "" + s, x + x(), y + y(), color);
     }
 }

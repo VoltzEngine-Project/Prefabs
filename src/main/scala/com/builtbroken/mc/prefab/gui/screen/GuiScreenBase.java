@@ -54,11 +54,19 @@ public class GuiScreenBase extends GuiScreen
      * @param <E>
      * @return
      */
-    protected <E extends GuiComponent> E add(E component)
+    public <E extends GuiComponent> E add(E component)
     {
         buttonList.add(component);
         component.setHost(this);
         return component;
+    }
+
+    public void remove(GuiButton button)
+    {
+        if (buttonList.contains(button))
+        {
+            buttonList.remove(button);
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
 {
     private final List<GuiComponent> components = new ArrayList();
 
-    public boolean resizeAsNeeded = true;
+    public boolean resizeAsNeeded = false;
     protected boolean updatePositionLogic = true;
 
     public GuiComponentContainer(int id, IPos2D point)

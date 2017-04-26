@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.gui;
 
+import com.builtbroken.jlib.data.vector.IPos2D;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
@@ -16,9 +17,10 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
 {
     public static final Point DEFAULT_SIZE = new Point(200, 20);
 
-    public GuiButton2(int id, Point point, String key)
+    public GuiButton2(int id, IPos2D point, String key)
     {
-        this(id, point, DEFAULT_SIZE, key);
+        super(id, point);
+        this.displayString = key;
     }
 
     public GuiButton2(int id, int x, int y, String key)

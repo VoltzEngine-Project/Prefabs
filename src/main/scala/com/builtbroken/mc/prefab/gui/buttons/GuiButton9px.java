@@ -70,7 +70,22 @@ public class GuiButton9px<E extends GuiButton9px> extends GuiImageButton<E>
 
     public static GuiButton9px newRightButton(int id, int x, int y)
     {
-        return new GuiButton9px(id, x, y, SIZE, 0);
+        return new GuiButton9px(id, x, y, 9, 0);
+    }
+
+    public static GuiButton9px newPlayerButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 13, 0);
+    }
+
+    public static GuiButton9px newGearButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 14, 0);
+    }
+
+    public static GuiButton9px newNodeButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 15, 0);
     }
 
     public void setTexturePos(int row, int col)

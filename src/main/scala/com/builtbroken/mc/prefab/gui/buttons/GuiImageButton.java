@@ -96,7 +96,7 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
 
     protected int getURenderModifier()
     {
-        if (supportsDisabledState() && !enabled)
+        if (supportsDisabledState() && !isEnabled())
         {
             return width * 2;
         }
