@@ -49,6 +49,11 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
         return new GuiImageButton(id, x, y, 18, 18, 18, 162);
     }
 
+    public static GuiImageButton newButtonEmpty(int id, int x, int y)
+    {
+        return new GuiImageButton(id, x, y, 18, 18, 18, 180);
+    }
+
     /**
      * Creates a new refresh button
      *

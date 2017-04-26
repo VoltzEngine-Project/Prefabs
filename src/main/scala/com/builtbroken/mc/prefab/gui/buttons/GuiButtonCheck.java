@@ -18,6 +18,11 @@ public class GuiButtonCheck extends GuiButton9px<GuiButtonCheck>
         this.checked = checked;
     }
 
+    public boolean isChecked()
+    {
+        return checked;
+    }
+
     public GuiButtonCheck check()
     {
         this.checked = true;

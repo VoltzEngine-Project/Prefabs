@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.opengl.GL11;
 
-public class GuiField extends GuiComponent
+public class GuiField extends GuiComponent<GuiField>
 {
     /** Has the current text being edited on the textbox. */
     private String text = "";
