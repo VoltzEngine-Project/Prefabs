@@ -18,24 +18,14 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     private final List<GuiComponent> components = new ArrayList();
     protected boolean updatePositionLogic = true;
 
-    public GuiComponentContainer(int id, Point point, String key)
+    public GuiComponentContainer(int id, Point point)
     {
-        super(id, point, key);
+        super(id, point.xi(), point.yi());
     }
 
     public GuiComponentContainer(int id, int x, int y)
     {
         super(id, x, y);
-    }
-
-    public GuiComponentContainer(int id, int x, int y, String key)
-    {
-        super(id, x, y, key);
-    }
-
-    public GuiComponentContainer(int id, Point point, Point size, String key)
-    {
-        super(id, point, size, key);
     }
 
     public GuiComponentContainer(int id, int x, int y, int width, int height, String key)
@@ -152,7 +142,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
         if (!getComponents().contains(component))
         {
             this.getComponents().add(component);
-            component.parentComponent = this;
+            component.setParentComponent(this);
         }
         return component;
     }

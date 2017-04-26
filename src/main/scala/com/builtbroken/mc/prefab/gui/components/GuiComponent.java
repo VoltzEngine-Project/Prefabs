@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.gui.components;
 
+import com.builtbroken.jlib.data.vector.IPos2D;
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import net.minecraft.client.Minecraft;
@@ -27,29 +28,37 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     /** Enable debug data for all components */
     public static boolean enableDebug = false;
 
-    public GuiComponentContainer parentComponent;
-    public GuiScreen host;
+    private GuiComponentContainer parentComponent;
+    private IPos2D relativePosition;
+    private GuiScreen host;
 
+    public GuiComponent(int id, Point point)
+    {
+        this(id, point.xi(), point.yi());
+        this.setRelativePosition(point);
+    }
+
+    /**
+     * Creates a component with the id at the position
+     *
+     * @param id - button action ID
+     * @param x  - location
+     * @param y  - location
+     */
     public GuiComponent(int id, int x, int y)
     {
-        this(id, x, y, "");
+        this(id, x, y, DEFAULT_SIZE.xi(), DEFAULT_SIZE.yi(), "");
     }
 
-    public GuiComponent(int id, Point point, String key)
-    {
-        this(id, point, DEFAULT_SIZE, key);
-    }
-
-    public GuiComponent(int id, int x, int y, String key)
-    {
-        this(id, x, y, DEFAULT_SIZE.xi(), DEFAULT_SIZE.yi(), key);
-    }
-
-    public GuiComponent(int id, Point point, Point size, String key)
-    {
-        super(id, point.xi(), point.yi(), size.xi(), size.yi(), key);
-    }
-
+    /**
+     * Creates a component with the id at the position with size
+     *
+     * @param id     - button action ID
+     * @param x      - location
+     * @param y      - location
+     * @param width  - how wide the component is (X axis)
+     * @param height - how tall the component is (Y axis)
+     */
     public GuiComponent(int id, int x, int y, int width, int height, String key)
     {
         super(id, x, y, width, height, key);
@@ -62,7 +71,10 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      */
     protected void updatePositions()
     {
-
+        if (getRelativePosition() != null && getParentComponent() != null)
+        {
+            this.setPosition(getParentComponent().x() + getRelativePosition().xi(), getParentComponent().y() + getRelativePosition().yi());
+        }
     }
 
     @Override
@@ -166,27 +178,23 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public boolean isMouseInside(int mouseX, int mouseY)
     {
-        return mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+        return mouseX >= x() && mouseY >= y() && mouseX < x() + getWidth() && mouseY < y() + getHeight();
     }
 
-    /**
-     * Gets the GUI that is hosting this component
-     *
-     * @return host, or parent's host
-     */
-    public GuiScreen getHost()
+    public int getHeight()
     {
-        if (parentComponent != null)
-        {
-            return parentComponent.getHost();
-        }
-        return host;
+        return height;
     }
 
     public E setHeight(int height)
     {
         this.height = height;
         return (E) this;
+    }
+
+    public int getWidth()
+    {
+        return width;
     }
 
     public E setWidth(int width)
@@ -227,6 +235,67 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     public E hide()
     {
         this.visible = false;
+        return (E) this;
+    }
+
+    public int x()
+    {
+        return xPosition;
+    }
+
+    public int y()
+    {
+        return yPosition;
+    }
+
+    public E setPosition(int x, int y)
+    {
+        this.xPosition = x;
+        this.yPosition = y;
+        return (E) this;
+    }
+
+    /** Parent component holding this component */
+    public GuiComponentContainer getParentComponent()
+    {
+        return parentComponent;
+    }
+
+    public E setParentComponent(GuiComponentContainer parentComponent)
+    {
+        this.parentComponent = parentComponent;
+        return (E) this;
+    }
+
+    /** Relative position to it's parent */
+    public IPos2D getRelativePosition()
+    {
+        return relativePosition;
+    }
+
+    public E setRelativePosition(IPos2D relativePosition)
+    {
+        this.relativePosition = relativePosition;
+        return (E) this;
+    }
+
+    /**
+     * Gets the GUI that is hosting this component
+     *
+     * @return host, or parent's host
+     */
+    public GuiScreen getHost()
+    {
+        if (getParentComponent() != null)
+        {
+            return getParentComponent().getHost();
+        }
+        return host;
+    }
+
+    public E setHost(GuiScreen host)
+    {
+        this.host = host;
         return (E) this;
     }
 }

@@ -57,7 +57,7 @@ public class GuiScreenBase extends GuiScreen
     protected <E extends GuiComponent> E add(E component)
     {
         buttonList.add(component);
-        component.host = this;
+        component.setHost(this);
         return component;
     }
 

@@ -2,6 +2,9 @@ package com.builtbroken.mc.prefab.gui.components;
 
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.client.helpers.Render2DHelper;
+import com.builtbroken.mc.prefab.gui.pos.HugBottom;
+import com.builtbroken.mc.prefab.gui.pos.HugXSide;
+import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.prefab.gui.GuiContainerBase;
 import com.builtbroken.mc.prefab.gui.buttons.GuiButton9px;
 import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
@@ -12,6 +15,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+
 
 /**
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
@@ -30,28 +34,46 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
     public static final int sbarWidth = 7;
     public static final int sbarHeight = 138;
 
+    //Current scroll index
     private int currentScroll = 0;
 
+    //Max scroll index
     private int maxScroll;
+    //Size in pixels of mid section of rendered bar
     private int middleHeight;
+    //Total size in pixels of rendered bar
     private int totalSize;
 
-    GuiButton9px upButton;
-    GuiButton9px downButton;
+    //Buttons
+    protected GuiButton9px upButton;
+    protected GuiButton9px downButton;
+
+    public GuiScrollBar(int id, Point point, int height, int maxScroll)
+    {
+        super(id, point);
+        this.maxScroll = maxScroll;
+        addArrows();
+        setHeight(height);
+    }
 
     public GuiScrollBar(int id, int x, int y, int height, int maxScroll)
     {
         super(id, x, y, barWidth, height, "");
         this.maxScroll = maxScroll;
-        upButton = add(GuiButton9px.newUpButton(0, x, y));
-        downButton = add(GuiButton9px.newDownButton(1, x, y + barWidth));
+        addArrows();
         setHeight(height);
+    }
+
+    protected void addArrows()
+    {
+        upButton = (GuiButton9px) add(GuiButton9px.newUpButton(0, xPosition, yPosition).setRelativePosition(new HugXSide(this, -GuiButton9px.SIZE, false))).disable();
+        downButton = (GuiButton9px) add(GuiButton9px.newDownButton(1, xPosition, yPosition).setRelativePosition(new HugBottom(this, -GuiButton9px.SIZE, -GuiButton9px.SIZE, false)));
     }
 
     @Override
     public GuiScrollBar setHeight(int height)
     {
-        super.setHeight(Math.max(height, 40 + 18)); //Min size is 40 plus button size
+        super.setHeight(Math.max(height, 40 + GuiButton9px.SIZE * 2)); //Min size is 40 plus button size
         middleHeight = height - (getTopHeight() + getBotHeight()) - barWidth * 2; //Mid height is equal to height minus size of caps & buttons
         totalSize = getTopHeight() + middleHeight + getBotHeight();
         return this;
@@ -68,17 +90,6 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
     public void setMaxScroll(int maxScroll)
     {
         this.maxScroll = Math.max(0, maxScroll);
-        updatePositions();
-    }
-
-    @Override
-    protected void updatePositions()
-    {
-        super.updatePositions();
-        upButton.xPosition = xPosition;
-        upButton.yPosition = yPosition;
-        downButton.xPosition = xPosition;
-        downButton.yPosition = yPosition + height - barWidth;
     }
 
     @Override
@@ -91,18 +102,21 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
 
         if (maxScroll > 0)
         {
-            //Render scroll bar
+            //Calculate slider render size
             int maxScroll = this.maxScroll + 1;
             float heightP = Math.min(1f, 1f / (float) maxScroll);
             int barHeight = (int) (heightP * totalSize);
 
+            //Calculate slider render position
             float barPercent = (float) (getCurrentScroll() + 1) / (float) maxScroll;
-            int yPos = Math.max((int) (barPercent * this.totalSize) - barHeight + yPosition, yPosition);
+            int sliderRenderY = Math.max((int) (barPercent * this.totalSize) - barHeight + yPosition, yPosition);
 
             //Set color to red and render scroll bar
             color = new Color(119, 119, 119);
             GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, 1.0F);
-            Render2DHelper.renderWithRepeatVertical(xPosition + 1, yPos + 9, sbarU, sbarV, sbarWidth, sbarHeight, 4, 4, barHeight - 8);
+
+            //Render slider
+            Render2DHelper.renderWithRepeatVertical(xPosition + 1, sliderRenderY + GuiButton9px.SIZE, sbarU, sbarV, sbarWidth, sbarHeight, 4, 4, barHeight - 8);
         }
     }
 

@@ -16,9 +16,11 @@ import net.minecraft.util.ResourceLocation;
  */
 public class GuiButton9px<E extends GuiButton9px> extends GuiImageButton<E>
 {
+    public static final int SIZE = 9;
+
     public GuiButton9px(int id, int x, int y, int row, int col)
     {
-        super(id, x, y, 9, 9, col * 9 * 3, row * 9); //Each col is 3 buttons wide (normal, hover, disable)
+        super(id, x, y, SIZE, SIZE, col * SIZE * 3, row * SIZE); //Each col is 3 buttons wide (normal, hover, disable)
     }
 
     public static GuiButton9px newOnButton(int id, int x, int y)
@@ -68,12 +70,12 @@ public class GuiButton9px<E extends GuiButton9px> extends GuiImageButton<E>
 
     public static GuiButton9px newRightButton(int id, int x, int y)
     {
-        return new GuiButton9px(id, x, y, 9, 0);
+        return new GuiButton9px(id, x, y, SIZE, 0);
     }
 
     public void setTexturePos(int row, int col)
     {
-        setUV(row * 9, col * 9 * 3);
+        setUV(row * SIZE, col * SIZE * 3);
     }
 
     @Override
