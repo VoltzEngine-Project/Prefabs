@@ -17,6 +17,6 @@ public class GuiFrame<E extends GuiFrame> extends GuiComponentContainer<E>
 
     public void initGui()
     {
-
+        getComponents().clear();
     }
 }

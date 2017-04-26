@@ -296,16 +296,13 @@ public class GuiField extends GuiComponent
                     {
                         this.writeText(GuiScreen.getClipboardString());
                     }
-
                     return true;
                 case 24:
                     GuiScreen.setClipboardString(this.getSelectedText());
-
                     if (this.isEnabled())
                     {
                         this.writeText("");
                     }
-
                     return true;
                 default:
                     switch (p_146201_2_)
