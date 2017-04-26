@@ -3,6 +3,7 @@ package com.builtbroken.mc.prefab.gui.components;
 import com.builtbroken.jlib.data.vector.IPos2D;
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.imp.transform.vector.Point;
+import com.builtbroken.mc.prefab.gui.GuiButton2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -32,9 +33,9 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     private IPos2D relativePosition;
     private GuiScreen host;
 
-    public GuiComponent(int id, Point point)
+    public GuiComponent(int id, IPos2D point)
     {
-        this(id, point.xi(), point.yi());
+        this(id, 0, 0);
         this.setRelativePosition(point);
     }
 
@@ -83,16 +84,53 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         update(mc, mouseX, mouseY);
         if (this.visible)
         {
-            mc.getTextureManager().bindTexture(getTexture());
-
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+            mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
             drawBackground(mc, mouseX, mouseY);
+
+            if (enableDebug)
+            {
+                this.drawCenteredString(mc.fontRenderer, "" + id, this.xPosition + (width / 2), this.yPosition + (height / 2), this instanceof GuiComponentContainer ? Color.red.getRGB() : Color.blue.getRGB());
+
+                if (!(this instanceof GuiButton2))
+                {
+                    mc.getTextureManager().bindTexture(SharedAssets.GREY_TEXTURE);
+
+                    Color color = Color.RED;
+                    if (this instanceof GuiComponentContainer)
+                    {
+                        color = Color.blue;
+                    }
+                    GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), getWidth(), 2);
+                    this.drawTexturedModalRect(xPosition, yPosition + getHeight() - 2, getU(), getV(), getWidth(), 2);
+
+                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), 2, getHeight());
+                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition, getU(), getV(), 2, getHeight());
+
+                    color = Color.GREEN;
+                    GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), 2, 2);
+
+                    color = Color.black;
+                    GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition, getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition + getHeight() - 2, getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(xPosition, yPosition + getHeight() - 2, getU(), getV(), 2, 2);
+                }
+            }
+
+            GL11.glColor4f(1, 1, 1, 1);
+            mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
             doRender(mc, mouseX, mouseY);
+
             this.mouseDragged(mc, mouseX, mouseY);
+
         }
     }
 
@@ -109,10 +147,6 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
             GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         }
         this.drawTexturedModalRect(this.xPosition, this.yPosition, getU(), getV(), this.width, this.height);
-        if (enableDebug)
-        {
-            this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB());
-        }
     }
 
     protected Color getBackgroundColor()
@@ -145,7 +179,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public ResourceLocation getTexture()
     {
-        return SharedAssets.GREY_TEXTURE;
+        return null;
     }
 
     public boolean supportsDisabledState()

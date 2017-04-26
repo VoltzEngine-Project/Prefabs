@@ -10,25 +10,17 @@ import com.builtbroken.mc.prefab.gui.components.GuiComponent;
  */
 public class HugXSide extends GuiRelativePos
 {
-    public final int xOffset;
     public final boolean left;
 
     public HugXSide(GuiComponent component, int xOffset, boolean left)
     {
-        super(component);
-        this.xOffset = xOffset;
+        super(component, xOffset, 0);
         this.left = left;
     }
 
     @Override
     public int xi()
     {
-        return left ? 0 : component.getWidth() + xOffset;
-    }
-
-    @Override
-    public int yi()
-    {
-        return 0;
+        return super.xi() + (left ? 0 : component.getWidth());
     }
 }

@@ -5,8 +5,6 @@ import com.builtbroken.mc.prefab.gui.GuiButton2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
-import java.awt.*;
-
 /**
  * Simple button that uses images instead of text
  *
@@ -94,10 +92,6 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
         this.drawTexturedModalRect(this.xPosition, this.yPosition, u + getURenderModifier(), v + getVRenderModifier(), this.width, this.height);
-        if (enableDebug)
-        {
-            this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB());
-        }
     }
 
     protected int getURenderModifier()

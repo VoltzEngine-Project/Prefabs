@@ -1,12 +1,12 @@
 package com.builtbroken.mc.prefab.gui.components;
 
+import com.builtbroken.jlib.data.vector.IPos2D;
 import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.client.helpers.Render2DHelper;
-import com.builtbroken.mc.prefab.gui.pos.HugBottom;
-import com.builtbroken.mc.prefab.gui.pos.HugXSide;
-import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.prefab.gui.GuiContainerBase;
 import com.builtbroken.mc.prefab.gui.buttons.GuiButton9px;
+import com.builtbroken.mc.prefab.gui.pos.HugBottom;
+import com.builtbroken.mc.prefab.gui.pos.HugXSide;
 import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -48,9 +48,11 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
     protected GuiButton9px upButton;
     protected GuiButton9px downButton;
 
-    public GuiScrollBar(int id, Point point, int height, int maxScroll)
+    public GuiScrollBar(int id, IPos2D point, int height, int maxScroll)
     {
         super(id, point);
+        this.width = 9;
+        this.height = height;
         this.maxScroll = maxScroll;
         addArrows();
         setHeight(height);
@@ -66,8 +68,8 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
 
     protected void addArrows()
     {
-        upButton = (GuiButton9px) add(GuiButton9px.newUpButton(0, xPosition, yPosition).setRelativePosition(new HugXSide(this, -GuiButton9px.SIZE, false))).disable();
-        downButton = (GuiButton9px) add(GuiButton9px.newDownButton(1, xPosition, yPosition).setRelativePosition(new HugBottom(this, -GuiButton9px.SIZE, -GuiButton9px.SIZE, false)));
+        upButton = (GuiButton9px) add(GuiButton9px.newUpButton(0, 0, 0).setRelativePosition(new HugXSide(this, 0, true))).disable();
+        downButton = (GuiButton9px) add(GuiButton9px.newDownButton(1, 0, 0).setRelativePosition(new HugBottom(this, 0, -GuiButton9px.SIZE, true)));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.builtbroken.mc.prefab.gui.components;
 
-import com.builtbroken.mc.imp.transform.vector.Point;
+import com.builtbroken.jlib.data.vector.IPos2D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiButton;
@@ -16,11 +16,13 @@ import java.util.List;
 public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiComponent<E>
 {
     private final List<GuiComponent> components = new ArrayList();
+
+    public boolean resizeAsNeeded = true;
     protected boolean updatePositionLogic = true;
 
-    public GuiComponentContainer(int id, Point point)
+    public GuiComponentContainer(int id, IPos2D point)
     {
-        super(id, point.xi(), point.yi());
+        super(id, point);
     }
 
     public GuiComponentContainer(int id, int x, int y)
@@ -37,7 +39,10 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     public E setHeight(int height)
     {
         super.setHeight(height);
-        updatePositions();
+        if (updatePositionLogic)
+        {
+            updatePositions();
+        }
         return (E) this;
     }
 
@@ -45,7 +50,10 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     public E setWidth(int width)
     {
         super.setWidth(width);
-        updatePositions();
+        if (updatePositionLogic)
+        {
+            updatePositions();
+        }
         return (E) this;
     }
 
@@ -143,6 +151,10 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
         {
             this.getComponents().add(component);
             component.setParentComponent(this);
+            if (updatePositionLogic)
+            {
+                calcSize();
+            }
         }
         return component;
     }
@@ -155,7 +167,38 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
             if (updatePositionLogic)
             {
                 updatePositions();
+                calcSize();
             }
+        }
+    }
+
+    /**
+     * Attempts to resize the container to fit it's
+     * components automatically.
+     */
+    protected void calcSize()
+    {
+        if (resizeAsNeeded)
+        {
+            int width = 0;
+            int height = 0;
+            for (GuiComponent component : getComponents())
+            {
+                int sizeX = (component.x() - xPosition) + component.getWidth();
+                int sizeY = (component.y() - xPosition) + component.getHeight();
+                if (sizeX > width)
+                {
+                    width = sizeX;
+                }
+                if (sizeY > height)
+                {
+                    height = sizeY;
+                }
+            }
+            updatePositionLogic = false;
+            setWidth(width);
+            setHeight(height);
+            updatePositionLogic = true;
         }
     }
 

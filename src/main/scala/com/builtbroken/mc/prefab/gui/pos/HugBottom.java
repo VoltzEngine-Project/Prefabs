@@ -11,18 +11,17 @@ import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 public class HugBottom extends HugXSide
 {
     public final GuiComponent component;
-    public final int yOffset;
 
-    public HugBottom(GuiComponent component, int yOffset, int xOffset, boolean left)
+    public HugBottom(GuiComponent component, int xOffset, int yOffset, boolean left)
     {
         super(component, xOffset, left);
         this.component = component;
-        this.yOffset = yOffset;
+        this.setYOffset(yOffset);
     }
 
     @Override
     public int yi()
     {
-        return component.getHeight() + yOffset;
+        return super.yi() + component.getHeight();
     }
 }

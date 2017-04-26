@@ -5,8 +5,6 @@ import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
-import java.awt.*;
-
 /**
  * Wrapper/Utility version of the default MC button
  * Is also used a prefab for buttons with more features
@@ -60,11 +58,6 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
             color = 16777120;
         }
         this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, color);
-
-        if (enableDebug)
-        {
-            this.drawString(mc.fontRenderer, "" + id, this.xPosition, this.yPosition, Color.red.getRGB());
-        }
     }
 
     @Override

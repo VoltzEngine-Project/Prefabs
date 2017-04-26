@@ -1,5 +1,7 @@
 package com.builtbroken.mc.prefab.gui.components;
 
+import com.builtbroken.mc.prefab.gui.pos.GuiRelativePos;
+import com.builtbroken.mc.prefab.gui.pos.HugXSide;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
@@ -17,7 +19,7 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
     private CallbackGuiArray callback;
 
     private int entryCount = -1;
-    private int ySpaceing = 20;
+    private int ySpacing = 20;
 
     public GuiArray(CallbackGuiArray callback, int id, int x, int y, int entries)
     {
@@ -27,10 +29,10 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
     public GuiArray(CallbackGuiArray callback, int id, int x, int y, int entries, int ySpacing)
     {
         super(id, x, y, 200, entries * ySpacing, "");
-        this.ySpaceing = ySpacing;
+        this.resizeAsNeeded = false;
+        this.ySpacing = ySpacing;
         this.callback = callback;
-        //TODO implement left bar position
-        scrollBar = add(new GuiScrollBar(0, x, y, height, entries));
+        scrollBar = add(new GuiScrollBar(0, new HugXSide(this, -9, false), height, entries));
         setEntriesShown(entries);
     }
 
@@ -44,35 +46,34 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
             reloadEntries();
             scrollBar.setMaxScroll(callback.getSize() - entriesShown);
         }
+        if(entriesShown > entryCount)
+        {
+            scrollBar.downButton.disable();
+        }
     }
 
     @Override
     protected void updatePositions()
     {
-        scrollBar.xPosition = xPosition + width - GuiScrollBar.barWidth;
-        scrollBar.yPosition = yPosition;
-        scrollBar.setHeight(height);
-
-        int i = 0;
-        for (GuiComponent component : buttonEntries)
-        {
-            component.xPosition = xPosition;
-            component.yPosition = yPosition + (i++ * ySpaceing);
-        }
+        scrollBar.setHeight(height); //TODO create a way to auto update, or add a listener
         super.updatePositions();
     }
 
     public void reloadEntries()
     {
+        //Create buttons if empty
         if (buttonEntries == null)
         {
             buttonEntries = new GuiComponent[entriesShown];
             for (int i = 0; i < buttonEntries.length; i++)
             {
                 buttonEntries[i] = add(callback.newEntry(i, i + 10, xPosition, yPosition));
+                //Set relative position so it auto updates
+                buttonEntries[i].setRelativePosition(new GuiRelativePos(this, 0, i * getEntryYSpacing()));
             }
         }
 
+        //Update buttons
         for (int i = 0; i < buttonEntries.length; i++)
         {
             buttonEntries[i].hide();
@@ -105,7 +106,7 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
 
     protected int getEntryYSpacing()
     {
-        return ySpaceing;
+        return ySpacing;
     }
 
     public void setEntriesShown(int entries)
