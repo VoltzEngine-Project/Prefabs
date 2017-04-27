@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class GuiScreenBase extends GuiScreen
 {
     protected HashMap<Rectangle, String> tooltips = new HashMap();
     protected ArrayList<GuiTextField> fields = new ArrayList();
+    private GuiButton lastButtonClicked;
 
     @Override
     public void initGui()
@@ -45,6 +48,55 @@ public class GuiScreenBase extends GuiScreen
             }
         }
         super.handleMouseInput();
+    }
+
+    @Override
+    protected void mouseMovedOrUp(int mouseX, int mouseY, int mouseKey)
+    {
+        if (this.lastButtonClicked != null && mouseKey == 0) //left click
+        {
+            this.lastButtonClicked.mouseReleased(mouseX, mouseY);
+            this.lastButtonClicked = null;
+        }
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseKey)
+    {
+        if (mouseKey == 0) //left click
+        {
+            for (int l = 0; l < this.buttonList.size(); ++l)
+            {
+                GuiButton guibutton = (GuiButton) this.buttonList.get(l);
+
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY))
+                {
+                    //Check if the event should be canceled
+                    GuiScreenEvent.ActionPerformedEvent.Pre event = new GuiScreenEvent.ActionPerformedEvent.Pre(this, guibutton, this.buttonList);
+                    if (MinecraftForge.EVENT_BUS.post(event))
+                    {
+                        break;
+                    }
+                    //Mark button as selected
+                    this.lastButtonClicked = event.button;
+
+                    //Fire audio of click
+                    event.button.func_146113_a(this.mc.getSoundHandler());
+
+                    if(guibutton.id >= 0)
+                    {
+                        //Fire event of click
+                        this.actionPerformed(event.button);
+                    }
+
+                    //Do forge stuff
+                    if (this.equals(this.mc.currentScreen))
+                    {
+                        MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(this, event.button, this.buttonList));
+                    }
+                }
+            }
+        }
     }
 
     @Override
