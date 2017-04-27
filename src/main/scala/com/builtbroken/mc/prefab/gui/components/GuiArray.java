@@ -46,14 +46,14 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
             reloadEntries();
             scrollBar.setMaxScroll(callback.getSize() - entriesShown);
         }
-        if(entriesShown > entryCount)
+        if (entriesShown > entryCount)
         {
             scrollBar.downButton.disable();
         }
     }
 
     @Override
-    protected void updatePositions()
+    public void updatePositions()
     {
         scrollBar.setHeight(height); //TODO create a way to auto update, or add a listener
         super.updatePositions();

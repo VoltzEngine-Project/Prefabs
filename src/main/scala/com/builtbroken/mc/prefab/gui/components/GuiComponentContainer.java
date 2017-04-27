@@ -58,7 +58,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    protected void updatePositions()
+    public void updatePositions()
     {
         if (updatePositionLogic)
         {
