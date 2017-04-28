@@ -217,7 +217,11 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public boolean isMouseInside(int mouseX, int mouseY)
     {
-        return mouseX >= x() && mouseY >= y() && mouseX < x() + getWidth() && mouseY < y() + getHeight();
+        boolean lowerX = mouseX >= x();
+        boolean lowerY = mouseY >= y();
+        boolean upperX = mouseX < (x() + getWidth());
+        boolean upperY = mouseY < (y() + getHeight());
+        return lowerX && lowerY && upperX && upperY;
     }
 
     public int getHeight()

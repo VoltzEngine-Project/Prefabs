@@ -160,7 +160,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
      */
     public <E extends GuiComponent> E add(E component)
     {
-        if (!getComponents().contains(component))
+        if (component != null && !getComponents().contains(component))
         {
             this.getComponents().add(component);
             component.setParentComponent(this);
@@ -174,7 +174,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
 
     public void remove(GuiComponent component)
     {
-        if (getComponents().contains(component))
+        if (component != null && getComponents().contains(component))
         {
             getComponents().remove(component);
             if (updatePositionLogic)
