@@ -428,7 +428,7 @@ public class GuiField extends GuiComponent<GuiField>
             this.setFocused(true);
             if (this.isFocused)
             {
-                int l = mouseX - this.xPosition;
+                int l = mouseX - this.x();
 
                 if (this.enableBackgroundDrawing)
                 {
@@ -456,8 +456,8 @@ public class GuiField extends GuiComponent<GuiField>
             GL11.glDisable(GL11.GL_BLEND);
             if (this.getEnableBackgroundDrawing())
             {
-                drawRect(this.xPosition - 1, this.yPosition - 1, this.xPosition + this.width + 1, this.yPosition + this.height + 1, -6250336);
-                drawRect(this.xPosition, this.yPosition, this.xPosition + this.width, this.yPosition + this.height, -16777216);
+                drawRect(this.x() - 1, this.y() - 1, this.x() + this.getWidth() + 1, this.y() + this.getHeight() + 1, -6250336);
+                drawRect(this.x(), this.y(), this.x() + this.getWidth(), this.y() + this.getHeight(), -16777216);
             }
 
             int i = this.isEnabled() ? this.enabledColor : this.disabledColor;
@@ -466,8 +466,8 @@ public class GuiField extends GuiComponent<GuiField>
             String s = Minecraft.getMinecraft().fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
             boolean flag = j >= 0 && j <= s.length();
             boolean flag1 = this.isFocused && this.cursorCounter / 6 % 2 == 0 && flag;
-            int l = this.enableBackgroundDrawing ? this.xPosition + 4 : this.xPosition;
-            int i1 = this.enableBackgroundDrawing ? this.yPosition + (this.height - 8) / 2 : this.yPosition;
+            int l = this.enableBackgroundDrawing ? this.x() + 4 : this.x();
+            int i1 = this.enableBackgroundDrawing ? this.y() + (this.getHeight() - 8) / 2 : this.y();
             int j1 = l;
 
             if (k > s.length())
@@ -486,7 +486,7 @@ public class GuiField extends GuiComponent<GuiField>
 
             if (!flag)
             {
-                k1 = j > 0 ? l + this.width : l;
+                k1 = j > 0 ? l + this.getWidth() : l;
             }
             else if (flag2)
             {
@@ -544,14 +544,14 @@ public class GuiField extends GuiComponent<GuiField>
             p_146188_4_ = i1;
         }
 
-        if (p_146188_3_ > this.xPosition + this.width)
+        if (p_146188_3_ > this.x() + this.getWidth())
         {
-            p_146188_3_ = this.xPosition + this.width;
+            p_146188_3_ = this.x() + this.getWidth();
         }
 
-        if (p_146188_1_ > this.xPosition + this.width)
+        if (p_146188_1_ > this.x() + this.getWidth())
         {
-            p_146188_1_ = this.xPosition + this.width;
+            p_146188_1_ = this.x() + this.getWidth();
         }
 
         Tessellator tessellator = Tessellator.instance;
@@ -658,7 +658,7 @@ public class GuiField extends GuiComponent<GuiField>
      */
     public int getWidth()
     {
-        return this.getEnableBackgroundDrawing() ? this.width - 8 : this.width;
+        return this.getEnableBackgroundDrawing() ? super.getWidth() - 8 : super.getWidth();
     }
 
     /**

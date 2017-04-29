@@ -44,13 +44,13 @@ public class GuiButtonCheck extends GuiButton9px<GuiButtonCheck>
     @Override
     protected int getVRenderModifier()
     {
-        if (checked)
+        if (isChecked())
         {
             if (type == 1)
             {
-                return height * 2; //Solid check box
+                return getHeight() * 2; //Solid check box
             }
-            return height; //Classic check symbol with no box background
+            return getHeight(); //Classic check symbol with no box background
         }
         return 0;
     }

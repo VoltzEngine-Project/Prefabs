@@ -2,8 +2,11 @@ package com.builtbroken.mc.prefab.gui.components;
 
 import com.builtbroken.mc.prefab.gui.pos.GuiRelativePos;
 import com.builtbroken.mc.prefab.gui.pos.HugXSide;
+import com.builtbroken.mc.prefab.gui.pos.size.GuiRelativeSize;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+
+import java.awt.*;
 
 /**
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
@@ -32,8 +35,15 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
         this.resizeAsNeeded = false;
         this.ySpacing = ySpacing;
         this.callback = callback;
-        scrollBar = add(new GuiScrollBar(0, new HugXSide(this, -9, false), height, entries));
+        scrollBar = add(new GuiScrollBar(0, new HugXSide(this, -9, false), getHeight(), entries));
+        scrollBar.setRelativeSize(new GuiRelativeSize(this, 9, 0).setUseHostWidth(false));
         setEntriesShown(entries);
+    }
+
+    @Override
+    protected Color getBackgroundColor()
+    {
+        return enableDebug ? Color.MAGENTA : null;
     }
 
     @Override
@@ -50,13 +60,6 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
         {
             scrollBar.downButton.disable();
         }
-    }
-
-    @Override
-    public void updatePositions()
-    {
-        scrollBar.setHeight(height); //TODO create a way to auto update, or add a listener
-        super.updatePositions();
     }
 
     public void reloadEntries()

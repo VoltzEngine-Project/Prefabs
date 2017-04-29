@@ -42,8 +42,8 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
         int hoverState = this.getHoverState(this.field_146123_n);
-        this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + hoverState * 20, this.width / 2, this.height);
-        this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + hoverState * 20, this.width / 2, this.height);
+        this.drawTexturedModalRect(this.x(), this.y(), 0, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
+        this.drawTexturedModalRect(this.x() + this.getWidth() / 2, this.y(), 200 - this.getWidth() / 2, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
 
         int color = 14737632;
 
@@ -59,7 +59,7 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
         {
             color = 16777120;
         }
-        this.drawCenteredString(mc.fontRenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, color);
+        this.drawCenteredString(mc.fontRenderer, this.displayString, this.x() + this.getWidth() / 2, this.y() + (this.getHeight() - 8) / 2, color);
     }
 
     @Override

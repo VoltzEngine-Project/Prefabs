@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.gui.screen;
 
+import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.region.Rectangle;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class GuiScreenBase extends GuiScreen
                     //Fire audio of click
                     event.button.func_146113_a(this.mc.getSoundHandler());
 
-                    if(guibutton.id >= 0)
+                    if (guibutton.id >= 0)
                     {
                         //Fire event of click
                         this.actionPerformed(event.button);
@@ -102,6 +104,11 @@ public class GuiScreenBase extends GuiScreen
     @Override
     protected void keyTyped(char c, int i)
     {
+        if (Engine.runningAsDev && i == Keyboard.KEY_GRAVE)
+        {
+            GuiComponent.enableDebug = !GuiComponent.enableDebug;
+            return;
+        }
         for (Object o : buttonList)
         {
             if (o instanceof GuiComponent)

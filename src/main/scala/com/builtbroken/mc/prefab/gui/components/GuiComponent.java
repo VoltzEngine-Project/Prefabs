@@ -31,6 +31,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     private GuiComponentContainer parentComponent;
     private IPos2D relativePosition;
+    private IPos2D relativeSize;
     private GuiScreenBase host;
 
     public GuiComponent(int id, IPos2D point)
@@ -82,7 +83,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     public void drawButton(Minecraft mc, int mouseX, int mouseY)
     {
         update(mc, mouseX, mouseY);
-        if (this.visible)
+        if (visible())
         {
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -95,7 +96,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
             if (enableDebug)
             {
-                this.drawCenteredString(mc.fontRenderer, "" + id, this.xPosition + (width / 2), this.yPosition + (height / 2), this instanceof GuiComponentContainer ? Color.red.getRGB() : Color.blue.getRGB());
+                this.drawCenteredString(mc.fontRenderer, "" + id, this.x() + (getWidth() / 2), this.y() + (getHeight() / 2), this instanceof GuiComponentContainer ? Color.red.getRGB() : Color.blue.getRGB());
 
                 if (!(this instanceof GuiButton2))
                 {
@@ -107,21 +108,21 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
                         color = Color.blue;
                     }
                     GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), getWidth(), 2);
-                    this.drawTexturedModalRect(xPosition, yPosition + getHeight() - 2, getU(), getV(), getWidth(), 2);
+                    this.drawTexturedModalRect(x(), y(), getU(), getV(), getWidth(), 2);
+                    this.drawTexturedModalRect(x(), y() + getHeight() - 2, getU(), getV(), getWidth(), 2);
 
-                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), 2, getHeight());
-                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition, getU(), getV(), 2, getHeight());
+                    this.drawTexturedModalRect(x(), y(), getU(), getV(), 2, getHeight());
+                    this.drawTexturedModalRect(x() + getWidth() - 2, y(), getU(), getV(), 2, getHeight());
 
                     color = Color.GREEN;
                     GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-                    this.drawTexturedModalRect(xPosition, yPosition, getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(x(), y(), getU(), getV(), 2, 2);
 
                     color = Color.black;
                     GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition, getU(), getV(), 2, 2);
-                    this.drawTexturedModalRect(xPosition + getWidth() - 2, yPosition + getHeight() - 2, getU(), getV(), 2, 2);
-                    this.drawTexturedModalRect(xPosition, yPosition + getHeight() - 2, getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(x() + getWidth() - 2, y(), getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(x() + getWidth() - 2, y() + getHeight() - 2, getU(), getV(), 2, 2);
+                    this.drawTexturedModalRect(x(), y() + getHeight() - 2, getU(), getV(), 2, 2);
                 }
             }
 
@@ -146,7 +147,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         {
             GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         }
-        this.drawTexturedModalRect(this.xPosition, this.yPosition, getU(), getV(), this.width, this.height);
+        this.drawTexturedModalRect(this.x(), this.y(), getU(), getV(), this.getWidth(), this.getHeight());
     }
 
     protected Color getBackgroundColor()
@@ -163,11 +164,11 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     {
         if (supportsDisabledState() && !isEnabled()) //disabled state
         {
-            return width * 2;
+            return getWidth() * 2;
         }
         else if (supportsHoverState() && field_146123_n) //Hover state
         {
-            return width;
+            return getWidth();
         }
         return 0;
     }
@@ -226,7 +227,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public int getHeight()
     {
-        return height;
+        return getRelativeSize() != null ? getRelativeSize().yi() : height;
     }
 
     public E setHeight(int height)
@@ -237,7 +238,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public int getWidth()
     {
-        return width;
+        return getRelativeSize() != null ? getRelativeSize().xi() : width;
     }
 
     public E setWidth(int width)
@@ -360,5 +361,17 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     public void drawString(int x, int y, String s, int color)
     {
         drawString(Minecraft.getMinecraft().fontRenderer, "" + s, x + x(), y + y(), color);
+    }
+
+    public IPos2D getRelativeSize()
+    {
+        return relativeSize;
+    }
+
+    public E setRelativeSize(IPos2D relativeSize)
+    {
+        this.relativeSize = relativeSize;
+        updatePositions();
+        return (E) this;
     }
 }
