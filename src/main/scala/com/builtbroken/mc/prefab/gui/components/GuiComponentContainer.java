@@ -78,6 +78,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
         {
             GL11.glPushMatrix();
             component.drawButton(mc, mouseX, mouseY);
+            GL11.glColor4f(1f, 1f, 1f, 1f);
             GL11.glPopMatrix();
         }
     }
