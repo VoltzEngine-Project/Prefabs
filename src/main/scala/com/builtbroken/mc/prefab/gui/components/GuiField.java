@@ -23,14 +23,11 @@ public class GuiField extends GuiComponent<GuiField>
     private int cursorPosition;
     /** other selection position, maybe the same as the cursor */
     private int selectionEnd;
-    private int enabledColor = 14737632;
-    private int disabledColor = 7368816;
 
     public GuiField(int x, int y)
     {
         super(-1, x, y);
     }
-
     /**
      * Increments the cursor counter
      */
@@ -44,16 +41,23 @@ public class GuiField extends GuiComponent<GuiField>
      */
     public void setText(String text)
     {
-        if (text.length() > this.maxStringLength)
+        if(text != null)
         {
-            this.text = text.substring(0, this.maxStringLength);
+            if (text.length() > this.maxStringLength)
+            {
+                this.text = text.substring(0, this.maxStringLength);
+            }
+            else
+            {
+                this.text = text;
+            }
+
+            this.setCursorPositionEnd();
         }
         else
         {
-            this.text = text;
+            setText("");
         }
-
-        this.setCursorPositionEnd();
     }
 
     /**
@@ -448,78 +452,93 @@ public class GuiField extends GuiComponent<GuiField>
     }
 
     @Override
+    protected void preRender(Minecraft mc, int mouseX, int mouseY)
+    {
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_BLEND);
+    }
+
+    @Override
+    protected void postRender(Minecraft mc, int mouseX, int mouseY)
+    {
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_BLEND);
+    }
+
+    @Override
+    protected void drawBackground(Minecraft mc, int mouseX, int mouseY)
+    {
+        if (this.getEnableBackgroundDrawing())
+        {
+            drawRect(this.x() - 1, this.y() - 1, this.x() + this.getWidth() + 1, this.y() + this.getHeight() + 1, -6250336);
+            drawRect(this.x(), this.y(), this.x() + this.getWidth(), this.y() + this.getHeight(), -16777216);
+        }
+    }
+
+    @Override
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
-        if (this.visible())
+        super.doRender(mc, mouseX, mouseY);
+
+        final int textRenderColor = getTextColor();
+
+        int renderedCursorPosition = this.cursorPosition - this.lineScrollOffset;
+        int k = this.selectionEnd - this.lineScrollOffset;
+
+        String s = Minecraft.getMinecraft().fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth()); //TODO make optional
+
+        boolean flag = renderedCursorPosition >= 0 && renderedCursorPosition <= s.length();
+        boolean flag1 = this.isFocused && this.cursorCounter / 6 % 2 == 0 && flag;
+
+        int l = this.enableBackgroundDrawing ? this.x() + 4 : this.x();
+        int i1 = this.enableBackgroundDrawing ? this.y() + (this.getHeight() - 8) / 2 : this.y();
+        int j1 = l;
+
+        if (k > s.length())
         {
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_BLEND);
-            if (this.getEnableBackgroundDrawing())
+            k = s.length();
+        }
+
+        if (s.length() > 0)
+        {
+            String s1 = flag ? s.substring(0, renderedCursorPosition) : s;
+            j1 = Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s1, l, i1, textRenderColor);
+        }
+
+        boolean flag2 = this.cursorPosition < this.text.length() || this.text.length() >= this.getMaxStringLength();
+        int k1 = j1;
+
+        if (!flag)
+        {
+            k1 = renderedCursorPosition > 0 ? l + this.getWidth() : l;
+        }
+        else if (flag2)
+        {
+            k1 = j1 - 1;
+            --j1;
+        }
+
+        if (s.length() > 0 && flag && renderedCursorPosition < s.length())
+        {
+            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s.substring(renderedCursorPosition), j1, i1, textRenderColor);
+        }
+
+        if (flag1)
+        {
+            if (flag2)
             {
-                drawRect(this.x() - 1, this.y() - 1, this.x() + this.getWidth() + 1, this.y() + this.getHeight() + 1, -6250336);
-                drawRect(this.x(), this.y(), this.x() + this.getWidth(), this.y() + this.getHeight(), -16777216);
+                Gui.drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT, -3092272);
             }
-
-            int i = this.isEnabled() ? this.enabledColor : this.disabledColor;
-            int j = this.cursorPosition - this.lineScrollOffset;
-            int k = this.selectionEnd - this.lineScrollOffset;
-            String s = Minecraft.getMinecraft().fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
-            boolean flag = j >= 0 && j <= s.length();
-            boolean flag1 = this.isFocused && this.cursorCounter / 6 % 2 == 0 && flag;
-            int l = this.enableBackgroundDrawing ? this.x() + 4 : this.x();
-            int i1 = this.enableBackgroundDrawing ? this.y() + (this.getHeight() - 8) / 2 : this.y();
-            int j1 = l;
-
-            if (k > s.length())
+            else
             {
-                k = s.length();
+                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("_", k1, i1, textRenderColor);
             }
+        }
 
-            if (s.length() > 0)
-            {
-                String s1 = flag ? s.substring(0, j) : s;
-                j1 = Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s1, l, i1, i);
-            }
-
-            boolean flag2 = this.cursorPosition < this.text.length() || this.text.length() >= this.getMaxStringLength();
-            int k1 = j1;
-
-            if (!flag)
-            {
-                k1 = j > 0 ? l + this.getWidth() : l;
-            }
-            else if (flag2)
-            {
-                k1 = j1 - 1;
-                --j1;
-            }
-
-            if (s.length() > 0 && flag && j < s.length())
-            {
-                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s.substring(j), j1, i1, i);
-            }
-
-            if (flag1)
-            {
-                if (flag2)
-                {
-                    Gui.drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT, -3092272);
-                }
-                else
-                {
-                    Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("_", k1, i1, i);
-                }
-            }
-
-            if (k != j)
-            {
-                int l1 = l + Minecraft.getMinecraft().fontRenderer.getStringWidth(s.substring(0, k));
-                this.drawCursorVertical(k1, i1 - 1, l1 - 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
-            }
-
-
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_BLEND);
+        if (k != renderedCursorPosition)
+        {
+            int l1 = l + Minecraft.getMinecraft().fontRenderer.getStringWidth(s.substring(0, k));
+            this.drawCursorVertical(k1, i1 - 1, l1 - 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
         }
     }
 
@@ -609,19 +628,6 @@ public class GuiField extends GuiComponent<GuiField>
     public void setEnableBackgroundDrawing(boolean p_146185_1_)
     {
         this.enableBackgroundDrawing = p_146185_1_;
-    }
-
-    /**
-     * Sets the text colour for this textbox (disabled text will not use this colour)
-     */
-    public void setTextColor(int p_146193_1_)
-    {
-        this.enabledColor = p_146193_1_;
-    }
-
-    public void setDisabledTextColour(int p_146204_1_)
-    {
-        this.disabledColor = p_146204_1_;
     }
 
     /**
@@ -715,6 +721,15 @@ public class GuiField extends GuiComponent<GuiField>
                 this.lineScrollOffset = j;
             }
         }
+    }
+
+    protected int getTextColor()
+    {
+        if(!isEnabled())
+        {
+            return 7368816;
+        }
+        return 14737632;
     }
 
     /**
