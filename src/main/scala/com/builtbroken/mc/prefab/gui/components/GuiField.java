@@ -24,10 +24,13 @@ public class GuiField extends GuiComponent<GuiField>
     /** other selection position, maybe the same as the cursor */
     private int selectionEnd;
 
+    private long unfocusedTime = 0L;
+
     public GuiField(int x, int y)
     {
         super(-1, x, y);
     }
+
     /**
      * Increments the cursor counter
      */
@@ -41,7 +44,7 @@ public class GuiField extends GuiComponent<GuiField>
      */
     public void setText(String text)
     {
-        if(text != null)
+        if (text != null)
         {
             if (text.length() > this.maxStringLength)
             {
@@ -633,14 +636,19 @@ public class GuiField extends GuiComponent<GuiField>
     /**
      * Sets focus to this gui element
      */
-    public void setFocused(boolean p_146195_1_)
+    public void setFocused(boolean focused)
     {
-        if (p_146195_1_ && !this.isFocused)
+        if (focused && !this.isFocused)
         {
             this.cursorCounter = 0;
         }
 
-        this.isFocused = p_146195_1_;
+        this.isFocused = focused;
+
+        if (!focused)
+        {
+            unfocusedTime = System.nanoTime();
+        }
     }
 
     /**
@@ -725,7 +733,7 @@ public class GuiField extends GuiComponent<GuiField>
 
     protected int getTextColor()
     {
-        if(!isEnabled())
+        if (!isEnabled())
         {
             return 7368816;
         }
@@ -746,5 +754,15 @@ public class GuiField extends GuiComponent<GuiField>
     public void setVisible(boolean p_146189_1_)
     {
         this.visible = p_146189_1_;
+    }
+
+    /**
+     * Time since the field was last focused
+     *
+     * @return
+     */
+    public long timeSinceFocused()
+    {
+        return System.nanoTime() - unfocusedTime;
     }
 }
