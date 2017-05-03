@@ -40,6 +40,24 @@ public abstract class TileListener implements ITileEventListener
         return z;
     }
 
+    @Override
+    public int xi()
+    {
+        return x;
+    }
+
+    @Override
+    public int yi()
+    {
+        return y;
+    }
+
+    @Override
+    public int zi()
+    {
+        return z;
+    }
+
     public void inject(World world, int x, int y, int z)
     {
         this.world = world;
@@ -79,6 +97,11 @@ public abstract class TileListener implements ITileEventListener
 
     protected Block getBlock()
     {
+        return getBlock(x, y, z);
+    }
+
+    protected Block getBlock(int x, int y, int z)
+    {
         if (world != null)
         {
             return world.getBlock(x, y, z);
@@ -90,6 +113,19 @@ public abstract class TileListener implements ITileEventListener
         return null;
     }
 
+    protected int getBlockMeta()
+    {
+        if (world != null)
+        {
+            return world.getBlockMetadata(x, y, z);
+        }
+        else if (blockAccess != null)
+        {
+            return blockAccess.getBlockMetadata(x, y, z);
+        }
+        return 0;
+    }
+
     protected boolean setMeta(int meta, int flag)
     {
         if (world != null)
@@ -97,6 +133,11 @@ public abstract class TileListener implements ITileEventListener
             return world.setBlockMetadataWithNotify(x, y, z, meta, flag);
         }
         return false;
+    }
+
+    protected boolean isServer()
+    {
+        return world != null && !world.isRemote;
     }
 
     @Override
