@@ -1,57 +1,87 @@
 package com.builtbroken.mc.prefab.gui;
 
 import com.builtbroken.mc.api.tile.IPlayerUsing;
+import com.builtbroken.mc.api.tile.node.ITileNode;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class ContainerBase extends Container
+public class ContainerBase<H extends Object> extends Container
 {
-	protected int slotCount = 0;
-	protected int xInventoryDisplacement = 8;
-	protected int yInventoryDisplacement = 135;
-	protected int yHotBarDisplacement = 193;
-	protected IInventory inventory;
+    protected int slotCount = 0;
+    protected int xInventoryDisplacement = 8;
+    protected int yInventoryDisplacement = 135;
+    protected int yHotBarDisplacement = 193;
 
-	public ContainerBase(IInventory inventory)
-	{
-		this.inventory = inventory;
-		this.slotCount = inventory.getSizeInventory();
-	}
 
-	public ContainerBase(EntityPlayer player, IInventory inventory)
-	{
-		this(inventory);
+    protected IInventory inventory;
+    protected EntityPlayer player;
+    protected H host;
 
-		if (inventory instanceof IPlayerUsing)
-		{
-			((IPlayerUsing) inventory).getPlayersUsing().add(player);
-		}
-	}
-
-	@Override
-	public void onContainerClosed(EntityPlayer entityplayer)
-	{
-		if (inventory instanceof IPlayerUsing && entityplayer.openContainer != this)
-		{
-			((IPlayerUsing) inventory).getPlayersUsing().remove(entityplayer);
-		}
-		super.onContainerClosed(entityplayer);
-	}
-
-	public void addPlayerInventory(EntityPlayer player)
+    public ContainerBase(IInventory inventory)
     {
-        addPlayerInventory(player, 8 , 84);
+        this.inventory = inventory;
+        this.slotCount = inventory.getSizeInventory();
+    }
+
+    @Deprecated
+    public ContainerBase(EntityPlayer player, IInventory inventory)
+    {
+        this(inventory);
+
+        this.player = player;
+        if (inventory instanceof IPlayerUsing)
+        {
+            ((IPlayerUsing) inventory).getPlayersUsing().add(player);
+        }
+    }
+
+    public ContainerBase(EntityPlayer player, H node)
+    {
+        if (node instanceof IInventory)
+        {
+            inventory = (IInventory) node;
+        }
+        else if (node instanceof IInventoryProvider)
+        {
+            inventory = ((IInventoryProvider) node).getInventory();
+        }
+        else if (node instanceof ITileNode && ((ITileNode) node).getHost() instanceof IInventory)
+        {
+            inventory = ((IInventory) node);
+        }
+
+        this.player = player;
+        if (node instanceof IPlayerUsing)
+        {
+            ((IPlayerUsing) inventory).addPlayerToUseList(player);
+        }
+    }
+
+    @Override
+    public void onContainerClosed(EntityPlayer entityplayer)
+    {
+        if (host instanceof IPlayerUsing && entityplayer.openContainer != this)
+        {
+            ((IPlayerUsing) host).removePlayerToUseList(entityplayer);
+        }
+        super.onContainerClosed(entityplayer);
+    }
+
+    public void addPlayerInventory(EntityPlayer player)
+    {
+        addPlayerInventory(player, 8, 84);
     }
 
     public void addPlayerInventory(EntityPlayer player, int x, int y)
     {
-		if (this.inventory instanceof IPlayerUsing)
-		{
-			((IPlayerUsing) this.inventory).getPlayersUsing().add(player);
-		}
+        if (this.inventory instanceof IPlayerUsing)
+        {
+            ((IPlayerUsing) this.inventory).getPlayersUsing().add(player);
+        }
 
         //Inventory
         for (int row = 0; row < 3; ++row)
@@ -67,76 +97,76 @@ public class ContainerBase extends Container
         {
             this.addSlotToContainer(new Slot(player.inventory, slot, slot * 18 + x, 58 + y));
         }
-	}
+    }
 
-	/**
-	 * Called to transfer a stack from one inventory to the other eg. when shift clicking.
-	 */
-	@Override
-	public ItemStack transferStackInSlot(EntityPlayer player, int slot_id)
-	{
-		ItemStack itemstack = null;
-		Slot slot = (Slot) this.inventorySlots.get(slot_id);
+    /**
+     * Called to transfer a stack from one inventory to the other eg. when shift clicking.
+     */
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer player, int slot_id)
+    {
+        ItemStack itemstack = null;
+        Slot slot = (Slot) this.inventorySlots.get(slot_id);
 
-		if (slot != null && slot.getHasStack())
-		{
-			ItemStack slotStack = slot.getStack();
-			itemstack = slotStack.copy();
+        if (slot != null && slot.getHasStack())
+        {
+            ItemStack slotStack = slot.getStack();
+            itemstack = slotStack.copy();
 
-			if (slot_id < this.slotCount)
-			{
-				/**
-				 * The item is inside the block inventory, trying to move an item out.
-				 */
-				if (!mergeItemStack(slotStack, this.slotCount, this.inventorySlots.size(), true))
-				{
-					return null;
-				}
-			}
-			else
-			{
-				/**
-				 * We are outside the block inventory, trying to move an item in.
-				 *
-				 * Only merge the inventory if it is valid for the specific slot!
-				 */
-				boolean foundValid = false;
+            if (slot_id < this.slotCount)
+            {
+                /**
+                 * The item is inside the block inventory, trying to move an item out.
+                 */
+                if (!mergeItemStack(slotStack, this.slotCount, this.inventorySlots.size(), true))
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                /**
+                 * We are outside the block inventory, trying to move an item in.
+                 *
+                 * Only merge the inventory if it is valid for the specific slot!
+                 */
+                boolean foundValid = false;
 
-				for (int i = 0; i < slotCount; i++)
-				{
-					if (inventory.isItemValidForSlot(i, slotStack))
-					{
-						if (!mergeItemStack(slotStack, i, i + 1, false))
-						{
-							return null;
-						}
+                for (int i = 0; i < slotCount; i++)
+                {
+                    if (inventory.isItemValidForSlot(i, slotStack))
+                    {
+                        if (!mergeItemStack(slotStack, i, i + 1, false))
+                        {
+                            return null;
+                        }
 
-						foundValid = true;
-					}
-				}
+                        foundValid = true;
+                    }
+                }
 
-				if (!foundValid)
-				{
-					return null;
-				}
-			}
+                if (!foundValid)
+                {
+                    return null;
+                }
+            }
 
-			if (slotStack.stackSize == 0)
-			{
-				slot.putStack(null);
-			}
-			else
-			{
-				slot.onSlotChanged();
-			}
-		}
+            if (slotStack.stackSize == 0)
+            {
+                slot.putStack(null);
+            }
+            else
+            {
+                slot.onSlotChanged();
+            }
+        }
 
-		return itemstack;
-	}
+        return itemstack;
+    }
 
-	@Override
-	public boolean canInteractWith(EntityPlayer entityplayer)
-	{
-		return this.inventory.isUseableByPlayer(entityplayer);
-	}
+    @Override
+    public boolean canInteractWith(EntityPlayer entityplayer)
+    {
+        return this.inventory.isUseableByPlayer(entityplayer);
+    }
 }
