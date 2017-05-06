@@ -57,7 +57,7 @@ public class ContainerBase<H extends Object> extends Container
         this.player = player;
         if (node instanceof IPlayerUsing)
         {
-            ((IPlayerUsing) inventory).addPlayerToUseList(player);
+            ((IPlayerUsing) node).addPlayerToUseList(player);
         }
     }
 

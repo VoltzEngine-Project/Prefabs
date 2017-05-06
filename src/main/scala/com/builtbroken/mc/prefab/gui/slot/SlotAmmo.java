@@ -23,6 +23,17 @@ public class SlotAmmo extends Slot
     @Override
     public boolean isItemValid(ItemStack stack)
     {
-        return stack != null && stack.getItem() instanceof IItemAmmo && (ammoType == null || ammoType == ((IItemAmmo) stack.getItem()).getAmmoData(stack).getAmmoType());
+        if (stack != null && stack.getItem() instanceof IItemAmmo)
+        {
+            if (ammoType == null)
+            {
+                return true;
+            }
+            else if (((IItemAmmo) stack.getItem()).getAmmoData(stack) != null)
+            {
+                return ammoType == ((IItemAmmo) stack.getItem()).getAmmoData(stack).getAmmoType();
+            }
+        }
+        return false;
     }
 }
