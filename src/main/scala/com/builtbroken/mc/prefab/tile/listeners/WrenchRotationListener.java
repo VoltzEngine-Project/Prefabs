@@ -73,7 +73,7 @@ public class WrenchRotationListener extends TileListener implements IBlockListen
         @Override
         public ITileEventListener createListener(Block block)
         {
-            return new RotatableListener();
+            return new WrenchRotationListener();
         }
 
         @Override
