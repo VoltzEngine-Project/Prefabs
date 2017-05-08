@@ -6,6 +6,7 @@ import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
 import com.builtbroken.mc.api.tile.listeners.IWrenchListener;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
+import com.builtbroken.mc.lib.helper.BlockUtility;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -38,21 +39,36 @@ public class WrenchRotationListener extends TileListener implements IBlockListen
         {
             if (isServer())
             {
-                if (rotatable.getDirection() == ForgeDirection.NORTH)
+                if (!player.isSneaking())
                 {
-                    rotatable.setDirection(ForgeDirection.EAST);
+                    if (rotatable.getDirection() == ForgeDirection.NORTH)
+                    {
+                        rotatable.setDirection(ForgeDirection.EAST);
+                    }
+                    else if (rotatable.getDirection() == ForgeDirection.EAST)
+                    {
+                        rotatable.setDirection(ForgeDirection.SOUTH);
+                    }
+                    else if (rotatable.getDirection() == ForgeDirection.SOUTH)
+                    {
+                        rotatable.setDirection(ForgeDirection.WEST);
+                    }
+                    else if (rotatable.getDirection() == ForgeDirection.WEST)
+                    {
+                        rotatable.setDirection(ForgeDirection.NORTH);
+                    }
                 }
-                else if (rotatable.getDirection() == ForgeDirection.EAST)
+                else
                 {
-                    rotatable.setDirection(ForgeDirection.SOUTH);
-                }
-                else if (rotatable.getDirection() == ForgeDirection.SOUTH)
-                {
-                    rotatable.setDirection(ForgeDirection.WEST);
-                }
-                else if (rotatable.getDirection() == ForgeDirection.WEST)
-                {
-                    rotatable.setDirection(ForgeDirection.NORTH);
+                    ForgeDirection direction = BlockUtility.determineForgeDirection(player);
+                    if (rotatable.getDirection() == direction)
+                    {
+                        rotatable.setDirection(direction.getOpposite());
+                    }
+                    else
+                    {
+                        rotatable.setDirection(direction);
+                    }
                 }
             }
             return true;
