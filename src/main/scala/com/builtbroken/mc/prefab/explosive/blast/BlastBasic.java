@@ -257,7 +257,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         }
         if (damageableTile != null)
         {
-            return damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+            return energy - damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
         }
         //Update debug info
         if (block.isAir(world, vec.xi(), vec.yi(), vec.zi()))
