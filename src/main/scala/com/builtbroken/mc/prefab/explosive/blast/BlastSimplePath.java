@@ -4,6 +4,7 @@ import com.builtbroken.mc.api.edit.IWorldChangeLayeredAction;
 import com.builtbroken.mc.api.edit.IWorldEdit;
 import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
+import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import net.minecraft.tileentity.TileEntity;
@@ -195,14 +196,23 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                             IWorldEdit edit = null;
 
                             //Do logic for damageable blocks
-                            TileEntity tile = nextNode.getTileEntity();
-                            if (tile instanceof IExplosiveDamageable)
+                            TileEntity tileEntity = nextNode.getTileEntity();
+                            IExplosiveDamageable damageableTile = null;
+                            if (tileEntity instanceof IExplosiveDamageable)
+                            {
+                                damageableTile = (IExplosiveDamageable) tileEntity;
+                            }
+                            else if(tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+                            {
+                                damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
+                            }
+                            if (damageableTile != null)
                             {
                                 float distance = (float) center.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
-                                float energy = ((IExplosiveDamageable) tile).getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
+                                float energy = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
                                 if (energy > 0)
                                 {
-                                    edit = ((IExplosiveDamageable) tile).getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
+                                    edit = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
                                 }
                             }
                             //Else do normal logic

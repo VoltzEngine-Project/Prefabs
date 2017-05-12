@@ -9,6 +9,7 @@ import com.builtbroken.mc.api.explosive.IBlastEdit;
 import com.builtbroken.mc.api.explosive.IExplosive;
 import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
+import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.sorting.Vector3DistanceComparator;
 import com.builtbroken.mc.imp.transform.vector.Location;
@@ -167,10 +168,19 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                         {
                             IBlastEdit v;
 
-                            TileEntity tile = vec.getTileEntity();
-                            if (tile instanceof IExplosiveDamageable)
+                            TileEntity tileEntity = vec.getTileEntity();
+                            IExplosiveDamageable damageableTile = null;
+                            if (tileEntity instanceof IExplosiveDamageable)
                             {
-                                v = ((IExplosiveDamageable) tile).getBlockEditOnBlastImpact(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+                                damageableTile = (IExplosiveDamageable) tileEntity;
+                            }
+                            else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+                            {
+                                damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
+                            }
+                            if (damageableTile != null)
+                            {
+                                v = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
                             }
                             else
                             {
@@ -235,10 +245,19 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     protected float getEnergyCostOfTile(IBlastEdit vec, float energy)
     {
         Block block = vec.getBlock();
-        TileEntity tile = vec.getTileEntity();
-        if (tile instanceof IExplosiveDamageable)
+        TileEntity tileEntity = vec.getTileEntity();
+        IExplosiveDamageable damageableTile = null;
+        if (tileEntity instanceof IExplosiveDamageable)
         {
-            return ((IExplosiveDamageable) tile).getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+            damageableTile = (IExplosiveDamageable) tileEntity;
+        }
+        else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+        {
+            damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
+        }
+        if (damageableTile != null)
+        {
+            return damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
         }
         //Update debug info
         if (block.isAir(world, vec.xi(), vec.yi(), vec.zi()))
