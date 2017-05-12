@@ -2,9 +2,12 @@ package com.builtbroken.mc.prefab.explosive.blast;
 
 import com.builtbroken.mc.api.edit.IWorldChangeLayeredAction;
 import com.builtbroken.mc.api.edit.IWorldEdit;
+import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -177,20 +180,37 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 //Pop a node off the stack each iteration
                 Location currentNode = stack.poll();
 
-                for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
+                for (EnumFacing dir : EnumFacing.values())
                 {
                     Location nextNode = currentNode.add(dir);
-
                     //Check if we can path to the node from the current node
-                    if (shouldPathTo(currentNode, nextNode))
+                    if (shouldPathTo(currentNode, nextNode, dir))
                     {
                         //Check if we can path the node
                         if (shouldPath(nextNode))
                         {
+                            //Add next node to path stack
                             stack.offer(nextNode);
 
-                            //Get Block edit for the location that we can path
-                            final IWorldEdit edit = changeBlock(nextNode);
+                            IWorldEdit edit = null;
+
+                            //Do logic for damageable blocks
+                            TileEntity tile = nextNode.getTileEntity();
+                            if (tile instanceof IExplosiveDamageable)
+                            {
+                                float distance = (float) center.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
+                                float energy = ((IExplosiveDamageable) tile).getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
+                                if (energy > 0)
+                                {
+                                    edit = ((IExplosiveDamageable) tile).getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
+                                }
+                            }
+                            //Else do normal logic
+                            else
+                            {
+                                //Get Block edit for the location that we can path
+                                edit = changeBlock(nextNode);
+                            }
 
                             //Avoid adding empty edits or existing edits
                             if (edit != null && !list.contains(edit) && edit.hasChanged())
@@ -235,12 +255,12 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 }
 
                 //Loop over all 6 sides
-                for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
+                for (EnumFacing dir : EnumFacing.values())
                 {
                     //Generated next node
                     final Location next = node.add(dir);
                     //Check if we can path to next node from this node
-                    if (shouldPathTo(node, next))
+                    if (shouldPathTo(node, next, dir))
                     {
                         pathNext(next, list);
                     }
@@ -269,7 +289,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
         return center.distance(location.xi() + 0.5, location.yi() + 0.5, location.zi() + 0.5) <= size;
     }
 
-    public boolean shouldPathTo(Location last, Location next)
+    public boolean shouldPathTo(Location last, Location next, EnumFacing dir)
     {
         return next.y() >= 0 && next.y() <= 255 && !pathed_locations.contains(next);
     }

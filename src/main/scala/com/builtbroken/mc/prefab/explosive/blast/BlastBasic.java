@@ -5,10 +5,13 @@ import com.builtbroken.mc.api.event.TriggerCause;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockEdit;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockReplaced;
 import com.builtbroken.mc.api.event.blast.BlastEventDestroyBlock;
+import com.builtbroken.mc.api.explosive.IBlastEdit;
 import com.builtbroken.mc.api.explosive.IExplosive;
+import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.sorting.Vector3DistanceComparator;
+import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
@@ -18,6 +21,7 @@ import net.minecraft.block.BlockTNT;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -70,6 +74,8 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      */
     protected BlastRunProfile profile;
 
+    public Location center;
+
     public BlastBasic(IExplosiveHandler handler)
     {
         super(handler);
@@ -80,14 +86,18 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     @Override
     public void getEffectedBlocks(List<IWorldEdit> list)
     {
+        Location c = new Location(world(), (int) x(), (int) y(), (int) z());
+        center = c.add(0.5);
+
         //TODO disable profiler if not in debug mode
-        HashMap<BlockEdit, Float> map = new HashMap();
+        HashMap<IBlastEdit, Float> map = new HashMap();
         profile.startSection("getEffectedBlocks");
 
         //Start path finder
         profile.startSection("Pathfinder");
-        BlockEdit edit = new BlockEdit(this, Blocks.air, 0);
-        if (edit.getHardness() >= 0)
+        IBlastEdit edit = new BlockEdit(this, Blocks.air, 0);
+        Block block = edit.getBlock();
+        if (block.getBlockHardness(world, edit.xi(), edit.yi(), edit.zi()) >= 0)
         {
             list.add(edit);
         }
@@ -117,7 +127,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      * @param vec    - starting block
      * @param energy - starting energy
      */
-    protected void triggerPathFinder(HashMap<BlockEdit, Float> map, BlockEdit vec, float energy)
+    protected void triggerPathFinder(HashMap<IBlastEdit, Float> map, IBlastEdit vec, float energy)
     {
         //Start pathfinder
         expand(map, vec, energy, null, 0);
@@ -132,7 +142,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      * @param side      - side not to expand in, and direction we came from
      * @param iteration - current iteration count from center, use this to stop the iteration if they get too far from center
      */
-    protected void expand(HashMap<BlockEdit, Float> map, BlockEdit vec, float energy, EnumFacing side, int iteration)
+    protected void expand(HashMap<IBlastEdit, Float> map, IBlastEdit vec, float energy, EnumFacing side, int iteration)
     {
         long timeStart = System.nanoTime();
         if (iteration < size * 2)
@@ -142,7 +152,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             if (e >= 0)
             {
                 //Add block to effect list
-                vec.energy = energy;
+                vec.setEnergy(energy);
                 onBlockMapped(vec, e, energy - e);
                 map.put(vec, energy - e);
 
@@ -150,16 +160,25 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                 if (e > 1)
                 {
                     //Get valid sides to iterate threw
-                    List<BlockEdit> sides = new ArrayList();
+                    List<IBlastEdit> sides = new ArrayList();
                     for (EnumFacing dir : EnumFacing.values())
                     {
                         if (dir != side)
                         {
-                            BlockEdit v = new BlockEdit(world, vec.x(), vec.y(), vec.z());
-                            v.doDrops();
-                            v = v.add(dir);
-                            v.face = dir;
-                            v.logPrevBlock();
+                            IBlastEdit v;
+
+                            TileEntity tile = vec.getTileEntity();
+                            if (tile instanceof IExplosiveDamageable)
+                            {
+                                v = ((IExplosiveDamageable) tile).getBlockEditOnBlastImpact(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+                            }
+                            else
+                            {
+                                v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
+                                v.doDrops();
+                                v.setBlastDirection(dir);
+                                v.logPrevBlock();
+                            }
                             sides.add(v);
                         }
                     }
@@ -168,15 +187,15 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
 
                     profile.blockIterationTimes.add(System.nanoTime() - timeStart);
                     //Iterate threw sides expending energy outwards
-                    for (BlockEdit f : sides)
+                    for (IBlastEdit editSides : sides)
                     {
                         float eToSpend = (e / sides.size()) + (e % sides.size());
                         e -= eToSpend;
-                        EnumFacing face = side == null ? getOpposite(f.face) : side;
-                        if (!map.containsKey(f) || map.get(f) < eToSpend)
+                        EnumFacing face = side == null ? getOpposite(editSides.getBlastDirection()) : side;
+                        if (!map.containsKey(editSides) || map.get(editSides) < eToSpend)
                         {
-                            f.face = face;
-                            expand(map, f, eToSpend, face, iteration + 1);
+                            editSides.setBlastDirection(face);
+                            expand(map, editSides, eToSpend, face, iteration + 1);
                         }
                     }
                 }
@@ -213,10 +232,16 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      * @param energy - energy to expend on the location
      * @return energy left over after effecting the block
      */
-    protected float getEnergyCostOfTile(BlockEdit vec, float energy)
+    protected float getEnergyCostOfTile(IBlastEdit vec, float energy)
     {
+        Block block = vec.getBlock();
+        TileEntity tile = vec.getTileEntity();
+        if (tile instanceof IExplosiveDamageable)
+        {
+            return ((IExplosiveDamageable) tile).getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+        }
         //Update debug info
-        if (vec.isAirBlock(world))
+        if (block.isAir(world, vec.xi(), vec.yi(), vec.zi()))
         {
             profile.airBlocksPathed++;
         }
@@ -225,7 +250,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             profile.blocksRemoved++;
         }
         //Get cost
-        return (vec.getHardness() >= 0 ? energy - (float) Math.max(vec.getResistance(explosionBlameEntity, x, y, z), 0.5) : -1);
+        return (block.getBlockHardness(world, vec.xi(), vec.yi(), vec.zi()) >= 0 ? energy - (float) Math.max(block.getExplosionResistance(explosionBlameEntity, world, vec.xi(), vec.yi(), vec.zi(), x, y, z), 0.5) : -1);
 
     }
 
@@ -270,11 +295,11 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      * @return new placement info, never change the location or you will
      * create a duplication issue as the original block will not be removed
      */
-    protected BlockEdit onBlockMapped(BlockEdit change, float energyExpended, float energyLeft)
+    protected IBlastEdit onBlockMapped(IBlastEdit change, float energyExpended, float energyLeft)
     {
         if (energyExpended > energyLeft)
         {
-            change.doItemDrop = true;
+            change.doDrops();
         }
         return change;
     }
@@ -345,9 +370,9 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         BlastEventBlockEdit event = new BlastEventDestroyBlock.Pre(this, BlastEventDestroyBlock.DestructionType.FORCE, world, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z());
 
         boolean result = MinecraftForge.EVENT_BUS.post(event);
-        if (vec instanceof BlockEdit && event instanceof BlastEventBlockReplaced.Pre)
+        if (vec instanceof IBlastEdit && event instanceof BlastEventBlockReplaced.Pre)
         {
-            ((BlockEdit) vec).set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
+            ((IBlastEdit) vec).set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
         }
         return !result;
     }
