@@ -202,7 +202,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                             {
                                 damageableTile = (IExplosiveDamageable) tileEntity;
                             }
-                            else if(tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+                            else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
                             {
                                 damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
                             }
@@ -299,7 +299,26 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
         return center.distance(location.xi() + 0.5, location.yi() + 0.5, location.zi() + 0.5) <= size;
     }
 
+    /**
+     * Called to see if the pathfinder should go to the next block
+     *
+     * @param last - last block pathed
+     * @param next - block being pathed next
+     * @param dir  - direction traveled
+     * @return true if can path
+     */
     public boolean shouldPathTo(Location last, Location next, EnumFacing dir)
+    {
+        return shouldPathTo(last, next);
+    }
+
+    /**
+     * Legacy for older versions of ICBM
+     *
+     * @deprecated Use the above method instead
+     */
+    @Deprecated
+    public boolean shouldPathTo(Location last, Location next)
     {
         return next.y() >= 0 && next.y() <= 255 && !pathed_locations.contains(next);
     }
