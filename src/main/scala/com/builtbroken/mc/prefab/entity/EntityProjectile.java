@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.entity;
 
+import com.builtbroken.mc.api.entity.IBullet;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -7,7 +8,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
@@ -20,7 +20,7 @@ import java.util.UUID;
  *
  * @author Darkguardsman
  */
-public class EntityProjectile extends Entity implements IProjectile
+public abstract class EntityProjectile extends EntityBase implements IBullet
 {
     /**
      * The entity who shot this projectile and can be used for damage calculations
@@ -133,8 +133,8 @@ public class EntityProjectile extends Entity implements IProjectile
     @Override
     protected void entityInit()
     {
+        super.entityInit();
     }
-
 
     @Override
     public void onUpdate()
@@ -333,23 +333,13 @@ public class EntityProjectile extends Entity implements IProjectile
      */
     protected void handleEntityCollision(MovingObjectPosition movingobjectposition, Entity entityHit)
     {
-        onImpactEntity(entityHit, getVelocity(), movingobjectposition);
-    }
-
-    /**
-     * Calculates and returns the velocity of the object. Has no direction...
-     *
-     * @return velocity >= 0
-     */
-    protected float getVelocity()
-    {
-        return MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+        onImpactEntity(entityHit, getSpeed(), movingobjectposition);
     }
 
 
     protected void onImpactEntity(Entity entityHit, float velocity, MovingObjectPosition hit)
     {
-        onImpactEntity(entityHit, getVelocity());
+        onImpactEntity(entityHit, getSpeed());
     }
 
     protected void onImpactEntity(Entity entityHit, float velocity)
@@ -427,7 +417,7 @@ public class EntityProjectile extends Entity implements IProjectile
 
 
     @Override
-    public void setThrowableHeading(double xx, double yy, double zz, float multiplier, float p_70186_8_)
+    public void setThrowableHeading(double xx, double yy, double zz, float multiplier, float random)
     {
         //Normalize
         float velocity = MathHelper.sqrt_double(xx * xx + yy * yy + zz * zz);
@@ -436,9 +426,12 @@ public class EntityProjectile extends Entity implements IProjectile
         zz /= (double) velocity;
 
         //Add randomization to make the arrow miss
-        xx += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) p_70186_8_;
-        yy += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) p_70186_8_;
-        zz += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) p_70186_8_;
+        if(random > 0)
+        {
+            xx += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) random;
+            yy += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) random;
+            zz += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) random;
+        }
 
         //Add multiplier
         xx *= (double) multiplier;
@@ -544,5 +537,11 @@ public class EntityProjectile extends Entity implements IProjectile
     public boolean canAttackWithItem()
     {
         return false;
+    }
+
+    @Override
+    public boolean canBeDestroyed(Object attacker, DamageSource damageSource)
+    {
+        return hasHealth;
     }
 }

@@ -1,6 +1,8 @@
 package com.builtbroken.mc.prefab.entity;
 
 import com.builtbroken.mc.api.IWorldPosition;
+import com.builtbroken.mc.api.data.SensorType;
+import com.builtbroken.mc.api.entity.IEntity;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.IPacketIDReceiver;
 import com.builtbroken.mc.core.network.packet.PacketEntity;
@@ -20,14 +22,10 @@ import net.minecraft.world.World;
  * Base entity class to be shared by most entities
  * Created by robert on 1/24/2015.
  */
-public abstract class EntityBase extends Entity implements IPacketIDReceiver, IWorldPosition
+public abstract class EntityBase extends Entity implements IPacketIDReceiver, IEntity
 {
     /** Does the entity have HP to take damage. */
     protected boolean hasHealth = false;
-    /** What is the default max HP of the entity. */
-    protected float maxHealth = 5;
-    /** The current HP of the entity. */
-    private float _health = 0;
 
     public EntityBase(World world)
     {
@@ -37,32 +35,22 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IW
     @Override
     protected void entityInit()
     {
-        if (hasHealth)
-        {
-            this._health = getMaxHealth();
-        }
-        this.dataWatcher.addObject(6, _health);
+        this.dataWatcher.addObject(6, getMaxHealth());
     }
 
     public void setHealth(float hp)
     {
-        //TODO recode to just use the data watcher
-        _health = hp;
         this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(hp, 0.0F, this.getMaxHealth())));
     }
 
     public float getHealth()
     {
-        if (worldObj == null || !worldObj.isRemote)
-        {
-            return _health;
-        }
         return this.dataWatcher.getWatchableObjectFloat(6);
     }
 
     public float getMaxHealth()
     {
-        return maxHealth;
+        return 5;
     }
 
     @Override
@@ -119,7 +107,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IW
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbt)
     {
-        _health = nbt.getFloat("health");
+        setHealth(nbt.getFloat("health"));
     }
 
     @Override
@@ -202,5 +190,17 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IW
     public double z()
     {
         return posZ;
+    }
+
+    @Override
+    public float getGeneralSize(SensorType type)
+    {
+        return width > height ? width : height;
+    }
+
+    @Override
+    public Pos getVelocity()
+    {
+        return new Pos(motionX, motionY, motionZ); //TODO make wrapper object
     }
 }

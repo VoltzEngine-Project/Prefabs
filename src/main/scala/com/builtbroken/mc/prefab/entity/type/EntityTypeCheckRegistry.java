@@ -1,6 +1,8 @@
 package com.builtbroken.mc.prefab.entity.type;
 
+import com.builtbroken.mc.prefab.entity.type.checkers.EntityTypeCheckBullet;
 import com.builtbroken.mc.prefab.entity.type.checkers.EntityTypeCheckMob;
+import com.builtbroken.mc.prefab.entity.type.checkers.EntityTypeCheckRocket;
 
 import java.util.HashMap;
 
@@ -15,6 +17,8 @@ public class EntityTypeCheckRegistry
     static
     {
         register(new EntityTypeCheckMob());
+        register(new EntityTypeCheckBullet());
+        register(new EntityTypeCheckRocket());
     }
 
     public static void register(EntityTypeCheck typeCheck)
