@@ -274,6 +274,8 @@ public class InventoryUtility
             if (r instanceof IRecipe && ((IRecipe) r).getRecipeOutput() != null)
             {
                 ItemStackWrapper wrapper = new ItemStackWrapper(((IRecipe) r).getRecipeOutput());
+
+                //Update stack recipe list
                 List<IRecipe> list = ITEMSTACK_TO_RECIPES.get(wrapper);
                 if (list == null)
                 {
@@ -281,7 +283,16 @@ public class InventoryUtility
                 }
                 list.add((IRecipe) r);
                 ITEMSTACK_TO_RECIPES.put(wrapper, list);
-                ITEM_TO_RECIPES.put(((IRecipe) r).getRecipeOutput().getItem(), list);
+
+                //Update item recipe list
+                Item item = ((IRecipe) r).getRecipeOutput().getItem();
+                list = ITEM_TO_RECIPES.get(item);
+                if (list == null)
+                {
+                    list = new ArrayList();
+                }
+                list.add((IRecipe) r);
+                ITEM_TO_RECIPES.put(item, list);
             }
         }
         Engine.logger().info(" Done in.. " + StringHelpers.formatNanoTime(System.nanoTime() - time));
