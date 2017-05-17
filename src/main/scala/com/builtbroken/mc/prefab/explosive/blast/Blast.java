@@ -14,6 +14,7 @@ import com.builtbroken.mc.api.event.blast.BlastEventBlockReplaced;
 import com.builtbroken.mc.api.explosive.IBlast;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.core.Engine;
+import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -46,6 +47,10 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     public World world;
     /** Center coords of the blast */
     public double x, y, z;
+
+    /** Center of the blast by block location, is not exact center but is used for block pathing to get distance */
+    public Location blockCenter;
+
     /** Size of the explosive */
     public double size = 1;
     /** Energy cost to damage each block */
@@ -72,7 +77,10 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     {
         this.explosiveHandler = handler;
         this.wrapperExplosion = new BlastBasic.WrapperExplosion(this);
-        MinecraftForge.EVENT_BUS.register(this);
+        if (!Engine.isJUnitTest())
+        {
+            MinecraftForge.EVENT_BUS.register(this);
+        }
     }
 
     public Blast(IExplosiveHandler handler, final World world, int x, int y, int z, int size)
@@ -98,6 +106,7 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
         this.x = x;
         this.y = y;
         this.z = z;
+        blockCenter = new Location(world, Math.floor(x) + 0.5, Math.floor(y) + 0.5, Math.floor(z) + 0.5);
         return (B) this;
     }
 
@@ -295,7 +304,7 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
      */
     protected boolean shouldKillAction()
     {
-        return killExplosion || world == null || world.provider == null || DimensionManager.getWorld(world.provider.dimensionId) == null || toLocation().isChunkLoaded();
+        return killExplosion || world == null || world.provider == null || DimensionManager.getWorld(world.provider.dimensionId) == null || !toLocation().isChunkLoaded();
     }
 
     @Override

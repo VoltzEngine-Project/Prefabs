@@ -1,12 +1,13 @@
 package com.builtbroken.mc.prefab.explosive.blast;
 
+import com.builtbroken.jlib.lang.DebugPrinter;
 import com.builtbroken.mc.api.edit.IWorldChangeLayeredAction;
 import com.builtbroken.mc.api.edit.IWorldEdit;
 import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.imp.transform.vector.Location;
+import com.builtbroken.mc.imp.transform.vector.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -29,34 +30,36 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
     /**
      * List of locations already check by the pathfinder, used to prevent infinite loops
      */
-    protected List<Location> pathed_locations = new ArrayList();
-    /**
-     * Starting location or center of the blast as a location object
-     */
-    public Location center;
+    protected List<BlockPos> pathed_locations = new ArrayList();
 
     /** Set to use recursive pathfinder. */
     public boolean recursive = false;
 
-    protected Queue<Location> stack = new LinkedList();
+    public Queue<BlockPos> stack = new LinkedList();
     protected int layers = 1;
     protected int blocksPerLayer = 1000;
+
+    protected DebugPrinter debugPrinter;
 
     public BlastSimplePath(IExplosiveHandler handler)
     {
         super(handler);
+        debugPrinter = new DebugPrinter(Engine.logger());
     }
 
     public BlastSimplePath(IExplosiveHandler handler, World world, int x, int y, int z, int size)
     {
         super(handler, world, x, y, z, size);
+        debugPrinter = new DebugPrinter(Engine.logger());
     }
 
     @Override
     public void getEffectedBlocks(List<IWorldEdit> list)
     {
-        Location c = new Location(world(), (int) x(), (int) y(), (int) z());
-        center = c.add(0.5);
+        debugPrinter.start("getEffectedBlocks()", "EffectedBlocks", Engine.runningAsDev);
+        BlockPos c = new BlockPos(xi(), yi(), zi());
+        debugPrinter.log("Center: " + blockCenter);
+
         if (shouldPath(c))
         {
             if (recursive)
@@ -74,7 +77,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
             //Temp fix to solve if center is an air block
             for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
             {
-                Location location = center.add(dir);
+                BlockPos location = new BlockPos(xi() + dir.offsetX, yi() + dir.offsetY, zi() + dir.offsetZ);
                 if (shouldPath(location))
                 {
                     if (recursive)
@@ -88,6 +91,22 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                     }
                 }
             }
+        }
+        debugPrinter.end();
+    }
+
+
+    @Override
+    public void getEffectedBlocks(List<IWorldEdit> list, int layer)
+    {
+        recursive = false;
+        if (layer == 0)
+        {
+            getEffectedBlocks(list);
+        }
+        else
+        {
+            continuePathEntire(list, blocksPerLayer);
         }
     }
 
@@ -136,7 +155,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param startNode - starting point
      * @param list      - list of edits
      */
-    public void pathEntire(final Location startNode, final List<IWorldEdit> list)
+    public void pathEntire(final BlockPos startNode, final List<IWorldEdit> list)
     {
         pathEntire(startNode, list, blocksPerLayer);
     }
@@ -147,7 +166,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param startNode - starting point
      * @param list      - list of edits
      */
-    public void pathEntire(final Location startNode, final List<IWorldEdit> list, final int count)
+    public void pathEntire(final BlockPos startNode, final List<IWorldEdit> list, final int count)
     {
         if (shouldPath(startNode))
         {
@@ -160,79 +179,96 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 stack.offer(startNode);
                 pathed_locations.add(startNode);
             }
+            continuePathEntire(list, count);
+        }
+    }
 
-            int currentCount = 0;
+    /**
+     * Called to continue pathfinding
+     *
+     * @param list  - list of edits
+     * @param count - number of loops to run
+     */
+    public void continuePathEntire(final List<IWorldEdit> list, final int count)
+    {
+        debugPrinter.start("PathEntire(" + list.size() + ", " + count + ")");
 
-            //Loop until we run out of nodes
-            boolean shouldExit = false;
-            while (!stack.isEmpty() && !shouldExit && currentCount < count)
+        int currentCount = 0;
+
+        //Loop until we run out of nodes
+        boolean shouldExit = false;
+        while (!stack.isEmpty() && !shouldExit && currentCount < count)
+        {
+            debugPrinter.start("L: " + currentCount);
+            shouldExit = shouldKillAction();
+            //Pop a node off the stack each iteration
+            BlockPos currentNode = stack.poll();
+            currentCount++;
+
+            for (EnumFacing dir : EnumFacing.values())
             {
-                shouldExit = shouldKillAction();
-                currentCount++;
-                if (lastUpdate != -1)
+                BlockPos nextNode = new BlockPos(currentNode.xi() + dir.getFrontOffsetX(), currentNode.yi() + dir.getFrontOffsetY(), currentNode.zi() + dir.getFrontOffsetZ());
+                debugPrinter.start("Face: " + dir + "   " + nextNode);
+                //Check if we can path to the node from the current node
+                if (shouldPathTo(currentNode, nextNode, dir))
                 {
-                    long time = System.nanoTime();
-                    if (time - lastUpdate > 1e+8)
-                    {
-                        lastUpdate = time;
-                        Engine.instance.logger().info("PathEntireUpdate: " + list.size() + " entries added, " + stack.size() + " in stack, " + pathed_locations.size() + " nodes pathed.");
-                    }
-                }
-                //Pop a node off the stack each iteration
-                Location currentNode = stack.poll();
+                    //Add to already pathed list
+                    pathed_locations.add(nextNode);
 
-                for (EnumFacing dir : EnumFacing.values())
-                {
-                    Location nextNode = currentNode.add(dir);
-                    //Check if we can path to the node from the current node
-                    if (shouldPathTo(currentNode, nextNode, dir))
+                    debugPrinter.log("shouldPathTo(" + nextNode + ")");
+
+                    //Check if we can path the node
+                    if (shouldPath(nextNode))
                     {
-                        //Check if we can path the node
-                        if (shouldPath(nextNode))
+                        debugPrinter.log("shouldPath");
+                        //Add next node to path stack
+                        stack.offer(nextNode);
+
+                        IWorldEdit edit = null;
+
+                        //Do logic for damageable blocks
+                        TileEntity tileEntity = world.getTileEntity(nextNode.xi(), nextNode.yi(), nextNode.zi());
+                        IExplosiveDamageable damageableTile = null;
+                        if (tileEntity instanceof IExplosiveDamageable)
                         {
-                            //Add next node to path stack
-                            stack.offer(nextNode);
-                            pathed_locations.add(nextNode);
+                            damageableTile = (IExplosiveDamageable) tileEntity;
+                        }
+                        else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+                        {
+                            damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
+                        }
+                        if (damageableTile != null)
+                        {
+                            float distance = (float) blockCenter.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
+                            float energy = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
+                            if (energy > 0)
+                            {
+                                edit = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
+                            }
+                        }
+                        //Else do normal logic
+                        else
+                        {
+                            //Get Block edit for the location that we can path
+                            edit = changeBlock(nextNode);
+                        }
 
-                            IWorldEdit edit = null;
-
-                            //Do logic for damageable blocks
-                            TileEntity tileEntity = nextNode.getTileEntity();
-                            IExplosiveDamageable damageableTile = null;
-                            if (tileEntity instanceof IExplosiveDamageable)
-                            {
-                                damageableTile = (IExplosiveDamageable) tileEntity;
-                            }
-                            else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
-                            {
-                                damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
-                            }
-                            if (damageableTile != null)
-                            {
-                                float distance = (float) center.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
-                                float energy = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
-                                if (energy > 0)
-                                {
-                                    edit = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
-                                }
-                            }
-                            //Else do normal logic
-                            else
-                            {
-                                //Get Block edit for the location that we can path
-                                edit = changeBlock(nextNode);
-                            }
-
-                            //Avoid adding empty edits or existing edits
-                            if (edit != null && !list.contains(edit) && edit.hasChanged())
-                            {
-                                list.add(edit);
-                            }
+                        //Avoid adding empty edits or existing edits
+                        if (edit != null && !list.contains(edit) && edit.hasChanged())
+                        {
+                            list.add(edit);
+                            debugPrinter.log("applied edit");
                         }
                     }
                 }
+                debugPrinter.end();
             }
+            debugPrinter.end();
         }
+        debugPrinter.log("Edits: " + list.size());
+        debugPrinter.log("Pathed: " + pathed_locations);
+        debugPrinter.log("Stack: " + stack.size());
+        debugPrinter.end();
     }
 
     /**
@@ -242,7 +278,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param node - node, should not be null
      * @param list - list to add edits to, should not be null
      */
-    public void pathNext(final Location node, final List<IWorldEdit> list)
+    public void pathNext(final BlockPos node, final List<IWorldEdit> list)
     {
         if (!shouldKillAction())
         {
@@ -268,7 +304,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 for (EnumFacing dir : EnumFacing.values())
                 {
                     //Generated next node
-                    final Location next = node.add(dir);
+                    final BlockPos next = new BlockPos(node, dir);
                     //Check if we can path to next node from this node
                     if (shouldPathTo(node, next, dir))
                     {
@@ -285,7 +321,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param location - location to get data from
      * @return null for ignore, or BlockEdit for anything else
      */
-    public abstract IWorldEdit changeBlock(Location location);
+    public abstract IWorldEdit changeBlock(BlockPos location);
 
     /**
      * Called to check if the location should be pathed
@@ -294,9 +330,10 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param location - location to check
      * @return true if it can be pathed
      */
-    public boolean shouldPath(Location location)
+    public boolean shouldPath(BlockPos location)
     {
-        return center.distance(location.xi() + 0.5, location.yi() + 0.5, location.zi() + 0.5) <= size;
+        double distance = blockCenter.distance(location.xi() + 0.5, location.yi() + 0.5, location.zi() + 0.5);
+        return distance <= size;
     }
 
     /**
@@ -307,7 +344,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @param dir  - direction traveled
      * @return true if can path
      */
-    public boolean shouldPathTo(Location last, Location next, EnumFacing dir)
+    public boolean shouldPathTo(BlockPos last, BlockPos next, EnumFacing dir)
     {
         return shouldPathTo(last, next);
     }
@@ -318,7 +355,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      * @deprecated Use the above method instead
      */
     @Deprecated
-    public boolean shouldPathTo(Location last, Location next)
+    public boolean shouldPathTo(BlockPos last, BlockPos next)
     {
         return next.y() >= 0 && next.y() <= 255 && !pathed_locations.contains(next);
     }
