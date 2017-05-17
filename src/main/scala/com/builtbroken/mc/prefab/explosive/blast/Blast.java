@@ -68,13 +68,13 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     /**
      * Entity to pass into methods when destroying blocks or attacking entities
      */
-    protected Entity explosionBlameEntity;
+    public Entity explosionBlameEntity;
     /**
      * Explosion wrapper for block methods
      */
-    protected Explosion wrapperExplosion;
+    public Explosion wrapperExplosion;
 
-    public List<IExplosiveHandler> explosivesToTriggerAfter = new ArrayList();
+    public List<PostBlastTrigger> explosivesToTriggerAfter = new ArrayList();
 
     public Blast(IExplosiveHandler handler)
     {
@@ -91,6 +91,18 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
         this(handler);
         setLocation(world, x, y, z);
         setYield(size);
+    }
+
+    public PostBlastTrigger addPostTriggerExplosive(String explosiveID, double size, TriggerCause triggerCause, NBTTagCompound data)
+    {
+        IExplosiveHandler handler = ExplosiveRegistry.get(explosiveID);
+        if (handler != null)
+        {
+            PostBlastTrigger blastTrigger = new PostBlastTrigger(handler, size, triggerCause, data);
+            explosivesToTriggerAfter.add(blastTrigger);
+            return blastTrigger;
+        }
+        return null;
     }
 
     @SubscribeEvent
@@ -254,13 +266,12 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     {
         if (!beforeBlocksPlaced)
         {
-            for (IExplosiveHandler handler : explosivesToTriggerAfter)
+            for (PostBlastTrigger handler : explosivesToTriggerAfter)
             {
                 if (handler != null)
                 {
-                    ExplosiveRegistry.triggerExplosive(toLocation(), handler, new TriggerCause.TriggerCauseExplosion(wrapperExplosion), size, new NBTTagCompound());
+                    handler.triggerExplosive(toLocation());
                 }
-                //TODO store size, nbt, and trigger cause
             }
         }
     }
