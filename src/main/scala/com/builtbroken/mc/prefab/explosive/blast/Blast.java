@@ -1,5 +1,7 @@
 package com.builtbroken.mc.prefab.explosive.blast;
 
+import com.builtbroken.jlib.data.network.IByteBufReader;
+import com.builtbroken.jlib.data.network.IByteBufWriter;
 import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.api.edit.IWorldChangeAction;
 import com.builtbroken.mc.api.edit.IWorldChangeAudio;
@@ -12,23 +14,25 @@ import com.builtbroken.mc.api.event.blast.BlastEventBlockReplaced;
 import com.builtbroken.mc.api.explosive.IBlast;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.jlib.data.network.IByteBufReader;
-import com.builtbroken.jlib.data.network.IByteBufWriter;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.world.WorldEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +59,20 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
 
     public final IExplosiveHandler explosiveHandler;
 
+    /**
+     * Entity to pass into methods when destroying blocks or attacking entities
+     */
+    protected Entity explosionBlameEntity;
+    /**
+     * Explosion wrapper for block methods
+     */
+    protected Explosion wrapperExplosion;
+
     public Blast(IExplosiveHandler handler)
     {
         this.explosiveHandler = handler;
+        this.wrapperExplosion = new BlastBasic.WrapperExplosion(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public Blast(IExplosiveHandler handler, final World world, int x, int y, int z, int size)
@@ -65,6 +80,16 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
         this(handler);
         setLocation(world, x, y, z);
         setYield(size);
+    }
+
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event)
+    {
+        if (event.world == world)
+        {
+            killAction(false);
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
     }
 
     public B setLocation(final World world, double x, double y, double z)
@@ -91,9 +116,22 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     }
 
     @Override
-    public B setCause(final TriggerCause cause)
+    public B setCause(TriggerCause cause)
     {
         this.cause = cause;
+        if (cause != null)
+        {
+            //Create entity to check for blast resistance values on blocks
+            if (cause instanceof TriggerCause.TriggerCauseEntity)
+            {
+                explosionBlameEntity = ((TriggerCause.TriggerCauseEntity) cause).source;
+            }
+            if (explosionBlameEntity == null)
+            {
+                explosionBlameEntity = new EntityTNTPrimed(world);
+                explosionBlameEntity.setPosition(x, y, z);
+            }
+        }
         return (B) this;
     }
 
@@ -113,7 +151,7 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     @Override
     public int shouldThreadAction()
     {
-        return size > 4 ? 20 : -1;
+        return size > 4 ? -2 : -1;
     }
 
     @Override
@@ -257,7 +295,7 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
      */
     protected boolean shouldKillAction()
     {
-        return killExplosion || world == null || world.provider == null || DimensionManager.getWorld(world.provider.dimensionId) == null;
+        return killExplosion || world == null || world.provider == null || DimensionManager.getWorld(world.provider.dimensionId) == null || toLocation().isChunkLoaded();
     }
 
     @Override
@@ -447,5 +485,20 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     {
         //size and explosive data are already synced
         return buf;
+    }
+
+
+    /**
+     * Used to wrapper the blast into a minecraft explosion data object
+     */
+    public static class WrapperExplosion extends Explosion
+    {
+        public final Blast blast;
+
+        public WrapperExplosion(Blast blast)
+        {
+            super(blast.world(), blast.explosionBlameEntity, blast.x(), blast.y(), blast.z(), (float) blast.size);
+            this.blast = blast;
+        }
     }
 }

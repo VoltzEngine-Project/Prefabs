@@ -40,7 +40,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
 
     protected Queue<Location> stack = new LinkedList();
     protected int layers = 1;
-    protected int blocksPerLayer = 500;
+    protected int blocksPerLayer = 1000;
 
     public BlastSimplePath(IExplosiveHandler handler)
     {
@@ -192,6 +192,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         {
                             //Add next node to path stack
                             stack.offer(nextNode);
+                            pathed_locations.add(nextNode);
 
                             IWorldEdit edit = null;
 
@@ -228,7 +229,6 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                                 list.add(edit);
                             }
                         }
-                        pathed_locations.add(nextNode);
                     }
                 }
             }

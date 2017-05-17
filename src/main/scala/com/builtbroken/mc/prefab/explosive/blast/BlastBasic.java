@@ -1,7 +1,6 @@
 package com.builtbroken.mc.prefab.explosive.blast;
 
 import com.builtbroken.mc.api.edit.IWorldEdit;
-import com.builtbroken.mc.api.event.TriggerCause;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockEdit;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockReplaced;
 import com.builtbroken.mc.api.event.blast.BlastEventDestroyBlock;
@@ -20,13 +19,11 @@ import com.builtbroken.mc.prefab.entity.selector.EntityDistanceSelector;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTNT;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.Explosion;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
@@ -58,14 +55,6 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      */
     protected double radius = 0;
 
-    /**
-     * Entity to pass into methods when destroying blocks or attacking entities
-     */
-    protected Entity explosionBlameEntity;
-    /**
-     * Explosion wrapper for block methods
-     */
-    protected Explosion wrapperExplosion;
     /**
      * Blocks to call after all blocks are removed in case they do updates when destroyed
      */
@@ -340,24 +329,6 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         }
     }
 
-    @Override
-    public B setCause(TriggerCause cause)
-    {
-        super.setCause(cause);
-        //Create entity to check for blast resistance values on blocks
-        if (cause instanceof TriggerCause.TriggerCauseEntity)
-        {
-            explosionBlameEntity = ((TriggerCause.TriggerCauseEntity) cause).source;
-        }
-        if (explosionBlameEntity == null)
-        {
-            explosionBlameEntity = new EntityTNTPrimed(world);
-            explosionBlameEntity.setPosition(x, y, z);
-        }
-        wrapperExplosion = new WrapperExplosion(this);
-        return (B) this;
-    }
-
 
     @Override
     public B setYield(double size)
@@ -394,19 +365,5 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             ((IBlastEdit) vec).set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
         }
         return !result;
-    }
-
-    /**
-     * Used to wrapper the blast into a minecraft explosion data object
-     */
-    public static class WrapperExplosion extends Explosion
-    {
-        public final BlastBasic blast;
-
-        public WrapperExplosion(BlastBasic blast)
-        {
-            super(blast.world(), blast.explosionBlameEntity, blast.x(), blast.y(), blast.z(), (float) blast.size);
-            this.blast = blast;
-        }
     }
 }
