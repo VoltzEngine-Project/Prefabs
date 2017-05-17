@@ -17,6 +17,7 @@ import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
+import com.builtbroken.mc.lib.world.explosive.ExplosiveRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -72,6 +73,8 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
      * Explosion wrapper for block methods
      */
     protected Explosion wrapperExplosion;
+
+    public List<IExplosiveHandler> explosivesToTriggerAfter = new ArrayList();
 
     public Blast(IExplosiveHandler handler)
     {
@@ -249,7 +252,17 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     @Override
     public void doEffectOther(boolean beforeBlocksPlaced)
     {
-
+        if (!beforeBlocksPlaced)
+        {
+            for (IExplosiveHandler handler : explosivesToTriggerAfter)
+            {
+                if (handler != null)
+                {
+                    ExplosiveRegistry.triggerExplosive(toLocation(), handler, new TriggerCause.TriggerCauseExplosion(wrapperExplosion), size, new NBTTagCompound());
+                }
+                //TODO store size, nbt, and trigger cause
+            }
+        }
     }
 
     protected void damageEntities(List<Entity> entities, DamageSource source)

@@ -1,12 +1,10 @@
 package com.builtbroken.mc.prefab.explosive.blast;
 
-import com.builtbroken.jlib.lang.DebugPrinter;
 import com.builtbroken.mc.api.edit.IWorldChangeLayeredAction;
 import com.builtbroken.mc.api.edit.IWorldEdit;
 import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
-import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -39,26 +37,20 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
     protected int layers = 1;
     protected int blocksPerLayer = 1000;
 
-    protected DebugPrinter debugPrinter;
-
     public BlastSimplePath(IExplosiveHandler handler)
     {
         super(handler);
-        debugPrinter = new DebugPrinter(Engine.logger());
     }
 
     public BlastSimplePath(IExplosiveHandler handler, World world, int x, int y, int z, int size)
     {
         super(handler, world, x, y, z, size);
-        debugPrinter = new DebugPrinter(Engine.logger());
     }
 
     @Override
     public void getEffectedBlocks(List<IWorldEdit> list)
     {
-        debugPrinter.start("getEffectedBlocks()", "EffectedBlocks", Engine.runningAsDev);
         BlockPos c = new BlockPos(xi(), yi(), zi());
-        debugPrinter.log("Center: " + blockCenter);
 
         if (shouldPath(c))
         {
@@ -92,7 +84,6 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 }
             }
         }
-        debugPrinter.end();
     }
 
 
@@ -191,15 +182,12 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      */
     public void continuePathEntire(final List<IWorldEdit> list, final int count)
     {
-        debugPrinter.start("PathEntire(" + list.size() + ", " + count + ")");
-
         int currentCount = 0;
 
         //Loop until we run out of nodes
         boolean shouldExit = false;
         while (!stack.isEmpty() && !shouldExit && currentCount < count)
         {
-            debugPrinter.start("L: " + currentCount);
             shouldExit = shouldKillAction();
             //Pop a node off the stack each iteration
             BlockPos currentNode = stack.poll();
@@ -208,19 +196,16 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
             for (EnumFacing dir : EnumFacing.values())
             {
                 BlockPos nextNode = new BlockPos(currentNode.xi() + dir.getFrontOffsetX(), currentNode.yi() + dir.getFrontOffsetY(), currentNode.zi() + dir.getFrontOffsetZ());
-                debugPrinter.start("Face: " + dir + "   " + nextNode);
+
                 //Check if we can path to the node from the current node
                 if (shouldPathTo(currentNode, nextNode, dir))
                 {
                     //Add to already pathed list
                     pathed_locations.add(nextNode);
 
-                    debugPrinter.log("shouldPathTo(" + nextNode + ")");
-
                     //Check if we can path the node
                     if (shouldPath(nextNode))
                     {
-                        debugPrinter.log("shouldPath");
                         //Add next node to path stack
                         stack.offer(nextNode);
 
@@ -257,18 +242,11 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         if (edit != null && !list.contains(edit) && edit.hasChanged())
                         {
                             list.add(edit);
-                            debugPrinter.log("applied edit");
                         }
                     }
                 }
-                debugPrinter.end();
             }
-            debugPrinter.end();
         }
-        debugPrinter.log("Edits: " + list.size());
-        debugPrinter.log("Pathed: " + pathed_locations);
-        debugPrinter.log("Stack: " + stack.size());
-        debugPrinter.end();
     }
 
     /**
