@@ -133,6 +133,12 @@ public abstract class Blast<B extends Blast> implements IWorldChangeAction, IWor
     }
 
     @Override
+    public double getYield()
+    {
+        return size;
+    }
+
+    @Override
     public B setEnergyPerBlock(float f)
     {
         this.eUnitPerBlock = f;

@@ -362,7 +362,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         boolean result = MinecraftForge.EVENT_BUS.post(event);
         if (vec instanceof IBlastEdit && event instanceof BlastEventBlockReplaced.Pre)
         {
-            ((IBlastEdit) vec).set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
+            vec.set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
         }
         return !result;
     }
