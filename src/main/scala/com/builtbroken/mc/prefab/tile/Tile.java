@@ -930,7 +930,15 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public boolean canPlaceBlockAt()
     {
-        return world() != null ? world().getBlock(xi(), yi(), zi()).isReplaceable(world(), xi(), yi(), zi()) : false;
+        if (world() != null)
+        {
+            Block block = world().getBlock(xi(), yi(), zi());
+            if (block != null)
+            {
+                return block.isReplaceable(world(), xi(), yi(), zi());
+            }
+        }
+        return false;
     }
 
     /**
