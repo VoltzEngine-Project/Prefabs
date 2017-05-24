@@ -2,10 +2,10 @@ package com.builtbroken.mc.prefab.tile;
 
 import com.builtbroken.jlib.data.Colors;
 import com.builtbroken.mc.core.Engine;
-import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.imp.transform.region.Cube;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.prefab.inventory.InventoryUtility;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -312,6 +312,12 @@ public class BlockTile extends BlockContainer
     }
 
     @Override
+    public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side)
+    {
+        return isBlockSolid(world, x, y, z, side.ordinal());
+    }
+
+    @Override
     public int getLightValue(IBlockAccess access, int x, int y, int z)
     {
         int value = 0;
@@ -467,7 +473,7 @@ public class BlockTile extends BlockContainer
     public void setBlockBoundsForItemRender()
     {
         Cube cube = staticTile.getBlockBounds();
-        if(cube != null)
+        if (cube != null)
         {
             setBlockBounds(cube.min().xf(), cube.min().yf(), cube.min().zf(), cube.max().xf(), cube.max().yf(), cube.max().zf());
         }
