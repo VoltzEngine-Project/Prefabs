@@ -82,6 +82,12 @@ public class EnergyBuffer implements IEnergyBuffer
         return energyStorage;
     }
 
+    @Override
+    public void setEnergyStored(int energy)
+    {
+        this.energyStorage = Math.min(maxStorage, Math.max(0, energy));
+    }
+
     /**
      * Called to remove energy from the item and add it to this storage
      * <p>
