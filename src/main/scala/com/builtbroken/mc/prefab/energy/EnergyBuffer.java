@@ -22,6 +22,7 @@ public class EnergyBuffer implements IEnergyBuffer
     @Override
     public int addEnergyToStorage(int energy, boolean doAction)
     {
+        int prev = getEnergyStored();
         if (energy > 0)
         {
             int roomLeft = getMaxBufferSize() - getEnergyStored();
@@ -30,6 +31,10 @@ public class EnergyBuffer implements IEnergyBuffer
                 if (doAction)
                 {
                     energyStorage += energy;
+                    if (prev != energyStorage)
+                    {
+                        onPowerChange(prev, getEnergyStored(), EnergyActionType.ADD);
+                    }
                 }
                 return energy;
             }
@@ -38,6 +43,10 @@ public class EnergyBuffer implements IEnergyBuffer
                 if (doAction)
                 {
                     energyStorage = getMaxBufferSize();
+                    if (prev != energyStorage)
+                    {
+                        onPowerChange(prev, getEnergyStored(), EnergyActionType.ADD);
+                    }
                 }
                 return roomLeft;
             }
@@ -48,6 +57,7 @@ public class EnergyBuffer implements IEnergyBuffer
     @Override
     public int removeEnergyFromStorage(int energy, boolean doAction)
     {
+        int prev = getEnergyStored();
         if (energy > 0 && energyStorage > 0)
         {
             if (energy >= maxStorage)
@@ -55,6 +65,10 @@ public class EnergyBuffer implements IEnergyBuffer
                 if (doAction)
                 {
                     energyStorage = 0;
+                    if (prev != energyStorage)
+                    {
+                        onPowerChange(prev, getEnergyStored(), EnergyActionType.REMOVE);
+                    }
                 }
                 return maxStorage;
             }
@@ -63,11 +77,26 @@ public class EnergyBuffer implements IEnergyBuffer
                 if (doAction)
                 {
                     energyStorage -= energy;
+                    if (prev != energyStorage)
+                    {
+                        onPowerChange(prev, getEnergyStored(), EnergyActionType.REMOVE);
+                    }
                 }
                 return energy;
             }
         }
         return 0;
+    }
+
+    /**
+     * Called when the power changes in the buffer
+     *
+     * @param prevEnergy - energy before action
+     * @param current    - energy after action
+     */
+    protected void onPowerChange(int prevEnergy, int current, EnergyActionType actionType)
+    {
+
     }
 
     @Override
@@ -85,7 +114,12 @@ public class EnergyBuffer implements IEnergyBuffer
     @Override
     public void setEnergyStored(int energy)
     {
+        int prev = getEnergyStored();
         this.energyStorage = Math.min(maxStorage, Math.max(0, energy));
+        if (prev != energyStorage)
+        {
+            onPowerChange(prev, getEnergyStored(), EnergyActionType.SET);
+        }
     }
 
     /**
@@ -105,5 +139,12 @@ public class EnergyBuffer implements IEnergyBuffer
                 UniversalEnergySystem.drain(stackInSlot, addEnergyToStorage(energy, true), true);
             }
         }
+    }
+
+    public static enum EnergyActionType
+    {
+        ADD,
+        REMOVE,
+        SET
     }
 }

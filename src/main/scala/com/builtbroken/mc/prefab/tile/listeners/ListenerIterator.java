@@ -99,7 +99,14 @@ public class ListenerIterator implements Iterator<ITileEventListener>, Iterable<
         //Inject location
         if (re instanceof IBlockListener)
         {
-            ((IBlockListener) re).inject(world, xi(), yi(), zi());
+            if(world != null)
+            {
+                ((IBlockListener) re).inject(world, xi(), yi(), zi());
+            }
+            else
+            {
+                ((IBlockListener) re).inject(access, xi(), yi(), zi());
+            }
         }
 
         //set next index
