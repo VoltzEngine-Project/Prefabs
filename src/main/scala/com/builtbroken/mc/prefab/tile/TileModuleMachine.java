@@ -185,6 +185,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
             {
                 return true;
             }
+            return false;
         }
         return true;
     }
