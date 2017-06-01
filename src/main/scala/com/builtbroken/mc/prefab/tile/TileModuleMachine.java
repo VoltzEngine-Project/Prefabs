@@ -4,10 +4,10 @@ import com.builtbroken.mc.api.ISave;
 import com.builtbroken.mc.api.energy.IEnergyBuffer;
 import com.builtbroken.mc.api.energy.IEnergyBufferProvider;
 import com.builtbroken.mc.api.tile.ConnectionType;
-import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.api.tile.ITileConnection;
 import com.builtbroken.mc.api.tile.node.ITileModule;
-import com.builtbroken.mc.mods.rf.RFEnergyHandler;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
+import com.builtbroken.mc.lib.energy.UniversalEnergySystem;
 import com.builtbroken.mc.prefab.energy.EnergyBuffer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
@@ -135,14 +135,13 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
         return false;
     }
 
-
     public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate)
     {
         IEnergyBuffer buffer = getEnergyBuffer(from);
         if (buffer != null)
         {
-            int received = buffer.addEnergyToStorage(RFEnergyHandler.INSTANCE.toUEEnergy(maxReceive), !simulate);
-            return RFEnergyHandler.INSTANCE.fromUE(received);
+            int received = buffer.addEnergyToStorage(UniversalEnergySystem.RF_HANDLER.toUEEnergy(maxReceive), !simulate);
+            return UniversalEnergySystem.RF_HANDLER.fromUE(received);
         }
         return 0;
     }
@@ -152,8 +151,8 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
         IEnergyBuffer buffer = getEnergyBuffer(from);
         if (buffer != null)
         {
-            int extracted = buffer.removeEnergyFromStorage(RFEnergyHandler.INSTANCE.toUEEnergy(maxExtract), !simulate);
-            return RFEnergyHandler.INSTANCE.fromUE(extracted);
+            int extracted = buffer.removeEnergyFromStorage(UniversalEnergySystem.RF_HANDLER.toUEEnergy(maxExtract), !simulate);
+            return UniversalEnergySystem.RF_HANDLER.fromUE(extracted);
         }
         return 0;
     }
@@ -163,14 +162,14 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
         IEnergyBuffer buffer = getEnergyBuffer(from);
         if (buffer != null)
         {
-            return RFEnergyHandler.INSTANCE.fromUE(buffer.getEnergyStored());
+            return UniversalEnergySystem.RF_HANDLER.fromUE(buffer.getEnergyStored());
         }
         return 0;
     }
 
     public int getMaxEnergyStored(ForgeDirection from)
     {
-        return RFEnergyHandler.INSTANCE.fromUE(getEnergyBufferSize());
+        return UniversalEnergySystem.RF_HANDLER.fromUE(getEnergyBufferSize());
     }
 
     public boolean canConnectEnergy(ForgeDirection from)
