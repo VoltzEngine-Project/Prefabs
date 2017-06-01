@@ -126,7 +126,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
     @Override
     public boolean canConnect(TileEntity connection, ConnectionType type, ForgeDirection from)
     {
-        return getEnergyBufferSize() > 0 && type == ConnectionType.POWER;
+        return type == ConnectionType.POWER;
     }
 
     @Override
@@ -176,7 +176,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
     {
         if (this instanceof ITileConnection)
         {
-            TileEntity connector = toPos().add(from.getOpposite()).getTileEntity(world());
+            TileEntity connector = toPos().add(from).getTileEntity(world());
             if (this.canConnect(connector, ConnectionType.RF_POWER, from))
             {
                 return true;
