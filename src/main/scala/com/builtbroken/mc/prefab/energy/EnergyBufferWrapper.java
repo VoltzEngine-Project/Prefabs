@@ -31,7 +31,7 @@ public class EnergyBufferWrapper implements IEnergyBuffer
     @Override
     public int addEnergyToStorage(int energy, boolean doAction)
     {
-        if (acceptPower)
+        if (canAcceptPower())
         {
             return internalBuffer.addEnergyToStorage(energy, doAction);
         }
@@ -41,7 +41,7 @@ public class EnergyBufferWrapper implements IEnergyBuffer
     @Override
     public int removeEnergyFromStorage(int energy, boolean doAction)
     {
-        if (releasePower)
+        if (canReleasePower())
         {
             return internalBuffer.removeEnergyFromStorage(energy, doAction);
         }
@@ -66,11 +66,25 @@ public class EnergyBufferWrapper implements IEnergyBuffer
         internalBuffer.setEnergyStored(energy);
     }
 
+    /**
+     * Does the tile have a power connection from this buffer
+     *
+     * @return true if connection exists and is valid
+     */
     public boolean hasConnection()
     {
         return connection != null && connection.get() != null && !connection.get().isInvalid();
     }
 
+    /**
+     * Gets the activate power connection for this buffer side.
+     * <p>
+     * Connection is stored in a weak reference to avoid issues.
+     * Additionally connection will check for invalidation of the tile.
+     * However, updating connection status must be done by the host tile.
+     *
+     * @return connection unless invalid or missing
+     */
     public TileEntity getConnection()
     {
         if (hasConnection())
@@ -80,8 +94,59 @@ public class EnergyBufferWrapper implements IEnergyBuffer
         return null;
     }
 
+    /**
+     * Sets the active power connection
+     *
+     * @param connection - connection, must not be null
+     */
     public void setConnection(TileEntity connection)
     {
         this.connection = new WeakReference<TileEntity>(connection);
+    }
+
+    public EnergyBufferWrapper disableInput()
+    {
+        this.acceptPower = false;
+        return this;
+    }
+
+    public EnergyBufferWrapper enableInput()
+    {
+        this.acceptPower = true;
+        return this;
+    }
+
+    public EnergyBufferWrapper disableOutput()
+    {
+        this.releasePower = false;
+        return this;
+    }
+
+    public EnergyBufferWrapper enableOutput()
+    {
+        this.releasePower = true;
+        return this;
+    }
+
+    public EnergyBufferWrapper toggleInput()
+    {
+        this.acceptPower = !acceptPower;
+        return this;
+    }
+
+    public EnergyBufferWrapper toggleOutput()
+    {
+        this.releasePower = !releasePower;
+        return this;
+    }
+
+    public boolean canAcceptPower()
+    {
+        return acceptPower;
+    }
+
+    public boolean canReleasePower()
+    {
+        return releasePower;
     }
 }

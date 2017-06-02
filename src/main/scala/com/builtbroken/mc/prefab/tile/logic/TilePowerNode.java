@@ -41,8 +41,13 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
         super.firstTick();
         for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
         {
-            sides[dir.ordinal()] = new EnergyBufferWrapper(getEnergyBuffer(ForgeDirection.UNKNOWN));
+            sides[dir.ordinal()] = createEnergySideWrapper();
         }
+    }
+
+    protected EnergyBufferWrapper createEnergySideWrapper()
+    {
+        return new EnergyBufferWrapper(getEnergyBuffer(ForgeDirection.UNKNOWN));
     }
 
     @Override
@@ -68,7 +73,7 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
                 TileEntity tile = pos.getTileEntity(world());
 
                 //Check if is a valid connection
-                if (UniversalEnergySystem.isHandler(tile, dir.getOpposite()))
+                if (UniversalEnergySystem.isHandler(tile, dir.getOpposite()) && canConnect(tile, ConnectionType.POWER, dir))
                 {
                     sides[dir.ordinal()].setConnection(tile);
                 }
