@@ -16,19 +16,11 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
 {
     /** ItemStack that represents this module */
     protected ItemStack item;
-    protected String name;
+    protected final String name;
 
     public AbstractModule(ItemStack item, String name)
     {
-        if (item == null)
-        {
-            throw new IllegalArgumentException("Item for module can not be null");
-        }
-        if (name == null || name.isEmpty())
-        {
-            throw new IllegalArgumentException("Name for a module can not be null or empty");
-        }
-        this.item = item.copy();
+        this.setItem(item != null ? item.copy() : null);
         this.name = name;
     }
 
@@ -41,13 +33,16 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     @Override
     public String getUnlocalizedName()
     {
-        return "module." + name;
+        return "module." + getName();
     }
 
     /** Loads from the item's NBT */
     public final AbstractModule load()
     {
-        load(item);
+        if (getItem() != null)
+        {
+            load(getItem());
+        }
         return this;
     }
 
@@ -112,7 +107,7 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     @Override
     public ItemStack toStack()
     {
-        ItemStack stack = item.copy();
+        ItemStack stack = getItem().copy();
         save(stack);
         return stack;
     }
@@ -120,7 +115,7 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     /** Does the same thing as {@link #toStack()} */
     public ItemStack save()
     {
-        ItemStack stack = item.copy();
+        ItemStack stack = getItem().copy();
         save(stack);
         return stack;
     }
@@ -155,4 +150,18 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
         return getClass().getName() + "@" + hashCode();
     }
 
+    public ItemStack getItem()
+    {
+        return item;
+    }
+
+    public void setItem(ItemStack item)
+    {
+        this.item = item;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
 }
