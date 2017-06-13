@@ -103,7 +103,7 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
             {
                 energyBuffer = new EnergyBuffer(getEnergyBufferSize());
             }
-            return sides[side.ordinal()];
+            return side == ForgeDirection.UNKNOWN ? energyBuffer : sides[side.ordinal()];
         }
         return null;
     }
