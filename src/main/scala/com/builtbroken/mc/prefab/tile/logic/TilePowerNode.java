@@ -60,7 +60,7 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
     /** Called to update the connection map */
     protected void updateConnections(long ticks)
     {
-        if (ticks % nextConnectionUpdate == 0 || ticks == -1)
+        if (sides != null && (ticks % nextConnectionUpdate == 0 || ticks == -1))
         {
             final Pos center = toPos();
             for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)

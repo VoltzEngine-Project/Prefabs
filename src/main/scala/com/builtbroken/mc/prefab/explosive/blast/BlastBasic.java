@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.explosive.blast;
 
+import com.builtbroken.mc.api.edit.BlockEditResult;
 import com.builtbroken.mc.api.edit.IWorldEdit;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockEdit;
 import com.builtbroken.mc.api.event.blast.BlastEventBlockReplaced;
@@ -137,7 +138,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         long timeStart = System.nanoTime();
         if (iteration < size * 2)
         {
-            float e = getEnergyCostOfTile(vec, energy);
+            float e = Math.abs(getEnergyCostOfTile(vec, energy));
             profile.tilesPathed++;
             if (e >= 0)
             {
@@ -155,29 +156,10 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                     {
                         if (dir != side)
                         {
-                            IBlastEdit v;
-
-                            TileEntity tileEntity = vec.getTileEntity();
-                            IExplosiveDamageable damageableTile = null;
-                            if (tileEntity instanceof IExplosiveDamageable)
-                            {
-                                damageableTile = (IExplosiveDamageable) tileEntity;
-                            }
-                            else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
-                            {
-                                damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
-                            }
-                            if (damageableTile != null)
-                            {
-                                v = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
-                            }
-                            else
-                            {
-                                v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
-                                v.doDrops();
-                                v.setBlastDirection(dir);
-                                v.logPrevBlock();
-                            }
+                            IBlastEdit v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
+                            v.doDrops();
+                            v.setBlastDirection(dir);
+                            v.logPrevBlock();
                             sides.add(v);
                         }
                     }
@@ -205,23 +187,27 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     //TODO move to helper class later, and PR into forge if its not already there
     private EnumFacing getOpposite(EnumFacing face)
     {
-        switch (face)
+        if (face != null)
         {
-            case UP:
-                return EnumFacing.DOWN;
-            case DOWN:
-                return EnumFacing.UP;
-            case NORTH:
-                return EnumFacing.SOUTH;
-            case SOUTH:
-                return EnumFacing.NORTH;
-            case EAST:
-                return EnumFacing.WEST;
-            case WEST:
-                return EnumFacing.EAST;
-            default:
-                return null;
+            switch (face)
+            {
+                case UP:
+                    return EnumFacing.DOWN;
+                case DOWN:
+                    return EnumFacing.UP;
+                case NORTH:
+                    return EnumFacing.SOUTH;
+                case SOUTH:
+                    return EnumFacing.NORTH;
+                case EAST:
+                    return EnumFacing.WEST;
+                case WEST:
+                    return EnumFacing.EAST;
+                default:
+                    return null;
+            }
         }
+        return null;
     }
 
     /**
@@ -286,7 +272,11 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                 postCallDestroyMethod.add(vec);
             }
 
-            vec.place();
+            BlockEditResult result = vec.place();
+            if (Engine.runningAsDev)
+            {
+                System.out.println("Result: " + result + "   Edit: " + vec + "  Block: " + vec.getBlock() + "  Tile: " + vec.getTileEntity());
+            }
             postPlace(vec);
         }
     }
@@ -305,6 +295,21 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      */
     protected IBlastEdit onBlockMapped(IBlastEdit change, float energyExpended, float energyLeft)
     {
+        TileEntity tileEntity = change.getTileEntity();
+        IExplosiveDamageable damageableTile = null;
+        if (tileEntity instanceof IExplosiveDamageable)
+        {
+            damageableTile = (IExplosiveDamageable) tileEntity;
+        }
+        else if (tileEntity instanceof ITileNodeHost && ((ITileNodeHost) tileEntity).getTileNode() instanceof IExplosiveDamageable)
+        {
+            damageableTile = (IExplosiveDamageable) ((ITileNodeHost) tileEntity).getTileNode();
+        }
+        if (damageableTile != null)
+        {
+            return damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, change.getBlastDirection(), energy, (float) center.distance(change.xi() + 0.5, change.yi() + 0.5, change.zi() + 0.5));
+        }
+
         if (energyExpended > energyLeft)
         {
             change.doDrops();
@@ -360,7 +365,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         BlastEventBlockEdit event = new BlastEventDestroyBlock.Pre(this, BlastEventDestroyBlock.DestructionType.FORCE, world, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z());
 
         boolean result = MinecraftForge.EVENT_BUS.post(event);
-        if (vec instanceof IBlastEdit && event instanceof BlastEventBlockReplaced.Pre)
+        if (vec instanceof IBlastEdit && event instanceof BlastEventBlockReplaced.Pre && ((BlastEventBlockReplaced.Pre) event).newBlock != null)
         {
             vec.set(((BlastEventBlockReplaced.Pre) event).newBlock, ((BlastEventBlockReplaced.Pre) event).newMeta);
         }
