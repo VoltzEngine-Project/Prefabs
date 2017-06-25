@@ -65,17 +65,20 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
             final Pos center = toPos();
             for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
             {
-                //Reset
-                sides[dir.ordinal()].setConnection(null);
-
-                //Get tile
-                Pos pos = center.add(dir); //TODO fix to avoid orphan chunk loading
-                TileEntity tile = pos.getTileEntity(world());
-
-                //Check if is a valid connection
-                if (UniversalEnergySystem.isHandler(tile, dir.getOpposite()) && canConnect(tile, ConnectionType.POWER, dir))
+                if(sides[dir.ordinal()] != null)
                 {
-                    sides[dir.ordinal()].setConnection(tile);
+                    //Reset
+                    sides[dir.ordinal()].setConnection(null);
+
+                    //Get tile
+                    Pos pos = center.add(dir); //TODO fix to avoid orphan chunk loading
+                    TileEntity tile = pos.getTileEntity(world());
+
+                    //Check if is a valid connection
+                    if (UniversalEnergySystem.isHandler(tile, dir.getOpposite()) && canConnect(tile, ConnectionType.POWER, dir))
+                    {
+                        sides[dir.ordinal()].setConnection(tile);
+                    }
                 }
             }
 
