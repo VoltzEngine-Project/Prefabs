@@ -96,18 +96,6 @@ public class ListenerIterator implements Iterator<ITileEventListener>, Iterable<
 
         //Get current listener
         ITileEventListener re = peek();
-        //Inject location
-        if (re instanceof IBlockListener)
-        {
-            if(world != null)
-            {
-                ((IBlockListener) re).inject(world, xi(), yi(), zi());
-            }
-            else
-            {
-                ((IBlockListener) re).inject(access, xi(), yi(), zi());
-            }
-        }
 
         //set next index
         index = nextIndex;
@@ -171,7 +159,22 @@ public class ListenerIterator implements Iterator<ITileEventListener>, Iterable<
                     }
                 }
             }
-            return re;
+
+            //Inject location
+            if (re instanceof IBlockListener)
+            {
+                if(world != null)
+                {
+                    ((IBlockListener) re).inject(world, xi(), yi(), zi());
+                }
+                else
+                {
+                    ((IBlockListener) re).inject(access, xi(), yi(), zi());
+                }
+            }
+
+            //Validate listener is usable for location or connected tile
+            return re != null && re.isValidForTile() ? re : null;
         }
         return null;
     }
