@@ -20,7 +20,6 @@ import com.builtbroken.mc.prefab.entity.selector.EntityDistanceSelector;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTNT;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -86,13 +85,10 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
 
         //Start path finder
         profile.startSection("Pathfinder");
-        IBlastEdit edit = new BlockEdit(this, Blocks.air, 0);
-        Block block = edit.getBlock();
-        if (block.getBlockHardness(world, edit.xi(), edit.yi(), edit.zi()) >= 0)
-        {
-            list.add(edit);
-        }
+
+        IBlastEdit edit = new BlockEdit(this);
         triggerPathFinder(map, edit, energy);
+
         profile.endSection("Pathfinder");
 
         //Add map keys to block list
@@ -135,48 +131,63 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      */
     protected void expand(HashMap<IBlastEdit, Float> map, IBlastEdit vec, float energy, EnumFacing side, int iteration)
     {
+        //Keep track of iterations
+        profile.tilesPathed++;
+
         long timeStart = System.nanoTime();
         if (iteration < size * 2)
         {
-            float e = Math.abs(getEnergyCostOfTile(vec, energy));
-            profile.tilesPathed++;
-            if (e >= 0)
+            //Calculate energy lost on block path
+            float energyCost = Math.abs(getEnergyCostOfTile(vec, energy));
+            float energyLeft = energy - energyCost;
+
+            //Only path block if cost is not great
+            if (energyCost >= 0 && energyLeft > 1)
             {
-                //Add block to effect list
+                //Set energy pathed through block
                 vec.setEnergy(energy);
-                onBlockMapped(vec, e, energy - e);
-                map.put(vec, energy - e);
 
-                //Only iterate threw sides if we have more energy
-                if (e > 1)
+                //Get edit result of pathed block
+                IBlastEdit blastEdit = onBlockMapped(vec, energyCost, energyLeft);
+
+                //Only continue pathing if result is not empty
+                if (blastEdit != null)
                 {
-                    //Get valid sides to iterate threw
-                    List<IBlastEdit> sides = new ArrayList();
-                    for (EnumFacing dir : EnumFacing.values())
+                    map.put(blastEdit, energyCost);
+
+                    //Only iterate threw sides if we have more energy
+                    if (energyLeft > 1)
                     {
-                        if (dir != side)
+                        //Get valid sides to iterate threw
+                        List<IBlastEdit> sides = new ArrayList();
+                        for (EnumFacing dir : EnumFacing.values())
                         {
-                            IBlastEdit v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
-                            v.doDrops();
-                            v.setBlastDirection(dir);
-                            v.logPrevBlock();
-                            sides.add(v);
+                            if (dir != side)
+                            {
+                                IBlastEdit v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
+                                v.doDrops();
+                                v.setBlastDirection(dir);
+                                v.logPrevBlock();
+                                sides.add(v);
+                            }
                         }
-                    }
 
-                    Collections.sort(sides, new Vector3DistanceComparator(new Pos(x(), y(), z())));
+                        //Sort by distance
+                        Collections.sort(sides, new Vector3DistanceComparator(new Pos(x(), y(), z())));
 
-                    profile.blockIterationTimes.add(System.nanoTime() - timeStart);
-                    //Iterate threw sides expending energy outwards
-                    for (IBlastEdit editSides : sides)
-                    {
-                        float eToSpend = (e / sides.size()) + (e % sides.size());
-                        e -= eToSpend;
-                        EnumFacing face = side == null ? getOpposite(editSides.getBlastDirection()) : side;
-                        if (!map.containsKey(editSides) || map.get(editSides) < eToSpend)
+                        profile.blockIterationTimes.add(System.nanoTime() - timeStart);
+
+                        //Iterate threw sides expending energy outwards
+                        for (IBlastEdit editSides : sides)
                         {
-                            editSides.setBlastDirection(face);
-                            expand(map, editSides, eToSpend, face, iteration + 1);
+                            float eToSpend = (energyLeft / sides.size()) + (energyLeft % sides.size());
+                            energyLeft -= eToSpend;
+                            EnumFacing face = side == null ? getOpposite(editSides.getBlastDirection()) : side;
+                            if (!map.containsKey(editSides) || map.get(editSides) < eToSpend)
+                            {
+                                editSides.setBlastDirection(face);
+                                expand(map, editSides, eToSpend, face, iteration + 1);
+                            }
                         }
                     }
                 }
@@ -215,7 +226,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      *
      * @param vec    - location
      * @param energy - energy to expend on the location
-     * @return energy left over after effecting the block
+     * @return amount of energy used to destroy the block, -1 is ignore
      */
     protected float getEnergyCostOfTile(IBlastEdit vec, float energy)
     {
@@ -232,7 +243,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         }
         if (damageableTile != null)
         {
-            return energy - damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
+            return damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
         }
         //Update debug info
         if (block.isAir(world, vec.xi(), vec.yi(), vec.zi()))
@@ -244,7 +255,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             profile.blocksRemoved++;
         }
         //Get cost
-        return (block.getBlockHardness(world, vec.xi(), vec.yi(), vec.zi()) >= 0 ? energy - (float) Math.max(block.getExplosionResistance(explosionBlameEntity, world, vec.xi(), vec.yi(), vec.zi(), x, y, z), 0.5) : -1);
+        return (block.getBlockHardness(world, vec.xi(), vec.yi(), vec.zi()) >= 0 ? (float) Math.max(block.getExplosionResistance(explosionBlameEntity, world, vec.xi(), vec.yi(), vec.zi(), x, y, z), 0.5) : -1);
 
     }
 
