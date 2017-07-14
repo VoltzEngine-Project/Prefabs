@@ -225,10 +225,11 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         if (damageableTile != null)
                         {
                             float distance = (float) blockCenter.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
-                            float energy = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, -1, distance);
-                            if (energy > 0)
+                            float energy = getEnergy(nextNode, distance);
+                            float energyCost = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, energy, distance);
+                            if (energyCost > 0)
                             {
-                                edit = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, dir, -1, distance);
+                                edit = damageableTile.getBlockEditOnBlastImpact(explosiveHandler, this, dir, energy, distance);
                             }
                         }
                         //Else do normal logic
@@ -247,6 +248,20 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 }
             }
         }
+    }
+
+    /**
+     * Gets the energy of the blast the location
+     * <p>
+     * Only used for {@link IExplosiveDamageable} tiles and blocks
+     *
+     * @param location
+     * @param distance
+     * @return
+     */
+    public float getEnergy(BlockPos location, double distance)
+    {
+        return -1;
     }
 
     /**
