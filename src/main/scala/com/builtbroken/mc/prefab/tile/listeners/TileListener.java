@@ -1,6 +1,9 @@
 package com.builtbroken.mc.prefab.tile.listeners;
 
+import com.builtbroken.mc.api.IModObject;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
+import com.builtbroken.mc.api.tile.node.ITileNodeHost;
+import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -15,6 +18,12 @@ public abstract class TileListener implements ITileEventListener
     private World world;
     protected IBlockAccess blockAccess;
     private int x, y, z;
+
+    @JsonProcessorData("contentUseID")
+    protected String contentUseID = null;
+
+    @JsonProcessorData(value = "metadata", type = "int")
+    protected int metaCheck = -1;
 
     @Override
     public World world()
@@ -144,5 +153,48 @@ public abstract class TileListener implements ITileEventListener
     public String getListenerKey()
     {
         return "";
+    }
+
+    @Override
+    public boolean isValidForTile()
+    {
+        if (isValidForRuntime())
+        {
+            if (contentUseID != null)
+            {
+                TileEntity tile = getTileEntity();
+                if (tile instanceof IModObject)
+                {
+                    String id = ((IModObject) tile).uniqueContentID();
+                    if (id.equalsIgnoreCase(contentUseID))
+                    {
+                        return true;
+                    }
+                }
+                else if (tile instanceof ITileNodeHost && ((ITileNodeHost) tile).getTileNode() != null)
+                {
+                    String id = ((ITileNodeHost) tile).getTileNode().uniqueContentID();
+                    if (id.equalsIgnoreCase(contentUseID))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return metaCheck == -1 || getBlockMeta() == metaCheck;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the listener should function for
+     * the runtime conditions. This includes
+     * server client checks, configs, etc.
+     *
+     * @return true if valid
+     */
+    protected boolean isValidForRuntime()
+    {
+        return true;
     }
 }
