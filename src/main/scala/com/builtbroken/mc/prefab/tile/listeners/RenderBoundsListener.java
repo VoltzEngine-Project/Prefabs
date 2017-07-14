@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Handles unloading the inventory onto the group when a tile is broken
+ * Handles dynamic render bounds based on content id and meta
  *
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
- * Created by Dark(DarkGuardsman, Robert) on 4/3/2017.
+ * Created by Dark(DarkGuardsman, Robert) on 7/14/2017.
  */
 public class RenderBoundsListener extends TileListener implements IBlockListener, IRenderBoundsListener
 {
