@@ -3,19 +3,18 @@ package com.builtbroken.mc.prefab.tile.listeners;
 import com.builtbroken.jlib.type.Pair;
 import com.builtbroken.mc.api.IModObject;
 import com.builtbroken.mc.api.data.ActionResponse;
-import com.builtbroken.mc.api.tile.listeners.IBlockListener;
-import com.builtbroken.mc.api.tile.listeners.IPlacementListener;
-import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
-import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
+import com.builtbroken.mc.api.tile.listeners.*;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -30,13 +29,17 @@ import java.util.List;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 7/14/2017.
  */
-public class AdjacentPlacementListener extends TileListener implements IPlacementListener, IBlockListener
+public class AdjacentPlacementListener extends TileListener implements IPlacementListener, IBlockListener, IChangeListener
 {
     @JsonProcessorData("invert")
     protected boolean invert = false;
 
+    @JsonProcessorData("doBreakCheck")
+    protected boolean doBreakCheck = true;
+
     protected List<Pair<Block, Integer>> blockList = new ArrayList();
     protected List<String> contentIDs = new ArrayList();
+    protected ForgeDirection[] supportedDirections = null;
 
     public final Block block;
 
@@ -50,7 +53,17 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
     {
         List<String> list = new ArrayList();
         list.add("placement");
+        list.add("change");
         return list;
+    }
+
+    @Override
+    public void onBlockChanged()
+    {
+        if (doBreakCheck && world() != null && isValidTileAtLocation() && this.canBlockStay() == ActionResponse.CANCEL)
+        {
+            world().func_147480_a(xi(), yi(), zi(), true);
+        }
     }
 
     @Override
@@ -58,31 +71,93 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
     {
         if (entity instanceof EntityPlayer)
         {
+            //Checks if listener is valid
             ItemStack stack = ((EntityPlayer) entity).getHeldItem();
             if (stack == null || stack.getItemDamage() != metaCheck) //TODO add content ID check on item
             {
                 return ActionResponse.IGNORE;
             }
-
-            final Pos center = new Pos(this);
-            IBlockAccess access = world() != null ? world() : blockAccess;
-            for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS)
+            if (isPlacementValid())
             {
-                Pos pos = center.add(direction);
-                Block block = pos.getBlock(access);
-                int meta = pos.getBlockMetadata(access);
+                return ActionResponse.DO;
+            }
+            return ActionResponse.CANCEL;
+        }
+        return ActionResponse.IGNORE;
+    }
 
-                if (block != null)
+    @Override
+    public ActionResponse canBlockStay()
+    {
+        //Checks if listener is valid
+        if (!isValidTileAtLocation())
+        {
+            return ActionResponse.IGNORE;
+        }
+        if (isPlacementValid())
+        {
+            return ActionResponse.DO;
+        }
+        return ActionResponse.CANCEL;
+    }
+
+    protected boolean isPlacementValid()
+    {
+        //Loops checking for connections
+        final Pos center = new Pos(this);
+        IBlockAccess access = world() != null ? world() : blockAccess;
+        for (ForgeDirection direction : supportedDirections == null ? ForgeDirection.VALID_DIRECTIONS : supportedDirections)
+        {
+            Pos pos = center.add(direction);
+            if (isSupportingTile(access, pos))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if tile at the location can support the block
+     *
+     * @param access
+     * @param pos
+     * @return
+     */
+    protected boolean isSupportingTile(IBlockAccess access, Pos pos)
+    {
+        return doesContainTile(access, pos, blockList, contentIDs);
+    }
+
+    /**
+     * Checks if the two lists contain the block at the location
+     *
+     * @param access
+     * @param pos
+     * @param blockList  - list of blockIDs & meta of tiles
+     * @param contentIDs - list of content IDs of tiles
+     * @return true if either list contains the tile
+     */
+    protected boolean doesContainTile(IBlockAccess access, Pos pos, List<Pair<Block, Integer>> blockList, List<String> contentIDs)
+    {
+        Block block = pos.getBlock(access);
+        if (block != null)
+        {
+            int meta = pos.getBlockMetadata(access);
+
+            if (block != null)
+            {
+                //Check block and/or meta
+                if (blockList.contains(new Pair(block, -1)) || blockList.contains(new Pair(block, meta)))
                 {
-                    //Check block and/or meta
-                    if (blockList.contains(new Pair(block, -1)) || blockList.contains(new Pair(block, meta)))
-                    {
-                        return ActionResponse.DO;
-                    }
+                    return true;
+                }
 
-                    //Check unique content ids
-                    List<String> ids = new ArrayList();
-                    TileEntity tile = pos.getTileEntity(access);
+                //Check unique content ids
+                List<String> ids = new ArrayList();
+                TileEntity tile = pos.getTileEntity(access);
+                if (tile != null && !tile.isInvalid())
+                {
                     if (tile instanceof ITileNodeHost && ((ITileNodeHost) tile).getTileNode() != null)
                     {
                         ids.add((((ITileNodeHost) tile).getTileNode()).modID() + ":" + (((ITileNodeHost) tile).getTileNode()).uniqueContentID());
@@ -91,23 +166,24 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
                     {
                         ids.add(((IModObject) tile).modID() + ":" + ((IModObject) tile).uniqueContentID());
                     }
-                    if (block instanceof IModObject)
-                    {
-                        ids.add(((IModObject) block).modID() + ":" + ((IModObject) block).uniqueContentID());
-                    }
+                }
+                if (block instanceof IModObject)
+                {
+                    ids.add(((IModObject) block).modID() + ":" + ((IModObject) block).uniqueContentID());
+                }
 
-                    for (String id : ids)
+                for (String id : ids)
+                {
+                    if (contentIDs.contains(id.toLowerCase()))
                     {
-                        if (contentIDs.contains(id.toLowerCase()))
-                        {
-                            return ActionResponse.DO;
-                        }
+                        return true;
                     }
                 }
             }
-            return ActionResponse.CANCEL;
+            return false;
         }
-        return ActionResponse.IGNORE;
+        //Unloaded chunks count as support
+        return true;
     }
 
     @Override
@@ -116,8 +192,50 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
         return true;
     }
 
+    @JsonProcessorData("sides")
+    public void processSides(JsonElement inputElement)
+    {
+        //TODO add rotation support
+        if (inputElement.isJsonArray())
+        {
+            ArrayList<ForgeDirection> directions = new ArrayList();
+            //Loop through elements in array
+            for (JsonElement element : inputElement.getAsJsonArray())
+            {
+                JsonPrimitive primitive = element.getAsJsonPrimitive();
+                String value = primitive.getAsString();
+                if (value.equalsIgnoreCase("north"))
+                {
+                    directions.add(ForgeDirection.NORTH);
+                }
+                else if (value.equalsIgnoreCase("south"))
+                {
+                    directions.add(ForgeDirection.SOUTH);
+                }
+                else if (value.equalsIgnoreCase("east"))
+                {
+                    directions.add(ForgeDirection.EAST);
+                }
+                else if (value.equalsIgnoreCase("west"))
+                {
+                    directions.add(ForgeDirection.WEST);
+                }
+                else if (value.equalsIgnoreCase("up"))
+                {
+                    directions.add(ForgeDirection.UP);
+                }
+                else if (value.equalsIgnoreCase("down"))
+                {
+                    directions.add(ForgeDirection.DOWN);
+                }
+            }
+
+            this.supportedDirections = directions.toArray(new ForgeDirection[directions.size()]);
+        }
+    }
+
     @JsonProcessorData("blocks")
-    public void process(JsonElement inputElement)
+    public void processBlocks(JsonElement inputElement)
     {
         if (inputElement.isJsonArray())
         {
@@ -139,9 +257,9 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
                         }
 
                         //Get block
-                        Block block = (Block) Block.blockRegistry.getObject(blockName);
+                        Block block = (Block) Block.blockRegistry.getObject(blockName); //TODO get block later as not all Blocks are registered when JSON is loaded
 
-                        if (block != null)
+                        if (block != null && block != Blocks.air)
                         {
                             blockList.add(new Pair(block, meta));
                         }

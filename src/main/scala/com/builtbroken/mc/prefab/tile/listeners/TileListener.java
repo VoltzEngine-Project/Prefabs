@@ -144,6 +144,11 @@ public abstract class TileListener implements ITileEventListener
         return false;
     }
 
+    protected IBlockAccess getBlockAccess()
+    {
+        return world() != null ? world() : blockAccess;
+    }
+
     protected boolean isServer()
     {
         return world != null && !world.isRemote;
@@ -157,6 +162,17 @@ public abstract class TileListener implements ITileEventListener
 
     @Override
     public boolean isValidForTile()
+    {
+        return isValidTileAtLocation();
+    }
+
+    /**
+     * Separated to allow ignoring normal checks but still having the code
+     * to check if needed.
+     *
+     * @return
+     */
+    protected boolean isValidTileAtLocation()
     {
         if (isValidForRuntime())
         {
