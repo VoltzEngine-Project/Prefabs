@@ -1,15 +1,14 @@
 package com.builtbroken.mc.prefab.tile.listeners;
 
-import com.builtbroken.jlib.type.Pair;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.data.BlockStateEntry;
 import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -27,8 +26,9 @@ public class PathPlacementListener extends AdjacentPlacementListener
     @JsonProcessorData(value = "pathRange", type = "int")
     protected int pathRange = 5;
 
-    protected List<Pair<Block, Integer>> pathBlocks = new ArrayList();
+    protected List<BlockStateEntry> pathBlocks = new ArrayList();
     protected List<String> pathContentIDs = new ArrayList();
+
 
     public PathPlacementListener(Block block)
     {
@@ -42,7 +42,7 @@ public class PathPlacementListener extends AdjacentPlacementListener
         Queue<Pos> pathNextList = new LinkedList();
 
         Pos center = new Pos(this);
-        if(canPath(center))
+        if (canPath(center))
         {
             pathNextList.add(center);
         }
@@ -140,18 +140,7 @@ public class PathPlacementListener extends AdjacentPlacementListener
                             meta = object.getAsJsonPrimitive("data").getAsInt();
                         }
 
-                        //Get block
-                        Block block = (Block) Block.blockRegistry.getObject(blockName); //TODO get block later as not all Blocks are registered when JSON is loaded
-
-                        if (block != null && block != Blocks.air)
-                        {
-                            pathBlocks.add(new Pair(block, meta));
-                        }
-                        //Provide warning if block is missing
-                        else
-                        {
-                            Engine.logger().warn("AdjacentPlacementListener#process(JsonElement) >> Could not find '" + blockName + "' for " + this);
-                        }
+                        pathBlocks.add(new BlockStateEntry(blockName, meta));
                     }
                     else if (object.has("contentID"))
                     {

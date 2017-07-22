@@ -1,12 +1,12 @@
 package com.builtbroken.mc.prefab.tile.listeners;
 
-import com.builtbroken.jlib.type.Pair;
 import com.builtbroken.mc.api.IModObject;
 import com.builtbroken.mc.api.data.ActionResponse;
 import com.builtbroken.mc.api.tile.listeners.*;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.data.BlockStateEntry;
 import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,7 +14,6 @@ import com.google.gson.JsonPrimitive;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -32,12 +31,12 @@ import java.util.List;
 public class AdjacentPlacementListener extends TileListener implements IPlacementListener, IBlockListener, IChangeListener
 {
     @JsonProcessorData("invert")
-    protected boolean invert = false;
+    protected boolean invert = false; //TODO implement
 
     @JsonProcessorData("doBreakCheck")
     protected boolean doBreakCheck = true;
 
-    protected List<Pair<Block, Integer>> blockList = new ArrayList();
+    protected List<BlockStateEntry> blockList = new ArrayList();
     protected List<String> contentIDs = new ArrayList();
     protected ForgeDirection[] supportedDirections = null;
 
@@ -77,6 +76,7 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
             {
                 return ActionResponse.IGNORE;
             }
+            //Check placement
             if (isPlacementValid())
             {
                 return ActionResponse.DO;
@@ -94,6 +94,7 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
         {
             return ActionResponse.IGNORE;
         }
+        //Check placement
         if (isPlacementValid())
         {
             return ActionResponse.DO;
@@ -101,6 +102,10 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
         return ActionResponse.CANCEL;
     }
 
+    /**
+     * Called to check if the placement of the block will work
+     * @return
+     */
     protected boolean isPlacementValid()
     {
         //Loops checking for connections
@@ -138,7 +143,7 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
      * @param contentIDs - list of content IDs of tiles
      * @return true if either list contains the tile
      */
-    protected boolean doesContainTile(IBlockAccess access, Pos pos, List<Pair<Block, Integer>> blockList, List<String> contentIDs)
+    protected boolean doesContainTile(IBlockAccess access, Pos pos, List<BlockStateEntry> blockList, List<String> contentIDs)
     {
         Block block = pos.getBlock(access);
         if (block != null)
@@ -147,13 +152,16 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
 
             if (block != null)
             {
-                //Check block and/or meta
-                if (blockList.contains(new Pair(block, -1)) || blockList.contains(new Pair(block, meta)))
+                //Check block and/or meta, loop is the same time as list.contains.... O(n)
+                for (BlockStateEntry entry : blockList)
                 {
-                    return true;
+                    if(entry.matches(block, meta)) //TODO pass in location to recycle code
+                    {
+                        return true;
+                    }
                 }
 
-                //Check unique content ids
+                //Check unique content ids TODO merge content ID check into BlockStateEntry
                 List<String> ids = new ArrayList();
                 TileEntity tile = pos.getTileEntity(access);
                 if (tile != null && !tile.isInvalid())
@@ -256,18 +264,7 @@ public class AdjacentPlacementListener extends TileListener implements IPlacemen
                             meta = object.getAsJsonPrimitive("data").getAsInt();
                         }
 
-                        //Get block
-                        Block block = (Block) Block.blockRegistry.getObject(blockName); //TODO get block later as not all Blocks are registered when JSON is loaded
-
-                        if (block != null && block != Blocks.air)
-                        {
-                            blockList.add(new Pair(block, meta));
-                        }
-                        //Provide warning if block is missing
-                        else
-                        {
-                            Engine.logger().warn("AdjacentPlacementListener#process(JsonElement) >> Could not find '" + blockName + "' for " + this);
-                        }
+                        blockList.add(new BlockStateEntry(blockName, meta));
                     }
                     else if (object.has("contentID"))
                     {
