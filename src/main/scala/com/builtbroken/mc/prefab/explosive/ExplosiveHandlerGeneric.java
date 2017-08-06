@@ -20,7 +20,7 @@ import java.util.List;
  * <p/>
  * Created by robert on 11/19/2014.
  */
-public final class ExplosiveHandlerGeneric extends AbstractExplosiveHandler
+public final class ExplosiveHandlerGeneric extends AbstractExplosiveHandler<Blast>
 {
     /**
      * Class to generate explosives from
