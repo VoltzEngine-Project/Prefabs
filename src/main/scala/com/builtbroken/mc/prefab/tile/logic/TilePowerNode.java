@@ -7,7 +7,7 @@ import com.builtbroken.mc.api.tile.ITileConnection;
 import com.builtbroken.mc.api.tile.listeners.IChangeListener;
 import com.builtbroken.mc.framework.logic.TileNode;
 import com.builtbroken.mc.imp.transform.vector.Pos;
-import com.builtbroken.mc.lib.energy.UniversalEnergySystem;
+import com.builtbroken.mc.framework.energy.UniversalEnergySystem;
 import com.builtbroken.mc.prefab.energy.EnergyBuffer;
 import com.builtbroken.mc.prefab.energy.EnergyBufferWrapper;
 import net.minecraft.nbt.NBTTagCompound;

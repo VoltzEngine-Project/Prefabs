@@ -4,7 +4,7 @@ import com.builtbroken.mc.api.map.radio.IRadioWaveReceiver;
 import com.builtbroken.mc.api.map.radio.IRadioWaveSender;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.region.Cube;
-import com.builtbroken.mc.lib.world.radio.RadioRegistry;
+import com.builtbroken.mc.lib.world.map.radio.RadioRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;

@@ -7,7 +7,7 @@ import com.builtbroken.mc.api.tile.ConnectionType;
 import com.builtbroken.mc.api.tile.ITileConnection;
 import com.builtbroken.mc.api.tile.node.ITileModule;
 import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
-import com.builtbroken.mc.lib.energy.UniversalEnergySystem;
+import com.builtbroken.mc.framework.energy.UniversalEnergySystem;
 import com.builtbroken.mc.prefab.energy.EnergyBuffer;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;

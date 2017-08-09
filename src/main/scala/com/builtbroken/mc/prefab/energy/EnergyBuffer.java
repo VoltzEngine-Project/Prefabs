@@ -1,7 +1,7 @@
 package com.builtbroken.mc.prefab.energy;
 
 import com.builtbroken.mc.api.energy.IEnergyBuffer;
-import com.builtbroken.mc.lib.energy.UniversalEnergySystem;
+import com.builtbroken.mc.framework.energy.UniversalEnergySystem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.ForgeDirection;
 

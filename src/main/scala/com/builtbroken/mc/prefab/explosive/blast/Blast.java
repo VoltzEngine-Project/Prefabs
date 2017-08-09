@@ -17,7 +17,7 @@ import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
-import com.builtbroken.mc.lib.world.explosive.ExplosiveRegistry;
+import com.builtbroken.mc.framework.explosive.ExplosiveRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.RenderGlobal;
