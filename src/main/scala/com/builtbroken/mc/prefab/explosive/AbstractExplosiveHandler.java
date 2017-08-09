@@ -7,7 +7,7 @@ import com.builtbroken.mc.api.items.explosives.IExplosiveContainerItem;
 import com.builtbroken.mc.core.References;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.framework.explosive.ExplosiveRegistry;
-import com.builtbroken.mc.prefab.explosive.blast.Blast;
+import com.builtbroken.mc.framework.explosive.blast.Blast;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

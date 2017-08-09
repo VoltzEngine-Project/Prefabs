@@ -9,6 +9,7 @@ import net.minecraft.nbt.NBTTagCompound
 /** Prefab trait for { @link com.builtbroken.mc.api.items.tools.IWorldPosItem }
   * Created by Dark on 8/25/2015.
   */
+@Deprecated
 trait TWorldPosItem extends IWorldPosItem {
   def getLocation(stack: ItemStack): Location = {
     if (stack.hasTagCompound && stack.getTagCompound.hasKey("linkPos")) {

@@ -1,7 +1,6 @@
 package com.builtbroken.mc.prefab.entity.damage;
 
 import com.builtbroken.mc.imp.transform.vector.Location;
-import com.builtbroken.mc.prefab.AbstractDamageSource;
 
 /**
  * Damage source for microwave radiation
@@ -9,7 +8,7 @@ import com.builtbroken.mc.prefab.AbstractDamageSource;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 12/20/2016.
  */
-public class DamageMicrowave extends AbstractDamageSource
+public class DamageMicrowave extends DamageSourceAbstract
 {
     /** Where the energy for the electrical damage ordinated from */
     public Location sourceOfEnergy;

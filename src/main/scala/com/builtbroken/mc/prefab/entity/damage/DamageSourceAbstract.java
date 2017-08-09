@@ -1,4 +1,4 @@
-package com.builtbroken.mc.prefab;
+package com.builtbroken.mc.prefab.entity.damage;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -11,17 +11,17 @@ import net.minecraft.util.StatCollector;
 /**
  * Extend this class to create more custom damage sources.
  */
-public abstract class AbstractDamageSource extends DamageSource
+public abstract class DamageSourceAbstract extends DamageSource
 {
     /** Source of the damage (can be an entity, tile, or the world itself) */
 	protected Object damageSource;
 
-	public AbstractDamageSource(String damageType)
+	public DamageSourceAbstract(String damageType)
 	{
 		super(damageType);
 	}
 
-	public AbstractDamageSource(String damageType, Object source)
+	public DamageSourceAbstract(String damageType, Object source)
 	{
 		this(damageType);
 		this.damageSource = source;

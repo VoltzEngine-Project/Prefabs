@@ -5,7 +5,7 @@ import com.builtbroken.mc.api.event.TriggerCause;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.References;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
-import com.builtbroken.mc.prefab.explosive.blast.Blast;
+import com.builtbroken.mc.framework.explosive.blast.Blast;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,6 +20,7 @@ import java.util.List;
  * <p/>
  * Created by robert on 11/19/2014.
  */
+@Deprecated
 public final class ExplosiveHandlerGeneric extends AbstractExplosiveHandler<Blast>
 {
     /**

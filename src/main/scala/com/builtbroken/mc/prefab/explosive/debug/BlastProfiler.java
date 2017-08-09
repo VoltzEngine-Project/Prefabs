@@ -1,6 +1,7 @@
-package com.builtbroken.mc.prefab.explosive.blast;
+package com.builtbroken.mc.prefab.explosive.debug;
 
 import com.builtbroken.jlib.profiler.Profiler;
+import com.builtbroken.mc.prefab.explosive.blast.BlastBasic;
 
 /**
  * Created by robert on 12/10/2014.

@@ -1,14 +1,13 @@
 package com.builtbroken.mc.prefab.entity.damage;
 
 import com.builtbroken.mc.imp.transform.vector.Location;
-import com.builtbroken.mc.prefab.AbstractDamageSource;
 
 /**
  * Electrical based damage source
  *
  * @author Darkguardsman
  */
-public class DamageElectrical extends AbstractDamageSource
+public class DamageElectrical extends DamageSourceAbstract
 {
     //TODO replace code calclavia removed, add Factory to setup damage type correctly
     //TODO add armor handling so metal armors cause more not less damage

@@ -188,7 +188,8 @@ public class GuiContainerBase extends GuiContainer
 
         if (this.tooltip != null && this.tooltip != "")
         {
-            this.drawTooltip(mouseX - this.guiLeft, mouseY - this.guiTop, LanguageUtility.splitStringPerWordIntoArray(this.tooltip, 5));
+            java.util.List<String> lines = LanguageUtility.splitByLine(tooltip, LanguageUtility.toolTipLineLength);
+            this.drawTooltip(mouseX - this.guiLeft, mouseY - this.guiTop, lines.toArray(new String[lines.size()])); //TODO find a way to not have to convert to array to improve render time
         }
 
         this.tooltip = "";

@@ -1,9 +1,10 @@
-package com.builtbroken.mc.prefab.explosive.blast;
+package com.builtbroken.mc.prefab.explosive.debug;
 
 
 import com.builtbroken.jlib.lang.StringHelpers;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.jlib.profiler.RunProfile;
+import com.builtbroken.mc.prefab.explosive.blast.BlastBasic;
 
 import java.util.ArrayList;
 import java.util.Collections;

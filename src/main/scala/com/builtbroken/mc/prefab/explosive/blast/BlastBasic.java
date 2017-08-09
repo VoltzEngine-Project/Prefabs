@@ -11,12 +11,15 @@ import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
+import com.builtbroken.mc.framework.explosive.blast.Blast;
 import com.builtbroken.mc.imp.transform.sorting.Vector3DistanceComparator;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.MathUtility;
 import com.builtbroken.mc.lib.world.edit.BlockEdit;
 import com.builtbroken.mc.prefab.entity.selector.EntityDistanceSelector;
+import com.builtbroken.mc.prefab.explosive.debug.BlastProfiler;
+import com.builtbroken.mc.prefab.explosive.debug.BlastRunProfile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTNT;
 import net.minecraft.entity.Entity;
@@ -49,7 +52,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     /**
      * Energy to start the explosion with
      */
-    protected float energy = 0;
+    public float energy = 0;
     /**
      * Median size of the explosion from center, max size is x2, min size is 0
      */

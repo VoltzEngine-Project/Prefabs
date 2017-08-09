@@ -1,4 +1,4 @@
-package com.builtbroken.mc.prefab.explosive;
+package com.builtbroken.mc.prefab.items;
 
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.items.explosives.IExplosiveItem;
