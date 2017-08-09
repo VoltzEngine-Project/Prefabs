@@ -25,6 +25,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 2/2/2017.
  */
+@Deprecated
 public abstract class TileModuleMachine<I extends IInventory> extends TileModuleMachineBase implements ISidedInventory, IInventoryProvider<I>, IEnergyBufferProvider, ITileConnection
 {
     /** Primary inventory container for this machine, all {@link IInventory} and {@link ISidedInventory} calls are wrapped to this object */

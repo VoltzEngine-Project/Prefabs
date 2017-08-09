@@ -9,6 +9,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 /** Module designed to take care of Thermal Expansion's RF energy
  * Created by robert on 2/22/2015.
  */
+@Deprecated
 public class TileModuleRFSupport extends TileModule implements IEnergyConnection, IEnergyHandler
 {
     protected int max_energy = 1000;

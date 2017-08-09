@@ -10,6 +10,7 @@ import net.minecraftforge.common.util.ForgeDirection
 /**
  * Created by Cow Pi on 8/10/2015.
  */
+@Deprecated
 trait TSidedInvProvider[I <: IInventory] extends IInventoryProvider[I] with ISidedInventory
 {
   protected var inventory_module: I;

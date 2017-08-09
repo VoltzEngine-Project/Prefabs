@@ -44,6 +44,7 @@ import java.util.Random;
  * <p>
  * Created by Robert(DarkGuardsman, DarkCow) on 1/4/2015.
  */
+@Deprecated
 public class BlockTile extends BlockContainer
 {
     /** Wrapper for any block call that does not go to the {@link TileEntity} version of the {@line Tile} object */

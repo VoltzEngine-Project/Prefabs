@@ -5,6 +5,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 
+@Deprecated
 public class ItemBlockMetadata extends ItemBlock
 {
 	public ItemBlockMetadata(Block block)

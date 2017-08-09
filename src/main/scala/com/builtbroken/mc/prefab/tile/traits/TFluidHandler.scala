@@ -6,6 +6,7 @@ import net.minecraftforge.fluids._
 /**
  * Created by Dark on 8/9/2015.
  */
+@Deprecated
 trait TFluidHandler extends IFluidHandler {
   def getTank(fluid: Fluid): IFluidTank
 

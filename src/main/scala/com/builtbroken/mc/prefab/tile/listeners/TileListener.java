@@ -3,7 +3,7 @@ package com.builtbroken.mc.prefab.tile.listeners;
 import com.builtbroken.mc.api.IModObject;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
-import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
+import com.builtbroken.mc.framework.json.loading.JsonProcessorData;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;

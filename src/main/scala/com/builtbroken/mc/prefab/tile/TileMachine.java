@@ -12,6 +12,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  * Prefab for anything that acts as a machine block
  * Created by Dark(DarkGuardsman, Robert) on 1/12/2015.
  */
+@Deprecated
 public class TileMachine extends TileEnt implements IRotation
 {
     /** Direction the machine is facing, try to use {@link #getFacing()} and {@link #setFacing(ForgeDirection)} */

@@ -13,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
  *
  * @param <I> - inventory type to return for {@link #getInventory()}
  */
+@Deprecated
 public abstract class TileEntityInv<I extends IInventory> extends TileEntityBase implements ISidedInventory, IInventoryProvider<I>
 {
     /** Primary inventory container for this machine, all {@link IInventory} and {@link ISidedInventory} calls are wrapped to this object */

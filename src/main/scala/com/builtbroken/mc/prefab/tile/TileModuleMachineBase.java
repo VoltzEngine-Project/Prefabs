@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author Darkguardsman
  */
+@Deprecated
 public class TileModuleMachineBase extends TileMachine implements ITileModuleProvider
 {
     protected List<ITileModule> modules = new ArrayList();

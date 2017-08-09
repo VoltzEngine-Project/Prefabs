@@ -11,6 +11,7 @@ import net.minecraft.world.World;
  * and functionality
  * Created by Dark on 9/4/2015.
  */
+@Deprecated
 public abstract class TileEntityBase extends TileEntity implements IWorldPosition
 {
     public static final int[] EMPTY_INT_ARRAY = new int[0];

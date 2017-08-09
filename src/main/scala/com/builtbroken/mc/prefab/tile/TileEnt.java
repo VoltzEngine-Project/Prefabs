@@ -16,6 +16,7 @@ import java.awt.*;
 /**
  * Created by robert on 1/12/2015.
  */
+@Deprecated
 public class TileEnt extends Tile
 {
     protected static int DESCRIPTION_PACKET_ID = -1;

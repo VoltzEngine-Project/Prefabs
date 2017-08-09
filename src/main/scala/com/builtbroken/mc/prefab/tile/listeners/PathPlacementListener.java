@@ -5,7 +5,7 @@ import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.data.BlockStateEntry;
-import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
+import com.builtbroken.mc.framework.json.loading.JsonProcessorData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;

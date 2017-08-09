@@ -5,7 +5,7 @@ import com.builtbroken.mc.api.tile.listeners.IRenderBoundsListener;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListener;
 import com.builtbroken.mc.api.tile.listeners.ITileEventListenerBuilder;
 import com.builtbroken.mc.imp.transform.region.Cube;
-import com.builtbroken.mc.lib.json.loading.JsonProcessorData;
+import com.builtbroken.mc.framework.json.loading.JsonProcessorData;
 import net.minecraft.block.Block;
 
 import java.util.ArrayList;

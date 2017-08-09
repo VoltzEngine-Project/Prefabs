@@ -11,6 +11,7 @@ import net.minecraft.nbt.{NBTTagCompound, NBTTagList}
 /** Basic inventory implementation as a scala trait
  * Created by Robert on 8/10/2015.
  */
+@Deprecated
 trait TInventory extends IInventory with ISave {
   protected var slots: Int = 0
   protected var containedItems: Array[ItemStack] = null
