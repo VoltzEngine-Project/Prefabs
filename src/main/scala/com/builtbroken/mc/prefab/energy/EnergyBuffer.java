@@ -58,14 +58,14 @@ public class EnergyBuffer implements IEnergyBuffer
     public int removeEnergyFromStorage(int energy, boolean doAction)
     {
         int prev = getEnergyStored();
-        if (energy > 0 && energyStorage > 0)
+        if (energy > 0 && getEnergyStored() > 0)
         {
-            if (energy >= maxStorage)
+            if (energy >= getEnergyStored())
             {
                 if (doAction)
                 {
                     energyStorage = 0;
-                    if (prev != energyStorage)
+                    if (prev != getEnergyStored())
                     {
                         onPowerChange(prev, getEnergyStored(), EnergyActionType.REMOVE);
                     }
@@ -77,7 +77,7 @@ public class EnergyBuffer implements IEnergyBuffer
                 if (doAction)
                 {
                     energyStorage -= energy;
-                    if (prev != energyStorage)
+                    if (prev != getEnergyStored())
                     {
                         onPowerChange(prev, getEnergyStored(), EnergyActionType.REMOVE);
                     }
