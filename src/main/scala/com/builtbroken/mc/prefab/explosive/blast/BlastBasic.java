@@ -106,7 +106,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
         //Generate debug info
         if (Engine.runningAsDev)
         {
-            Engine.instance.logger().info(profile.getOutputSimple());
+            Engine.logger().info(profile.getOutputSimple());
         }
     }
 

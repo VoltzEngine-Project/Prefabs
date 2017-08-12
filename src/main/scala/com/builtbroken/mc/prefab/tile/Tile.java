@@ -1362,7 +1362,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     @Override
     public final Packet getDescriptionPacket()
     {
-        return canHandlePackets() ? Engine.instance.packetHandler.toMCPacket(getDescPacket()) : null;
+        return canHandlePackets() ? Engine.packetHandler.toMCPacket(getDescPacket()) : null;
     }
 
     public IPacket getDescPacket()
@@ -1409,7 +1409,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     {
         if (world() != null && isServer() && canHandlePackets())
         {
-            Engine.instance.packetHandler.sendToAllAround(packet, world(), xi(), yi(), zi(), distance);
+            Engine.packetHandler.sendToAllAround(packet, world(), xi(), yi(), zi(), distance);
         }
     }
 
@@ -1417,7 +1417,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     {
         if (world() != null && isClient() && canHandlePackets())
         {
-            Engine.instance.packetHandler.sendToServer(packet);
+            Engine.packetHandler.sendToServer(packet);
         }
     }
 
@@ -1429,7 +1429,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
             {
                 if (player instanceof EntityPlayerMP)
                 {
-                    Engine.instance.packetHandler.sendToPlayer(packet, (EntityPlayerMP) player);
+                    Engine.packetHandler.sendToPlayer(packet, (EntityPlayerMP) player);
                 }
             }
         }
