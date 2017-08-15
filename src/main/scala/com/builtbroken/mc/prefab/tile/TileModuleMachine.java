@@ -177,7 +177,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
     {
         if (this instanceof ITileConnection)
         {
-            TileEntity connector = toPos().add(from).getTileEntity(world());
+            TileEntity connector = toPos().add(from).getTileEntity(oldWorld());
             if (this.canConnect(connector, ConnectionType.RF_POWER, from))
             {
                 return true;

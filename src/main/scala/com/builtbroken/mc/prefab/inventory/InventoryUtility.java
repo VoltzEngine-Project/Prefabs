@@ -797,12 +797,12 @@ public class InventoryUtility
 
     public static List<EntityItem> dropBlockAsItem(IWorldPosition position)
     {
-        return dropBlockAsItem(position.world(), position.xi(), position.yi(), position.zi(), false);
+        return dropBlockAsItem(position.oldWorld(), position.xi(), position.yi(), position.zi(), false);
     }
 
     public static List<EntityItem> dropBlockAsItem(IWorldPosition position, boolean destroy)
     {
-        return dropBlockAsItem(position.world(), position.xi(), position.yi(), position.zi(), destroy);
+        return dropBlockAsItem(position.oldWorld(), position.xi(), position.yi(), position.zi(), destroy);
     }
 
     public static List<EntityItem> dropBlockAsItem(World world, Pos position)
@@ -851,7 +851,7 @@ public class InventoryUtility
 
     public static EntityItem dropItemStack(IWorldPosition position, ItemStack itemStack)
     {
-        return dropItemStack(position.world(), position.x(), position.y(), position.z(), itemStack, 10, 0f);
+        return dropItemStack(position.oldWorld(), position.x(), position.y(), position.z(), itemStack, 10, 0f);
     }
 
     /**

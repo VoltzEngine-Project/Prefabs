@@ -169,7 +169,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
 
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return worldObj;
     }

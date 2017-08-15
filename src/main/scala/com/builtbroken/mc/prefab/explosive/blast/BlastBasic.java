@@ -79,7 +79,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     @Override
     public void getEffectedBlocks(List<IWorldEdit> list)
     {
-        Location c = new Location(world(), (int) x(), (int) y(), (int) z());
+        Location c = new Location(oldWorld(), (int) x(), (int) y(), (int) z());
         center = c.add(0.5);
 
         //TODO disable profiler if not in debug mode
@@ -167,7 +167,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                         {
                             if (dir != side)
                             {
-                                IBlastEdit v = new BlockEdit(world, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
+                                IBlastEdit v = new BlockEdit(oldWorld, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
                                 v.doDrops();
                                 v.setBlastDirection(dir);
                                 v.logPrevBlock();
@@ -249,7 +249,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             return damageableTile.getEnergyCostOfTile(explosiveHandler, this, vec.getBlastDirection(), energy, (float) center.distance(vec.xi() + 0.5, vec.yi() + 0.5, vec.zi() + 0.5));
         }
         //Update debug info
-        if (block.isAir(world, vec.xi(), vec.yi(), vec.zi()))
+        if (block.isAir(oldWorld, vec.xi(), vec.yi(), vec.zi()))
         {
             profile.airBlocksPathed++;
         }
@@ -258,7 +258,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             profile.blocksRemoved++;
         }
         //Get cost
-        return (block.getBlockHardness(world, vec.xi(), vec.yi(), vec.zi()) >= 0 ? (float) Math.max(block.getExplosionResistance(explosionBlameEntity, world, vec.xi(), vec.yi(), vec.zi(), x, y, z), 0.5) : -1);
+        return (block.getBlockHardness(oldWorld, vec.xi(), vec.yi(), vec.zi()) >= 0 ? (float) Math.max(block.getExplosionResistance(explosionBlameEntity, oldWorld, vec.xi(), vec.yi(), vec.zi(), x, y, z), 0.5) : -1);
 
     }
 
@@ -278,7 +278,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             //Trigger break event so blocks can do X action
             if (!(block instanceof BlockTNT) && !(vec.getTileEntity() instanceof IExplosive))
             {
-                block.onBlockDestroyedByExplosion(world, (int) vec.x(), (int) vec.y(), (int) vec.z(), wrapperExplosion);
+                block.onBlockDestroyedByExplosion(oldWorld, (int) vec.x(), (int) vec.y(), (int) vec.z(), wrapperExplosion);
             }
             else
             {
@@ -340,7 +340,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
             //TODO ensure that the entity is in line of sight
             //TODO ensure that the entity can be pathed by the explosive
             AxisAlignedBB bounds = AxisAlignedBB.getBoundingBox(x - size - 1, y - size - 1, z - size - 1, x + size + 1, y + size + 1, z + size + 1);
-            List list = world.selectEntitiesWithinAABB(Entity.class, bounds, new EntityDistanceSelector(new Pos(x, y, z), size + 1, true));
+            List list = oldWorld.selectEntitiesWithinAABB(Entity.class, bounds, new EntityDistanceSelector(new Pos(x, y, z), size + 1, true));
             if (list != null && !list.isEmpty())
             {
                 damageEntities(list, source);
@@ -370,13 +370,13 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     @Override
     protected void postPlace(final IWorldEdit vec)
     {
-        MinecraftForge.EVENT_BUS.post(new BlastEventDestroyBlock.Post(this, BlastEventDestroyBlock.DestructionType.FORCE, world, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z()));
+        MinecraftForge.EVENT_BUS.post(new BlastEventDestroyBlock.Post(this, BlastEventDestroyBlock.DestructionType.FORCE, oldWorld, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z()));
     }
 
     @Override
     protected boolean prePlace(final IWorldEdit vec)
     {
-        BlastEventBlockEdit event = new BlastEventDestroyBlock.Pre(this, BlastEventDestroyBlock.DestructionType.FORCE, world, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z());
+        BlastEventBlockEdit event = new BlastEventDestroyBlock.Pre(this, BlastEventDestroyBlock.DestructionType.FORCE, oldWorld, vec.getBlock(), vec.getBlockMetadata(), (int) vec.x(), (int) vec.y(), (int) vec.z());
 
         boolean result = MinecraftForge.EVENT_BUS.post(event);
         if (vec instanceof IBlastEdit && event instanceof BlastEventBlockReplaced.Pre && ((BlastEventBlockReplaced.Pre) event).newBlock != null)

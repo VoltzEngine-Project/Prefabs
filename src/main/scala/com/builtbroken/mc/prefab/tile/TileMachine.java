@@ -35,7 +35,7 @@ public class TileMachine extends TileEnt implements IRotation
         super.firstTick();
         if (useMetaForFacing())
         {
-            facing = ForgeDirection.getOrientation(world().getBlockMetadata(xi(), yi(), zi()));
+            facing = ForgeDirection.getOrientation(oldWorld().getBlockMetadata(xi(), yi(), zi()));
         }
     }
 

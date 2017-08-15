@@ -38,7 +38,7 @@ public class EntitySelector implements IEntitySelector
 
     public List<Entity> getEntities(IWorldPosition location, double radius)
     {
-        return getEntities(location.world(), location.x(), location.y(), location.z(), radius);
+        return getEntities(location.oldWorld(), location.x(), location.y(), location.z(), radius);
     }
 
     public List<Entity> getEntities(Entity entity, double radius)

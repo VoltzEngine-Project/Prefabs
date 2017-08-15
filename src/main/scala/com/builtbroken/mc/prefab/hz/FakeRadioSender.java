@@ -40,7 +40,7 @@ public class FakeRadioSender implements IRadioWaveSender
     @Override
     public void sendRadioMessage(float hz, String header, Object... data)
     {
-        RadioRegistry.popMessage(world(), this, hz, header, data);
+        RadioRegistry.popMessage(oldWorld(), this, hz, header, data);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class FakeRadioSender implements IRadioWaveSender
     }
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return player.worldObj;
     }

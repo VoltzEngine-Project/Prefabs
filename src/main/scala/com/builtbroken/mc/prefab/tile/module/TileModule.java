@@ -88,7 +88,7 @@ public class TileModule implements ITileModule, IWorldPosition, IUpdate
     }
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return ((TileEntity) parent).getWorldObj();
     }
