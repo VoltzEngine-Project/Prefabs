@@ -4,7 +4,7 @@ import com.builtbroken.mc.api.energy.IEnergyBuffer;
 import com.builtbroken.mc.api.energy.IEnergyBufferProvider;
 import com.builtbroken.mc.api.tile.ConnectionType;
 import com.builtbroken.mc.api.tile.ITileConnection;
-import com.builtbroken.mc.api.tile.listeners.IChangeListener;
+import com.builtbroken.mc.framework.block.imp.IChangeListener;
 import com.builtbroken.mc.framework.logic.TileNode;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.framework.energy.UniversalEnergySystem;
@@ -72,7 +72,7 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
 
                     //Get tile
                     Pos pos = center.add(dir); //TODO fix to avoid orphan chunk loading
-                    TileEntity tile = pos.getTileEntity(world());
+                    TileEntity tile = pos.getTileEntity(world().unwrap());
 
                     //Check if is a valid connection
                     if (UniversalEnergySystem.isHandler(tile, dir.getOpposite()) && canConnect(tile, ConnectionType.POWER, dir))
@@ -83,7 +83,7 @@ public class TilePowerNode extends TileNode implements ITileConnection, IEnergyB
             }
 
             //Set next tick time (Randomized to distribute ticks over time)
-            nextConnectionUpdate = 10 + world().rand.nextInt(100);
+            nextConnectionUpdate = 10 + world().unwrap().rand.nextInt(100);
         }
     }
 

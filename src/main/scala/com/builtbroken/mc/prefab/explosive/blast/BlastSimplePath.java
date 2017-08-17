@@ -213,7 +213,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         IWorldEdit edit = null;
 
                         //Do logic for damageable blocks
-                        TileEntity tileEntity = world.getTileEntity(nextNode.xi(), nextNode.yi(), nextNode.zi());
+                        TileEntity tileEntity = oldWorld.getTileEntity(nextNode.xi(), nextNode.yi(), nextNode.zi());
                         IExplosiveDamageable damageableTile = null;
                         if (tileEntity instanceof IExplosiveDamageable)
                         {

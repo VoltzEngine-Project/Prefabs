@@ -3,6 +3,7 @@ package com.builtbroken.mc.prefab.tile;
 import com.builtbroken.jlib.data.vector.IPos3D;
 import com.builtbroken.jlib.data.vector.Pos3D;
 import com.builtbroken.mc.api.IWorldPosition;
+import com.builtbroken.mc.api.abstraction.world.IWorld;
 import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.api.event.tile.TileEvent;
 import com.builtbroken.mc.api.items.ISimpleItemRenderer;
@@ -152,6 +153,11 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
 
     }
 
+    public IWorld world()
+    {
+        return Engine.minecraft.getWorld(worldObj.provider.dimensionId);
+    }
+
     @Override
     public String uniqueContentID()
     {
@@ -261,7 +267,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     protected int getNextCleanupTick()
     {
-        return 100 + (int) (world().rand.nextFloat() * 2000);
+        return 100 + (int) (oldWorld().rand.nextFloat() * 2000);
     }
 
     @Override
@@ -418,7 +424,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     {
         if (isServer())
         {
-            player.openGui(mod, gui, world(), xi(), yi(), zi());
+            player.openGui(mod, gui, oldWorld(), xi(), yi(), zi());
         }
     }
 
@@ -453,7 +459,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
                 //This should never happen but just in case... it is handled to prevent world crashes
                 Engine.error("Block at tile location " + toLocation() + " is not an instance of BlockTile. Destroying block " + b + " to prevent errors.");
                 invalidate();
-                world().setBlockToAir(xi(), yi(), zi());
+                oldWorld().setBlockToAir(xi(), yi(), zi());
             }
         }
         return block;
@@ -547,7 +553,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     }
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return getWorldObj();
     }
@@ -570,7 +576,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public IBlockAccess getAccess()
     {
-        return world() != null ? world() : access;
+        return oldWorld() != null ? oldWorld() : access;
     }
 
     @Deprecated
@@ -592,7 +598,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     @Deprecated
     public Location toVectorWorld()
     {
-        return new Location(world(), x(), y(), z());
+        return new Location(oldWorld(), x(), y(), z());
     }
 
     /**
@@ -602,7 +608,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public Location toLocation()
     {
-        return new Location(world(), x(), y(), z());
+        return new Location(oldWorld(), x(), y(), z());
     }
 
     //=========================
@@ -712,7 +718,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     //==========================
     public void notifyBlocksOfNeighborChange()
     {
-        world().notifyBlocksOfNeighborChange(xi(), yi(), zi(), getBlockType());
+        oldWorld().notifyBlocksOfNeighborChange(xi(), yi(), zi(), getBlockType());
     }
 
     protected void markRender()
@@ -720,27 +726,27 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         if (this instanceof IMultiTileHost)
         {
             //TODO implement custom handling for multi-blocks as their textures are dependent on host
-            world().markBlockRangeForRenderUpdate(xi(), yi(), zi(), xi(), yi(), zi());
+            oldWorld().markBlockRangeForRenderUpdate(xi(), yi(), zi(), xi(), yi(), zi());
         }
         else
         {
-            world().markBlockRangeForRenderUpdate(xi(), yi(), zi(), xi(), yi(), zi());
+            oldWorld().markBlockRangeForRenderUpdate(xi(), yi(), zi(), xi(), yi(), zi());
         }
     }
 
     protected void markUpdate()
     {
-        world().markBlockForUpdate(xi(), yi(), zi());
+        oldWorld().markBlockForUpdate(xi(), yi(), zi());
     }
 
     protected void updateLight()
     {
-        world().func_147451_t(xi(), yi(), zi());
+        oldWorld().func_147451_t(xi(), yi(), zi());
     }
 
     protected void scheduleTick(int delay)
     {
-        world().scheduleBlockUpdate(xi(), yi(), zi(), getBlockType(), delay);
+        oldWorld().scheduleBlockUpdate(xi(), yi(), zi(), getBlockType(), delay);
     }
 
     //=========================
@@ -818,7 +824,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     @Override
     public int getBlockMetadata()
     {
-        if (world() == null)
+        if (oldWorld() == null)
         {
             return 0;
         }
@@ -852,7 +858,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public boolean isIndirectlyPowered()
     {
-        return world().isBlockIndirectlyGettingPowered(xi(), yi(), zi());
+        return oldWorld().isBlockIndirectlyGettingPowered(xi(), yi(), zi());
     }
 
     /**
@@ -860,7 +866,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public int getStrongestIndirectPower()
     {
-        return world().getStrongestIndirectPower(xi(), yi(), zi());
+        return oldWorld().getStrongestIndirectPower(xi(), yi(), zi());
     }
 
     /**
@@ -931,12 +937,12 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public boolean canPlaceBlockAt()
     {
-        if (world() != null)
+        if (oldWorld() != null)
         {
-            Block block = world().getBlock(xi(), yi(), zi());
+            Block block = oldWorld().getBlock(xi(), yi(), zi());
             if (block != null)
             {
-                return block.isReplaceable(world(), xi(), yi(), zi());
+                return block.isReplaceable(oldWorld(), xi(), yi(), zi());
             }
         }
         return false;
@@ -951,7 +957,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public boolean removeByPlayer(EntityPlayer player, boolean willHarvest)
     {
-        return world().setBlockToAir(xi(), yi(), zi());
+        return oldWorld().setBlockToAir(xi(), yi(), zi());
     }
 
     /**
@@ -991,12 +997,12 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
 
     public boolean isClient()
     {
-        return world() != null && world().isRemote;
+        return oldWorld() != null && oldWorld().isRemote;
     }
 
     public boolean isServer()
     {
-        return world() != null && !world().isRemote;
+        return oldWorld() != null && !oldWorld().isRemote;
     }
 
     //==========================
@@ -1105,7 +1111,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         }
         else
         {
-            return block.staticTile.domain + textureName;
+            return (block.staticTile.domain != null ? block.staticTile.domain : "") + textureName;
         }
     }
 
@@ -1349,7 +1355,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
 
     public void setMeta(int meta)
     {
-        world().setBlockMetadataWithNotify(xi(), yi(), zi(), meta, 3);
+        oldWorld().setBlockMetadataWithNotify(xi(), yi(), zi(), meta, 3);
     }
 
     public NBTTagCompound getSaveData()
@@ -1362,7 +1368,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     @Override
     public final Packet getDescriptionPacket()
     {
-        return canHandlePackets() ? Engine.instance.packetHandler.toMCPacket(getDescPacket()) : null;
+        return canHandlePackets() ? Engine.packetHandler.toMCPacket(getDescPacket()) : null;
     }
 
     public IPacket getDescPacket()
@@ -1407,17 +1413,17 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public void sendPacket(IPacket packet, double distance)
     {
-        if (world() != null && isServer() && canHandlePackets())
+        if (oldWorld() != null && isServer() && canHandlePackets())
         {
-            Engine.instance.packetHandler.sendToAllAround(packet, world(), xi(), yi(), zi(), distance);
+            Engine.packetHandler.sendToAllAround(packet, oldWorld(), xi(), yi(), zi(), distance);
         }
     }
 
     public void sendPacketToServer(IPacket packet)
     {
-        if (world() != null && isClient() && canHandlePackets())
+        if (oldWorld() != null && isClient() && canHandlePackets())
         {
-            Engine.instance.packetHandler.sendToServer(packet);
+            Engine.packetHandler.sendToServer(packet);
         }
     }
 
@@ -1429,7 +1435,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
             {
                 if (player instanceof EntityPlayerMP)
                 {
-                    Engine.instance.packetHandler.sendToPlayer(packet, (EntityPlayerMP) player);
+                    Engine.packetHandler.sendToPlayer(packet, (EntityPlayerMP) player);
                 }
             }
         }

@@ -210,7 +210,7 @@ public class EntityAbstractCart extends EntityBase implements IPacketIDReceiver,
         }
 
         Pos pos = new Pos(Math.floor(posX), Math.floor(posY), Math.floor(posZ)).floor();
-        Block block = pos.getBlock(world());
+        Block block = pos.getBlock(oldWorld());
         if (block == Blocks.air)
         {
             pos = pos.add(railSide);
@@ -256,7 +256,7 @@ public class EntityAbstractCart extends EntityBase implements IPacketIDReceiver,
         }
         else if (block instanceof ITransportRailBlock)
         {
-            ((ITransportRailBlock) block).tickRailFromCart(this, world(), pos.xi(), pos.yi(), pos.zi(), worldObj.getBlockMetadata(pos.xi(), pos.yi(), pos.zi()));
+            ((ITransportRailBlock) block).tickRailFromCart(this, oldWorld(), pos.xi(), pos.yi(), pos.zi(), worldObj.getBlockMetadata(pos.xi(), pos.yi(), pos.zi()));
         }
 
         if (!worldObj.isRemote && updateClient)

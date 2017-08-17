@@ -117,7 +117,7 @@ public class TileEnt extends Tile
         }
         catch (Exception e)
         {
-            Engine.instance.logger().error("Failed to write description packet for " + this + "  ", e);
+            Engine.logger().error("Failed to write description packet for " + this + "  ", e);
         }
         return null;
     }

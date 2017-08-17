@@ -27,7 +27,7 @@ public abstract class TileEntityBase extends TileEntity implements IWorldPositio
     }
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return worldObj;
     }

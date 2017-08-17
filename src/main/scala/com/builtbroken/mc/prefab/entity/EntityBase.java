@@ -138,7 +138,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     {
         final PacketEntity entity = new PacketEntity(this, -1);
         writeDescData(entity.data());
-        Engine.instance.packetHandler.sendToAllAround(entity, (IWorldPosition) this, 64);
+        Engine.packetHandler.sendToAllAround(entity, (IWorldPosition) this, 64);
     }
 
     /**
@@ -169,7 +169,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
 
 
     @Override
-    public World world()
+    public World oldWorld()
     {
         return worldObj;
     }

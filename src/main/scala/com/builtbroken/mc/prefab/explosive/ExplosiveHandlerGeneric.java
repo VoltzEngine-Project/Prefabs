@@ -4,6 +4,7 @@ import com.builtbroken.mc.api.edit.IWorldChangeAction;
 import com.builtbroken.mc.api.event.TriggerCause;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.References;
+import com.builtbroken.mc.framework.explosive.handler.ExplosiveHandler;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.framework.explosive.blast.Blast;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,7 +22,7 @@ import java.util.List;
  * Created by robert on 11/19/2014.
  */
 @Deprecated
-public final class ExplosiveHandlerGeneric extends AbstractExplosiveHandler<Blast>
+public final class ExplosiveHandlerGeneric extends ExplosiveHandler<Blast>
 {
     /**
      * Class to generate explosives from
@@ -80,7 +81,7 @@ public final class ExplosiveHandlerGeneric extends AbstractExplosiveHandler<Blas
             return blast;
         } catch (InstantiationException | IllegalAccessException e)
         {
-            Engine.instance.logger().log(Level.ERROR, "Failed to create blast object");
+            Engine.logger().log(Level.ERROR, "Failed to create blast object");
             e.printStackTrace();
         }
         return null;

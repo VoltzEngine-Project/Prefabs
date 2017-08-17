@@ -55,7 +55,7 @@ public abstract class CustomPotion extends Potion
 
 	public static int getPotionID(String name, int id)
 	{
-		return Engine.instance.getConfig().get("Potion ID", name + " ID", id).getInt(id);
+		return Engine.loaderInstance.getConfig().get("Potion ID", name + " ID", id).getInt(id);
 	}
 
 	/**
