@@ -7,6 +7,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 
 import java.util.*;
 
@@ -66,7 +68,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         {
             ItemStack var3;
 
-            if (this.getStackInSlot(slot).stackSize <= ammount)
+            if (this.getStackInSlot(slot).getCount() <= ammount)
             {
                 var3 = this.getStackInSlot(slot);
                 setInventorySlotContents(slot, null);
@@ -77,7 +79,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
             {
                 var3 = this.getStackInSlot(slot).splitStack(ammount);
 
-                if (this.getStackInSlot(slot).stackSize == 0)
+                if (this.getStackInSlot(slot).getCount() == 0)
                 {
                     setInventorySlotContents(slot, null);
                 }
@@ -93,18 +95,15 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot)
+    public ItemStack removeStackFromSlot(int index)
     {
-        if (this.getStackInSlot(slot) != null)
+        ItemStack stack = getStackInSlot(index);
+        if (stack != null)
         {
-            ItemStack var2 = this.getStackInSlot(slot);
-            this.inventoryMap.remove(slot);
-            return var2;
+            setInventorySlotContents(0, null);
+            return stack;
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     @Override
@@ -146,7 +145,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     }
 
     @Override
-    public String getInventoryName()
+    public String getName()
     {
         return inventoryName;
     }
@@ -158,27 +157,57 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     }
 
     @Override
-    public void openInventory()
+    public void openInventory(EntityPlayer player)
     {
 
     }
 
     @Override
-    public void closeInventory()
+    public void closeInventory(EntityPlayer player)
     {
 
     }
 
     @Override
-    public boolean hasCustomInventoryName()
+    public boolean hasCustomName()
     {
         return false;
+    }
+
+    @Override
+    public ITextComponent getDisplayName()
+    {
+        return new TextComponentString(getName());
     }
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack)
     {
         return i >= this.getSizeInventory() && i < getSizeInventory();
+    }
+
+    @Override
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value)
+    {
+
+    }
+
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    @Override
+    public void clear()
+    {
+
     }
 
     @Override
@@ -193,7 +222,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
+    public boolean isUsableByPlayer(EntityPlayer par1EntityPlayer)
     {
         return true;
     }
@@ -212,7 +241,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
 
             if (id >= 0 && id < this.getSizeInventory())
             {
-                this.setInventorySlotContents(id, ItemStack.loadItemStackFromNBT(stackTag));
+                this.setInventorySlotContents(id, new ItemStack(stackTag));
             }
         }
 
@@ -292,7 +321,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     @Override
     public String toString()
     {
-        return "BasicInventory[" + getInventoryName() + ", " + getSizeInventory() + "]@" + hashCode();
+        return "BasicInventory[" + getName() + ", " + getSizeInventory() + "]@" + hashCode();
     }
 
     @Override

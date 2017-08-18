@@ -9,14 +9,18 @@ import com.builtbroken.mc.core.network.packet.PacketEntity;
 import com.builtbroken.mc.core.network.packet.PacketType;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.DamageUtility;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
 /**
  * Base entity class to be shared by most entities
@@ -27,6 +31,8 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     /** Does the entity have HP to take damage. */
     protected boolean hasHealth = false;
 
+    private static final DataParameter<Float> HEALTH = EntityDataManager.<Float>createKey(EntityLivingBase.class, DataSerializers.FLOAT);
+
     public EntityBase(World world)
     {
         super(world);
@@ -35,17 +41,17 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     @Override
     protected void entityInit()
     {
-        this.dataWatcher.addObject(6, getMaxHealth());
-    }
-
-    public void setHealth(float hp)
-    {
-        this.dataWatcher.updateObject(6, Float.valueOf(MathHelper.clamp_float(hp, 0.0F, this.getMaxHealth())));
+        this.dataManager.register(HEALTH, Float.valueOf(0));
     }
 
     public float getHealth()
     {
-        return this.dataWatcher.getWatchableObjectFloat(6);
+        return ((Float)this.dataManager.get(HEALTH)).floatValue();
+    }
+
+    public void setHealth(float health)
+    {
+        this.dataManager.set(HEALTH, Float.valueOf(MathHelper.clamp(health, 0.0F, this.getMaxHealth())));
     }
 
     public float getMaxHealth()
@@ -81,9 +87,9 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
      */
     protected void alignToBounds()
     {
-        this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
-        this.posY = this.boundingBox.minY + (double) this.yOffset - (double) this.ySize;
-        this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
+        this.posX = (this.getEntityBoundingBox().minX + this.getEntityBoundingBox().maxX) / 2.0D;
+        this.posY = this.getEntityBoundingBox().minY + (double) this.getYOffset() - (double) this.height;
+        this.posZ = (this.getEntityBoundingBox().minZ + this.getEntityBoundingBox().maxZ) / 2.0D;
     }
 
     /**
@@ -119,7 +125,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     @Override
     public boolean read(ByteBuf buf, int id, EntityPlayer player, PacketType type)
     {
-        if (worldObj.isRemote)
+        if (world.isRemote)
         {
             //Updates client if cargo changes
             if (id == -1)
@@ -171,7 +177,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     @Override
     public World oldWorld()
     {
-        return worldObj;
+        return world;
     }
 
     @Override

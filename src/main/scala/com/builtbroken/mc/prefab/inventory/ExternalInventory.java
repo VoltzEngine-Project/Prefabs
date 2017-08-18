@@ -1,12 +1,13 @@
 package com.builtbroken.mc.prefab.inventory;
 
-import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.api.tile.node.IExternalInventory;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
+import com.builtbroken.mc.data.Direction;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 /**
  * Version of the basic ISidedInventory that is designed to be used as a replacement for
@@ -38,7 +39,25 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1)
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value)
+    {
+
+    }
+
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    @Override
+    public int[] getSlotsForFace(EnumFacing facing)
     {
         if (openSlots == null || openSlots.length != this.getSizeInventory())
         {
@@ -52,15 +71,21 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j)
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing side)
     {
-        return this.isItemValidForSlot(i, itemstack) && host.canStore(itemstack, i, ForgeDirection.getOrientation(j));
+        return this.isItemValidForSlot(i, itemstack) && host.canStore(itemstack, i, Direction.getOrientation(side));
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j)
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing side)
     {
-        return host.canRemove(itemstack, i, ForgeDirection.getOrientation(j));
+        return host.canRemove(itemstack, i, Direction.getOrientation(side));
+    }
+
+    @Override
+    public ItemStack removeStackFromSlot(int index)
+    {
+        return null;
     }
 
     @Override
@@ -85,7 +110,7 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
+    public boolean isUsableByPlayer(EntityPlayer par1EntityPlayer)
     {
         return true;
     }
