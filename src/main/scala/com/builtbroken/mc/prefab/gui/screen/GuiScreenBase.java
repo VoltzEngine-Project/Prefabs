@@ -12,6 +12,7 @@ import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,7 +36,7 @@ public class GuiScreenBase extends GuiScreen
     }
 
     @Override
-    public void handleMouseInput()
+    public void handleMouseInput() throws IOException
     {
         int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
         int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
@@ -53,7 +54,7 @@ public class GuiScreenBase extends GuiScreen
     }
 
     @Override
-    protected void mouseMovedOrUp(int mouseX, int mouseY, int mouseKey)
+    protected void mouseClickMove(int mouseX, int mouseY, int mouseKey, long timeSinceLastClick)
     {
         if (this.lastButtonClicked != null && mouseKey == 0) //left click
         {
@@ -63,13 +64,13 @@ public class GuiScreenBase extends GuiScreen
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseKey)
+    protected void mouseClicked(int mouseX, int mouseY, int mouseKey) throws IOException
     {
         if (mouseKey == 0) //left click
         {
             for (int l = 0; l < this.buttonList.size(); ++l)
             {
-                GuiButton guibutton = (GuiButton) this.buttonList.get(l);
+                GuiButton guibutton = this.buttonList.get(l);
 
                 if (guibutton.mousePressed(this.mc, mouseX, mouseY))
                 {
@@ -80,21 +81,21 @@ public class GuiScreenBase extends GuiScreen
                         break;
                     }
                     //Mark button as selected
-                    this.lastButtonClicked = event.button;
+                    this.lastButtonClicked = event.getButton();
 
                     //Fire audio of click
-                    event.button.func_146113_a(this.mc.getSoundHandler());
+                    event.getButton().playPressSound(this.mc.getSoundHandler());
 
                     if (guibutton.id >= 0)
                     {
                         //Fire event of click
-                        this.actionPerformed(event.button);
+                        this.actionPerformed(event.getButton());
                     }
 
                     //Do forge stuff
                     if (this.equals(this.mc.currentScreen))
                     {
-                        MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(this, event.button, this.buttonList));
+                        MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(this, event.getButton(), this.buttonList));
                     }
                 }
             }
@@ -102,7 +103,7 @@ public class GuiScreenBase extends GuiScreen
     }
 
     @Override
-    protected void keyTyped(char c, int i)
+    protected void keyTyped(char c, int i) throws IOException
     {
         if (Engine.runningAsDev && i == Keyboard.KEY_GRAVE)
         {
@@ -145,7 +146,7 @@ public class GuiScreenBase extends GuiScreen
     }
 
     @Override
-    public void actionPerformed(GuiButton button)
+    public void actionPerformed(GuiButton button) throws IOException
     {
         super.actionPerformed(button);
     }

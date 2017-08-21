@@ -33,7 +33,7 @@ public abstract class ItemAbstractModule<I extends IModule> extends ItemAbstract
         if (stack != null)
         {
             ItemStack insert = stack.copy();
-            insert.stackSize = 1;
+            insert.setCount(1);
             return newModule(stack);
         }
         return null;

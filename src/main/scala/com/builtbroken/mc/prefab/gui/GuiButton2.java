@@ -41,7 +41,7 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     @Override
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
-        int hoverState = this.getHoverState(this.field_146123_n);
+        int hoverState = this.getHoverState(this.hovered);
         this.drawTexturedModalRect(this.x(), this.y(), 0, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
         this.drawTexturedModalRect(this.x() + this.getWidth() / 2, this.y(), 200 - this.getWidth() / 2, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
 
@@ -55,7 +55,7 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
         {
             color = 10526880;
         }
-        else if (this.field_146123_n)
+        else if (this.hovered)
         {
             color = 16777120;
         }
@@ -65,6 +65,6 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     @Override
     public ResourceLocation getTexture()
     {
-        return buttonTextures;
+        return BUTTON_TEXTURES;
     }
 }

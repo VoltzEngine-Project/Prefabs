@@ -1,18 +1,19 @@
 package com.builtbroken.mc.prefab.tile.module;
 
-import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.api.IUpdate;
+import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.api.tile.ITileModuleProvider;
 import com.builtbroken.mc.api.tile.node.ITileModule;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Created by robert on 1/12/2015.
  */
+@Deprecated
 public class TileModule implements ITileModule, IWorldPosition, IUpdate
 {
     private final ITileModuleProvider parent;
@@ -23,19 +24,21 @@ public class TileModule implements ITileModule, IWorldPosition, IUpdate
         this.parent = parent;
         if (!(parent instanceof TileEntity))
         {
-            throw new IllegalArgumentException(getClass() + " requires that " + parent +" is an instanceof TileEntity");
+            throw new IllegalArgumentException(getClass() + " requires that " + parent + " is an instanceof TileEntity");
         }
     }
 
-    public boolean allowConnection(ForgeDirection side)
+    public boolean allowConnection(EnumFacing side)
     {
-        return side == ForgeDirection.UNKNOWN || canConnect[side.ordinal()];
+        return side == null || canConnect[side.ordinal()];
     }
 
-    public void setAllowConnection(ForgeDirection side, boolean t)
+    public void setAllowConnection(EnumFacing side, boolean t)
     {
-        if(side != ForgeDirection.UNKNOWN)
+        if (side != null)
+        {
             canConnect[side.ordinal()] = t;
+        }
     }
 
     @Override
@@ -66,10 +69,10 @@ public class TileModule implements ITileModule, IWorldPosition, IUpdate
     //========= Helper =============
     //==============================
 
-    public <N extends ITileModule> N getModule(Class<? extends N> nodeType, ForgeDirection from)
+    public <N extends ITileModule> N getModule(Class<? extends N> nodeType, EnumFacing from)
     {
         TileEntity tile = toLocation().getTileEntity();
-        if(tile instanceof ITileModuleProvider)
+        if (tile instanceof ITileModuleProvider)
         {
             return ((ITileModuleProvider) tile).getModule(nodeType, from);
         }
@@ -90,25 +93,25 @@ public class TileModule implements ITileModule, IWorldPosition, IUpdate
     @Override
     public World oldWorld()
     {
-        return ((TileEntity) parent).getWorldObj();
+        return ((TileEntity) parent).getWorld();
     }
 
     @Override
     public double x()
     {
-        return ((TileEntity) parent).xCoord;
+        return ((TileEntity) parent).getPos().getX();
     }
 
     @Override
     public double y()
     {
-        return ((TileEntity) parent).yCoord;
+        return ((TileEntity) parent).getPos().getY();
     }
 
     @Override
     public double z()
     {
-        return ((TileEntity) parent).zCoord;
+        return ((TileEntity) parent).getPos().getZ();
     }
 
 

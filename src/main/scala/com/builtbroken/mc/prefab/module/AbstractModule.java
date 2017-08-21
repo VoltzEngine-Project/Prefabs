@@ -2,12 +2,8 @@ package com.builtbroken.mc.prefab.module;
 
 import com.builtbroken.mc.api.modules.IModule;
 import com.builtbroken.mc.api.modules.IModuleHasMass;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
 
 /**
  * Created by robert on 12/28/2014.
@@ -130,18 +126,6 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     public NBTTagCompound save(NBTTagCompound nbt)
     {
         return nbt;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public IIcon getIcon(ItemStack stack, int pass)
-    {
-        return null;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister register)
-    {
-
     }
 
     @Override

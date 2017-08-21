@@ -8,7 +8,6 @@ import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.region.Rectangle;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
-import com.builtbroken.mc.lib.render.RenderUtility;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -18,9 +17,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -28,6 +25,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -75,7 +73,14 @@ public class GuiContainerBase extends GuiContainer
 
     public void actionPerformedCallback(GuiButton button)
     {
-        actionPerformed(button);
+        try
+        {
+            actionPerformed(button);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -106,7 +111,7 @@ public class GuiContainerBase extends GuiContainer
 
     protected void drawString(String str, int x, int y, int color)
     {
-        fontRendererObj.drawString(str, x, y, color);
+        Minecraft.getMinecraft().fontRenderer.drawString(str, x, y, color);
     }
 
     protected void drawString(String str, int x, int y)
@@ -131,17 +136,17 @@ public class GuiContainerBase extends GuiContainer
 
     protected void drawStringCentered(String str, int x, int y, int color)
     {
-        drawString(str, x - (fontRendererObj.getStringWidth(str) / 2), y, color);
+        drawString(str, x - (Minecraft.getMinecraft().fontRenderer.getStringWidth(str) / 2), y, color);
     }
 
-    protected GuiTextField newField(int x, int y, int w, String msg)
+    protected GuiTextField newField(int id, int x, int y, int w, String msg)
     {
-        return this.newField(x, y, w, 20, msg);
+        return this.newField(id, x, y, w, 20, msg);
     }
 
-    protected GuiTextField newField(int x, int y, int w, int h, String msg)
+    protected GuiTextField newField(int id, int x, int y, int w, int h, String msg)
     {
-        GuiTextField x_field = new GuiTextField(this.fontRendererObj, x, y, w, h);
+        GuiTextField x_field = new GuiTextField(id, Minecraft.getMinecraft().fontRenderer, x, y, w, h);
         x_field.setText("" + msg);
         x_field.setMaxStringLength(15);
         x_field.setTextColor(16777215);
@@ -157,7 +162,7 @@ public class GuiContainerBase extends GuiContainer
     }
 
     @Override
-    public void handleMouseInput()
+    public void handleMouseInput() throws IOException
     {
         int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
         int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
@@ -211,7 +216,7 @@ public class GuiContainerBase extends GuiContainer
     }
 
     @Override
-    protected void keyTyped(char c, int id)
+    protected void keyTyped(char c, int id) throws IOException
     {
         //Key for debug render
         if (id == Keyboard.KEY_INSERT)
@@ -237,7 +242,7 @@ public class GuiContainerBase extends GuiContainer
     }
 
     @Override
-    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_)
+    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) throws IOException
     {
         super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
         for (GuiTextField field : fields)
@@ -299,7 +304,7 @@ public class GuiContainerBase extends GuiContainer
         // drawTexturedModelRectFromIcon
         // GL11.glEnable(GL11.GL_BLEND);
         // GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        itemRender.renderItemAndEffectIntoGUI(fontRendererObj, this.mc.renderEngine, itemStack, x, y);
+        itemRender.renderItemAndEffectIntoGUI(itemStack, x, y);
         // GL11.glDisable(GL11.GL_BLEND);
     }
 
@@ -314,7 +319,7 @@ public class GuiContainerBase extends GuiContainer
     {
         String name = LanguageUtility.getLocal("gui." + textName + ".name");
         String text = format.replaceAll("%1", name);
-        fontRendererObj.drawString(text, x, y, color);
+        Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, color);
 
         String tooltip = LanguageUtility.getLocal("gui." + textName + ".tooltip");
 
@@ -336,11 +341,11 @@ public class GuiContainerBase extends GuiContainer
     //TODO update and docs
     protected void drawSlot(Slot slot)
     {
-        drawSlot(slot.xDisplayPosition - 1, slot.yDisplayPosition - 1); //TODO get slot type from slot
+        drawSlot(slot.xPos - 1, slot.yPos - 1); //TODO get slot type from slot
         if (Engine.runningAsDev && renderSlotDebugIDs)
         {
-            this.drawStringCentered("" + slot.getSlotIndex(), guiLeft + slot.xDisplayPosition + 9, guiTop + slot.yDisplayPosition + 9, Color.YELLOW);
-            this.drawStringCentered("" + slot.slotNumber, guiLeft + slot.xDisplayPosition + 9, guiTop + slot.yDisplayPosition + 1, Color.RED);
+            this.drawStringCentered("" + slot.getSlotIndex(), guiLeft + slot.xPos + 9, guiTop + slot.yPos + 9, Color.YELLOW);
+            this.drawStringCentered("" + slot.slotNumber, guiLeft + slot.xPos + 9, guiTop + slot.yPos + 1, Color.RED);
         }
     }
 
@@ -653,7 +658,7 @@ public class GuiContainerBase extends GuiContainer
 
         this.lastChangeFrameTime--;
 
-        fontRendererObj.drawString(display, x, y, 4210752);
+        Minecraft.getMinecraft().fontRenderer.drawString(display, x, y, 4210752);
     }
 
     //TODO update and docs
@@ -694,7 +699,7 @@ public class GuiContainerBase extends GuiContainer
 
         this.lastChangeFrameTime--;
 
-        fontRendererObj.drawString(display, x, y, 4210752);
+        Minecraft.getMinecraft().fontRenderer.drawString(display, x, y, 4210752);
     }
 
     //TODO update and docs
@@ -713,7 +718,7 @@ public class GuiContainerBase extends GuiContainer
 
                 for (var6 = 0; var6 < toolTips.length; ++var6)
                 {
-                    var7 = fontRendererObj.getStringWidth(toolTips[var6]);
+                    var7 = Minecraft.getMinecraft().fontRenderer.getStringWidth(toolTips[var6]);
 
                     if (var7 > var5)
                     {
@@ -754,7 +759,7 @@ public class GuiContainerBase extends GuiContainer
                 {
                     String var14 = toolTips[var13];
 
-                    fontRendererObj.drawStringWithShadow(var14, var6, var7, -1);
+                    Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(var14, var6, var7, -1);
                     var7 += 10;
                 }
 
@@ -769,52 +774,9 @@ public class GuiContainerBase extends GuiContainer
     /**
      * Based on BuildCraft
      */
+    @Deprecated
     protected void displayGauge(int j, int k, int line, int col, int width, int squaled, FluidStack liquid)
     {
-        squaled -= 1;
 
-        if (liquid == null)
-        {
-            return;
-        }
-
-        int start = 0;
-
-        IIcon liquidIcon = null;
-        Fluid fluid = liquid.getFluid();
-
-        if (fluid != null && fluid.getStillIcon() != null)
-        {
-            liquidIcon = fluid.getStillIcon();
-        }
-
-        RenderUtility.setSpriteTexture(fluid.getSpriteNumber());
-
-        if (liquidIcon != null)
-        {
-            while (true)
-            {
-                int x;
-
-                if (squaled > 16)
-                {
-                    x = 16;
-                    squaled -= 16;
-                }
-                else
-                {
-                    x = squaled;
-                    squaled = 0;
-                }
-
-                this.drawTexturedModelRectFromIcon(j + col, k + line + 58 - x - start, liquidIcon, width, 16 - (16 - x));
-                start = start + 16;
-
-                if (x == 0 || squaled == 0)
-                {
-                    break;
-                }
-            }
-        }
     }
 }

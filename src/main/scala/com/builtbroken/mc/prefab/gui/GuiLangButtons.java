@@ -23,6 +23,6 @@ public class GuiLangButtons extends GuiButton
 
     public void addXOffset(int a)
     {
-        xPosition += LanguageUtility.getLangSetting(key +".x", a);
+        x += LanguageUtility.getLangSetting(key +".x", a);
     }
 }

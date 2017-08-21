@@ -33,9 +33,9 @@ public class SlotCraftingResult extends SlotWatched
 	 * When the slot has changed it calls @ISlotPickResult 's method
 	 */
 	@Override
-	public void onPickupFromSlot(EntityPlayer entityPlayer, ItemStack itemStack)
+	public ItemStack onTake(EntityPlayer entityPlayer, ItemStack itemStack)
 	{
 		this.tile.onPickUpFromSlot(entityPlayer, this.slotNumber, itemStack);
-		super.onPickupFromSlot(entityPlayer, itemStack);
+		return super.onTake(entityPlayer, itemStack);
 	}
 }

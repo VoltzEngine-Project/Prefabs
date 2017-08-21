@@ -2,6 +2,7 @@ package com.builtbroken.mc.prefab.tile.logic;
 
 import com.builtbroken.mc.api.ISave;
 import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
+import com.builtbroken.mc.framework.logic.TileNode;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,7 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 4/17/2017.
  */
-public abstract class TileMachineNode<I extends IInventory> extends TilePowerNode implements IInventoryProvider<I>
+public abstract class TileMachineNode<I extends IInventory> extends TileNode implements IInventoryProvider<I>
 {
     /** Primary inventory container for this machine, all {@link IInventory} and {@link ISidedInventory} calls are wrapped to this object */
     protected I inventory_module;

@@ -82,7 +82,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY)
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         update(mc, mouseX, mouseY);
         if (visible())
@@ -215,7 +215,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     protected void update(Minecraft mc, int mouseX, int mouseY)
     {
-        this.field_146123_n = isMouseInside(mouseX, mouseY);
+        this.hovered = isMouseInside(mouseX, mouseY);
     }
 
     protected int getU()
@@ -224,7 +224,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         {
             return getWidth() * 2;
         }
-        else if (supportsHoverState() && field_146123_n) //Hover state
+        else if (supportsHoverState() && hovered) //Hover state
         {
             return getWidth();
         }
@@ -299,12 +299,6 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         return getRelativeSize() != null ? getRelativeSize().xi() : width;
     }
 
-    public E setWidth(int width)
-    {
-        this.width = width;
-        return (E) this;
-    }
-
     public E enable()
     {
         this.enabled = true;
@@ -347,18 +341,18 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
 
     public int x()
     {
-        return xPosition;
+        return x;
     }
 
     public int y()
     {
-        return yPosition;
+        return y;
     }
 
     public E setPosition(int x, int y)
     {
-        this.xPosition = x;
-        this.yPosition = y;
+        this.x = x;
+        this.y = y;
         return (E) this;
     }
 

@@ -8,38 +8,40 @@ import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
-import com.builtbroken.mc.lib.helper.DummyPlayer;
-import com.builtbroken.mc.lib.helper.NBTUtility;
 import com.builtbroken.mc.lib.data.item.ItemStackWrapper;
+import com.builtbroken.mc.lib.helper.NBTUtility;
 import com.google.common.collect.Table;
-import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
-import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.GameData;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Series of helper classes for dealing with any kind of inventory
@@ -69,54 +71,49 @@ public class InventoryUtility
         long time = System.nanoTime();
 
         //Get registry
-        FMLControlledNamespacedRegistry<Item> registry = (FMLControlledNamespacedRegistry<Item>) Item.itemRegistry;
-        Set set = registry.getKeys();
-
-        Engine.logger().info("  " + set.size() + " entries detected");
+        RegistryNamespaced<ResourceLocation, Item> registry = Item.REGISTRY;
+        Engine.logger().info("  " + registry.getKeys().size() + " entries detected");
         //Loop all entries
-        for (Object obj : set)
+        for (ResourceLocation key : registry.getKeys())
         {
-            if (obj instanceof String)
+            String name = (String) key.toString();
+            String modID = name.substring(0, name.indexOf(":"));
+            name = name.substring(name.indexOf(":") + 1, name.length()).toLowerCase();
+
+            Object entry = registry.getObject(key);
+            if (entry instanceof Item)
             {
-                String name = (String) obj;
-                String modID = name.substring(0, name.indexOf(":"));
-                name = name.substring(name.indexOf(":") + 1, name.length()).toLowerCase();
+                Item item = (Item) entry;
 
-                Object entry = registry.getObject(obj);
-                if (entry instanceof Item)
+                //Map items to mod name
+                List<Item> items = MOD_TO_ITEMS.get(modID);
+                if (items == null)
                 {
-                    Item item = (Item) entry;
+                    items = new ArrayList();
+                }
+                items.add(item);
+                MOD_TO_ITEMS.put(modID, items);
 
-                    //Map items to mod name
-                    List<Item> items = MOD_TO_ITEMS.get(modID);
-                    if (items == null)
+                //Map item name to item
+                Object nameEntry = NAME_TO_ITEM.get(name);
+                if (nameEntry != null)
+                {
+                    if (nameEntry instanceof Item)
                     {
-                        items = new ArrayList();
+                        List<Item> list = new ArrayList();
+                        list.add(item);
+                        list.add((Item) nameEntry);
+                        NAME_TO_ITEM.put(name, list);
                     }
-                    items.add(item);
-                    MOD_TO_ITEMS.put(modID, items);
-
-                    //Map item name to item
-                    Object nameEntry = NAME_TO_ITEM.get(name);
-                    if (nameEntry != null)
+                    else if (nameEntry instanceof List)
                     {
-                        if (nameEntry instanceof Item)
-                        {
-                            List<Item> list = new ArrayList();
-                            list.add(item);
-                            list.add((Item) nameEntry);
-                            NAME_TO_ITEM.put(name, list);
-                        }
-                        else if (nameEntry instanceof List)
-                        {
-                            ((List) nameEntry).add(item);
-                            NAME_TO_ITEM.put(name, nameEntry);
-                        }
+                        ((List) nameEntry).add(item);
+                        NAME_TO_ITEM.put(name, nameEntry);
                     }
-                    else
-                    {
-                        NAME_TO_ITEM.put(name, item);
-                    }
+                }
+                else
+                {
+                    NAME_TO_ITEM.put(name, item);
                 }
             }
         }
@@ -150,10 +147,11 @@ public class InventoryUtility
      */
     public static Item getItem(String name)
     {
-        FMLControlledNamespacedRegistry<Item> registry = (FMLControlledNamespacedRegistry<Item>) Item.itemRegistry;
-        if (Item.itemRegistry.containsKey(name))
+        ResourceLocation location = new ResourceLocation(name);
+        RegistryNamespaced<ResourceLocation, Item> registry = Item.REGISTRY;
+        if (registry.containsKey(location))
         {
-            return registry.getObject(name);
+            return registry.getObject(location);
         }
         return null;
     }
@@ -187,7 +185,7 @@ public class InventoryUtility
     /**
      * Gets the item by name as an ItemStack
      * <p>
-     * Attempts to use the {@link GameData#customItemStacks} to
+     * Attempts to use the custom data to
      * get the item first. This way any NBT data or other params
      * can be copied to the stack.
      * <p>
@@ -248,7 +246,7 @@ public class InventoryUtility
         }
         if (is != null)
         {
-            is.stackSize = 1;
+            is.setCount(1);
         }
         return is;
     }
@@ -264,16 +262,18 @@ public class InventoryUtility
         ITEMSTACK_TO_RECIPES.clear();
         ITEM_TO_RECIPES.clear();
 
+        RegistryNamespaced<ResourceLocation, IRecipe> registry = CraftingManager.REGISTRY;
         Engine.logger().info("Mapping basic recipe data...");
-        Engine.logger().info("   " + CraftingManager.getInstance().getRecipeList().size() + " recipes detected.");
+        Engine.logger().info("   " + registry.getKeys().size() + " recipes detected.");
 
         long time = System.nanoTime();
 
-        for (Object r : CraftingManager.getInstance().getRecipeList())
+        for (ResourceLocation key : registry.getKeys())
         {
-            if (r instanceof IRecipe && ((IRecipe) r).getRecipeOutput() != null)
+            IRecipe recipe = registry.getObject(key);
+            if (recipe != null && recipe.getRecipeOutput() != null)
             {
-                ItemStackWrapper wrapper = new ItemStackWrapper(((IRecipe) r).getRecipeOutput());
+                ItemStackWrapper wrapper = new ItemStackWrapper(recipe.getRecipeOutput());
 
                 //Update stack recipe list
                 List<IRecipe> list = ITEMSTACK_TO_RECIPES.get(wrapper);
@@ -281,17 +281,17 @@ public class InventoryUtility
                 {
                     list = new ArrayList();
                 }
-                list.add((IRecipe) r);
+                list.add(recipe);
                 ITEMSTACK_TO_RECIPES.put(wrapper, list);
 
                 //Update item recipe list
-                Item item = ((IRecipe) r).getRecipeOutput().getItem();
+                Item item = recipe.getRecipeOutput().getItem();
                 list = ITEM_TO_RECIPES.get(item);
                 if (list == null)
                 {
                     list = new ArrayList();
                 }
-                list.add((IRecipe) r);
+                list.add(recipe);
                 ITEM_TO_RECIPES.put(item, list);
             }
         }
@@ -370,7 +370,7 @@ public class InventoryUtility
     public static ItemStack copyStack(ItemStack stack, int stackSize)
     {
         ItemStack stack1 = stack.copy();
-        stack1.stackSize = stackSize;
+        stack1.setCount(stackSize);
         return stack1;
     }
 
@@ -403,25 +403,25 @@ public class InventoryUtility
                     inventory.setInventorySlotContents(slot, toInsert);
                     return null;
                 }
-                else if (slot_stack.isItemEqual(toInsert) && slot_stack.stackSize < slot_stack.getMaxStackSize())
+                else if (slot_stack.isItemEqual(toInsert) && slot_stack.getCount() < slot_stack.getMaxStackSize())
                 {
-                    if (slot_stack.stackSize + toInsert.stackSize <= slot_stack.getMaxStackSize())
+                    if (slot_stack.getCount() + toInsert.getCount() <= slot_stack.getMaxStackSize())
                     {
                         ItemStack toSet = toInsert.copy();
-                        toSet.stackSize += slot_stack.stackSize;
+                        toSet.setCount(toSet.getCount() + slot_stack.getCount());
 
                         inventory.setInventorySlotContents(slot, toSet);
                         return null;
                     }
                     else
                     {
-                        int rejects = (slot_stack.stackSize + toInsert.stackSize) - slot_stack.getMaxStackSize();
+                        int rejects = (slot_stack.getCount() + toInsert.getCount()) - slot_stack.getMaxStackSize();
 
                         ItemStack toSet = toInsert.copy();
-                        toSet.stackSize = slot_stack.getMaxStackSize();
+                        toSet.setCount(slot_stack.getMaxStackSize());
 
                         ItemStack remains = toInsert.copy();
-                        remains.stackSize = rejects;
+                        remains.setCount(rejects);
 
                         inventory.setInventorySlotContents(slot, toSet);
 
@@ -443,7 +443,7 @@ public class InventoryUtility
      * @param force    - overrides {@link IInventory#isItemValidForSlot(int, ItemStack)} check
      * @return what is left of the toInsert stack
      */
-    public static ItemStack insertStack(Location position, ItemStack toInsert, int side, boolean force)
+    public static ItemStack insertStack(Location position, ItemStack toInsert, EnumFacing side, boolean force)
     {
         return insertStack(position.getTileEntity(), toInsert, side, force);
     }
@@ -458,7 +458,7 @@ public class InventoryUtility
      * @param force    - overrides {@link IInventory#isItemValidForSlot(int, ItemStack)} check
      * @return what is left of the toInsert stack
      */
-    public static ItemStack insertStack(TileEntity tile, ItemStack toInsert, int side, boolean force)
+    public static ItemStack insertStack(TileEntity tile, ItemStack toInsert, EnumFacing side, boolean force)
     {
         if (tile instanceof IInventory)
         {
@@ -476,7 +476,7 @@ public class InventoryUtility
      * @param side
      * @return
      */
-    public static ItemStack pullStack(Location position, int count, int side)
+    public static ItemStack pullStack(Location position, int count, EnumFacing side)
     {
         return pullStack(position.getTileEntity(), count, side);
     }
@@ -489,11 +489,11 @@ public class InventoryUtility
      * @param side
      * @return
      */
-    public static ItemStack pullStack(TileEntity tile, int count, int side)
+    public static ItemStack pullStack(TileEntity tile, int count, EnumFacing side)
     {
         if (tile instanceof IInventory)
         {
-            return takeTopItemFromInventory(checkChestInv((IInventory) tile), count, side);
+            return takeTopItemFromInventory(checkChestInv((IInventory) tile), side, count);
         }
         return null;
     }
@@ -508,7 +508,7 @@ public class InventoryUtility
      * @param force-    overrides {@link IInventory#isItemValidForSlot(int, ItemStack)} check
      * @return what is left of the toInsert stack
      */
-    public static ItemStack putStackInInventory(IInventory inventory, ItemStack itemStack, int side, boolean force)
+    public static ItemStack putStackInInventory(IInventory inventory, ItemStack itemStack, EnumFacing side, boolean force)
     {
         ItemStack toInsert = itemStack != null ? itemStack.copy() : null;
         if (toInsert != null)
@@ -520,7 +520,7 @@ public class InventoryUtility
             else
             {
                 ISidedInventory sidedInventory = (ISidedInventory) inventory;
-                int[] slots = sidedInventory.getAccessibleSlotsFromSide(side);
+                int[] slots = sidedInventory.getSlotsForFace(side);
 
                 if (slots != null && slots.length != 0)
                 {
@@ -537,25 +537,25 @@ public class InventoryUtility
                                 inventory.setInventorySlotContents(slotID, toInsert);
                                 return null;
                             }
-                            else if (inSlot.isItemEqual(toInsert) && inSlot.stackSize < inSlot.getMaxStackSize())
+                            else if (inSlot.isItemEqual(toInsert) && inSlot.getCount() < inSlot.getMaxStackSize())
                             {
-                                if (inSlot.stackSize + toInsert.stackSize <= inSlot.getMaxStackSize())
+                                if (inSlot.getCount() + toInsert.getCount() <= inSlot.getMaxStackSize())
                                 {
                                     ItemStack toSet = toInsert.copy();
-                                    toSet.stackSize += inSlot.stackSize;
+                                    toSet.setCount(toSet.getCount() + inSlot.getCount());
 
                                     inventory.setInventorySlotContents(slotID, toSet);
                                     return null;
                                 }
                                 else
                                 {
-                                    int rejects = (inSlot.stackSize + toInsert.stackSize) - inSlot.getMaxStackSize();
+                                    int rejects = (inSlot.getCount() + toInsert.getCount()) - inSlot.getMaxStackSize();
 
                                     ItemStack toSet = toInsert.copy();
-                                    toSet.stackSize = inSlot.getMaxStackSize();
+                                    toSet.setCount(inSlot.getMaxStackSize());
 
                                     ItemStack remains = toInsert.copy();
-                                    remains.stackSize = rejects;
+                                    remains.setCount(rejects);
 
                                     inventory.setInventorySlotContents(slotID, toSet);
 
@@ -601,25 +601,25 @@ public class InventoryUtility
                         inventory.setInventorySlotContents(slotID, toInsert);
                         return null;
                     }
-                    else if (stacksMatch(inSlot, toInsert) && inSlot.stackSize < inSlot.getMaxStackSize())
+                    else if (stacksMatch(inSlot, toInsert) && inSlot.getCount() < inSlot.getMaxStackSize())
                     {
-                        if (inSlot.stackSize + toInsert.stackSize <= inSlot.getMaxStackSize())
+                        if (inSlot.getCount() + toInsert.getCount() <= inSlot.getMaxStackSize())
                         {
                             ItemStack toSet = toInsert.copy();
-                            toSet.stackSize += inSlot.stackSize;
+                            toSet.setCount(toSet.getCount() + inSlot.getCount());
 
                             inventory.setInventorySlotContents(slotID, toSet);
                             return null;
                         }
                         else
                         {
-                            int rejects = (inSlot.stackSize + toInsert.stackSize) - inSlot.getMaxStackSize();
+                            int rejects = (inSlot.getCount() + toInsert.getCount()) - inSlot.getMaxStackSize();
 
                             ItemStack toSet = toInsert.copy();
-                            toSet.stackSize = inSlot.getMaxStackSize();
+                            toSet.setCount(inSlot.getMaxStackSize());
 
                             ItemStack remains = toInsert.copy();
-                            remains.stackSize = rejects;
+                            remains.setCount(rejects);
 
                             inventory.setInventorySlotContents(slotID, toSet);
 
@@ -633,7 +633,7 @@ public class InventoryUtility
     }
 
 
-    public static ItemStack takeTopItemFromInventory(IInventory inventory, int side)
+    public static ItemStack takeTopItemFromInventory(IInventory inventory, EnumFacing side)
     {
         return takeTopItemFromInventory(inventory, side, 1);
     }
@@ -646,12 +646,12 @@ public class InventoryUtility
      * @param stackSize - stack size limit to pull, -1 will be maxx
      * @return item or null if none found
      */
-    public static ItemStack takeTopItemFromInventory(IInventory inventory, int side, int stackSize)
+    public static ItemStack takeTopItemFromInventory(IInventory inventory, EnumFacing side, int stackSize)
     {
         final Pair<ItemStack, Integer> result = findFirstItemInInventory(inventory, side, stackSize);
         if (result != null)
         {
-            inventory.decrStackSize(result.right(), result.left().stackSize);
+            inventory.decrStackSize(result.right(), result.left().getCount());
             return result.left();
         }
         return null;
@@ -667,7 +667,7 @@ public class InventoryUtility
      * @param stackSize - amount to remove
      * @return pair containing the removed stack, and item
      */
-    public static Pair<ItemStack, Integer> findFirstItemInInventory(IInventory inventory, int side, int stackSize)
+    public static Pair<ItemStack, Integer> findFirstItemInInventory(IInventory inventory, EnumFacing side, int stackSize)
     {
         return findFirstItemInInventory(inventory, side, stackSize, null);
     }
@@ -683,7 +683,7 @@ public class InventoryUtility
      */
     public static Pair<ItemStack, Integer> findFirstItemInInventory(IInventory inventory, int stackSize)
     {
-        return findFirstItemInInventory(inventory, -1, stackSize);
+        return findFirstItemInInventory(inventory, null, stackSize);
     }
 
     /**
@@ -698,9 +698,9 @@ public class InventoryUtility
      * @param stackSize - amount to remove
      * @return pair containing the removed stack, and item
      */
-    public static Pair<ItemStack, Integer> findFirstItemInInventory(IInventory inventory, int side, int stackSize, IInventoryFilter filter)
+    public static Pair<ItemStack, Integer> findFirstItemInInventory(IInventory inventory, EnumFacing side, int stackSize, IInventoryFilter filter)
     {
-        if (!(inventory instanceof ISidedInventory) || side == -1 || side > 5)
+        if (!(inventory instanceof ISidedInventory) || side == null)
         {
             for (int i = inventory.getSizeInventory() - 1; i >= 0; i--)
             {
@@ -708,10 +708,10 @@ public class InventoryUtility
                 if (slotStack != null && (filter == null || filter.isStackInFilter(slotStack)))
                 {
                     int amountToTake = stackSize <= 0 ? slotStack.getMaxStackSize() : Math.min(stackSize, slotStack.getMaxStackSize());
-                    amountToTake = Math.min(amountToTake, slotStack.stackSize);
+                    amountToTake = Math.min(amountToTake, slotStack.getCount());
 
                     ItemStack toSend = slotStack.copy();
-                    toSend.stackSize = amountToTake;
+                    toSend.setCount(amountToTake);
                     //inventory.decrStackSize(i, amountToTake);
                     return new Pair(toSend, i);
                 }
@@ -720,7 +720,7 @@ public class InventoryUtility
         else
         {
             ISidedInventory sidedInventory = (ISidedInventory) inventory;
-            int[] slots = sidedInventory.getAccessibleSlotsFromSide(side);
+            int[] slots = sidedInventory.getSlotsForFace(side);
 
             if (slots != null)
             {
@@ -731,10 +731,10 @@ public class InventoryUtility
                     if (slotStack != null && (filter == null || filter.isStackInFilter(slotStack)))
                     {
                         int amountToTake = stackSize <= 0 ? slotStack.getMaxStackSize() : Math.min(stackSize, slotStack.getMaxStackSize());
-                        amountToTake = Math.min(amountToTake, slotStack.stackSize);
+                        amountToTake = Math.min(amountToTake, slotStack.getCount());
 
                         ItemStack toSend = slotStack.copy();
-                        toSend.stackSize = amountToTake;
+                        toSend.setCount(amountToTake);
 
                         if (sidedInventory.canExtractItem(slotID, toSend, side))
                         {
@@ -748,7 +748,7 @@ public class InventoryUtility
         return null;
     }
 
-    public static ItemStack takeTopBlockFromInventory(IInventory inventory, int side)
+    public static ItemStack takeTopBlockFromInventory(IInventory inventory, EnumFacing side)
     {
         if (!(inventory instanceof ISidedInventory))
         {
@@ -757,7 +757,7 @@ public class InventoryUtility
                 if (inventory.getStackInSlot(i) != null && inventory.getStackInSlot(i).getItem() instanceof ItemBlock)
                 {
                     ItemStack toSend = inventory.getStackInSlot(i).copy();
-                    toSend.stackSize = 1;
+                    toSend.setCount(1);
 
                     inventory.decrStackSize(i, 1);
 
@@ -768,7 +768,7 @@ public class InventoryUtility
         else
         {
             ISidedInventory sidedInventory = (ISidedInventory) inventory;
-            int[] slots = sidedInventory.getAccessibleSlotsFromSide(side);
+            int[] slots = sidedInventory.getSlotsForFace(side);
 
             if (slots != null)
             {
@@ -779,7 +779,7 @@ public class InventoryUtility
                     if (sidedInventory.getStackInSlot(slotID) != null && inventory.getStackInSlot(slotID).getItem() instanceof ItemBlock)
                     {
                         ItemStack toSend = sidedInventory.getStackInSlot(slotID);
-                        toSend.stackSize = 1;
+                        toSend.setCount(1);
 
                         if (sidedInventory.canExtractItem(slotID, toSend, side))
                         {
@@ -797,17 +797,17 @@ public class InventoryUtility
 
     public static List<EntityItem> dropBlockAsItem(IWorldPosition position)
     {
-        return dropBlockAsItem(position.oldWorld(), position.xi(), position.yi(), position.zi(), false);
+        return dropBlockAsItem(position, false);
     }
 
     public static List<EntityItem> dropBlockAsItem(IWorldPosition position, boolean destroy)
     {
-        return dropBlockAsItem(position.oldWorld(), position.xi(), position.yi(), position.zi(), destroy);
+        return dropBlockAsItem(position.oldWorld(), new BlockPos(position.xi(), position.yi(), position.zi()), destroy);
     }
 
     public static List<EntityItem> dropBlockAsItem(World world, Pos position)
     {
-        return dropBlockAsItem(world, position.xi(), position.yi(), position.zi(), false);
+        return dropBlockAsItem(world, position.toBlockPos(), false);
     }
 
     /**
@@ -815,26 +815,23 @@ public class InventoryUtility
      * and can fail if the block doesn't contain items.
      *
      * @param world
-     * @param x
-     * @param y
-     * @param z
+     * @param pos
      * @param destroy - will break the block
      */
-    public static List<EntityItem> dropBlockAsItem(World world, int x, int y, int z, boolean destroy)
+    public static List<EntityItem> dropBlockAsItem(World world, BlockPos pos, boolean destroy)
     {
         List<EntityItem> entities = new ArrayList();
         if (!world.isRemote)
         {
-            Block block = world.getBlock(x, y, z);
+            IBlockState state = world.getBlockState(pos);
 
-            int meta = world.getBlockMetadata(x, y, z);
-            if (block != null)
+            if (state != null && state.getBlock() != Blocks.AIR)
             {
-                ArrayList<ItemStack> items = block.getDrops(world, x, y, z, meta, 0);
+                List<ItemStack> items = state.getBlock().getDrops(world, pos, state, 0);
 
                 for (ItemStack itemStack : items)
                 {
-                    EntityItem entityItem = dropItemStack(world, new Pos(x, y, z), itemStack, 10);
+                    EntityItem entityItem = dropItemStack(world, new Pos(pos), itemStack, 10);
                     if (entityItem != null)
                     {
                         entities.add(entityItem);
@@ -843,7 +840,7 @@ public class InventoryUtility
             }
             if (destroy)
             {
-                world.setBlockToAir(x, y, z);
+                world.setBlockToAir(pos);
             }
         }
         return entities;
@@ -900,57 +897,14 @@ public class InventoryUtility
 
             if (itemStack.hasTagCompound())
             {
-                entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemStack.getTagCompound().copy());
+                entityitem.getItem().setTagCompound(itemStack.getTagCompound().copy());
             }
 
-            entityitem.delayBeforeCanPickup = delay;
-            world.spawnEntityInWorld(entityitem);
+            entityitem.setPickupDelay(delay);
+            world.spawnEntity(entityitem);
             return entityitem;
         }
         return null;
-    }
-
-    /**
-     * Tries to place the item stack into the world as a block.
-     *
-     * @param world     - world
-     * @param x         - the x-Coordinate of desired placement
-     * @param y         - the y-Coordinate of desired placement
-     * @param z         - the z-Coordinate of desired placement
-     * @param itemStack - itemStack, should be an ItemBlock or something that can be placed
-     * @param side      - the side we are trying to place on within this block space.
-     * @return true if the block was created from the item, or other words placed into the world. If
-     * the stack is null, if its not valid, or there is no room it returns false.
-     */
-    public static boolean placeItemBlock(World world, int x, int y, int z, ItemStack itemStack, int side)
-    {
-        //TODO implement support for micro blocks
-        if (itemStack != null)
-        {
-            try
-            {
-                Pos rightClickPos = new Pos(x, y, z);
-
-                if (world.isAirBlock(x, y, z))
-                {
-                    rightClickPos.add(ForgeDirection.getOrientation(side));
-                }
-
-                side ^= 1;
-                return DummyPlayer.useItemAt(itemStack, world, x, y - 1, z, side);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-
-                if (world.getBlock(x, y, z) == ((ItemBlock) itemStack.getItem()).field_150939_a)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -965,15 +919,15 @@ public class InventoryUtility
         if (stack != null)
         {
             ItemStack itemStack = stack.copy();
-            if (itemStack.stackSize <= amount)
+            if (itemStack.getCount() <= amount)
             {
                 return null;
             }
             else
             {
-                itemStack.stackSize -= amount;
+                itemStack.setCount(itemStack.getCount() - amount);
 
-                if (itemStack.stackSize <= 0)
+                if (itemStack.getCount() <= 0)
                 {
                     return null;
                 }
@@ -1001,7 +955,7 @@ public class InventoryUtility
                 stack = stack.copy();
                 if (stack.getItem().hasContainerItem(stack))
                 {
-                    if (stack.stackSize == 1)
+                    if (stack.getCount() == 1)
                     {
                         stack = stack.getItem().getContainerItem(stack);
                     }
@@ -1012,7 +966,7 @@ public class InventoryUtility
                 }
                 else
                 {
-                    if (stack.stackSize == 1)
+                    if (stack.getCount() == 1)
                     {
                         stack = null;
                     }
@@ -1027,42 +981,13 @@ public class InventoryUtility
     }
 
     /**
-     * Consumes the item in hand and then returns an empty bucket. Assumes that you
-     * have already checked the item is a bucket. As well that the return of the bucket
-     * is an empty bucket. If the item is not a bucket and doesn't return a bucket don't
-     * use this method. Instead use #consumeHeldItem()
-     *
-     * @param player
-     */
-    public static void consumeBucketInHand(EntityPlayer player)
-    {
-        if (!player.capabilities.isCreativeMode)
-        {
-            ItemStack bucket = new ItemStack(Items.bucket);
-            if (player.getHeldItem().stackSize == 1)
-            {
-                player.inventory.mainInventory[player.inventory.currentItem] = bucket;
-            }
-            else if (player.getHeldItem().stackSize > 1)
-            {
-                player.getHeldItem().stackSize--;
-                if (!player.inventory.addItemStackToInventory(bucket))
-                {
-                    InventoryUtility.dropItemStack(new Location(player), bucket);
-                }
-            }
-            player.inventoryContainer.detectAndSendChanges();
-        }
-    }
-
-    /**
      * Called to consume an ItemStack in a way that is mod supported. This mainly just allows fluid
      * items to return empty versions. For example a lava bucket will be consumed turned into an
      * empty bucket.
      */
     public static ItemStack consumeStack(ItemStack stack)
     {
-        if (stack.stackSize == 1)
+        if (stack.getCount() == 1)
         {
             if (stack.getItem().hasContainerItem(stack))
             {
@@ -1087,7 +1012,7 @@ public class InventoryUtility
     {
         if (stackA != null && stackB != null)
         {
-            return stackA.isItemEqual(stackB) && doesStackNBTMatch(stackA, stackB) && stackA.stackSize == stackB.stackSize;
+            return stackA.isItemEqual(stackB) && doesStackNBTMatch(stackA, stackB) && stackA.getCount() == stackB.getCount();
         }
         return stackA == null && stackB == null;
     }
@@ -1195,7 +1120,7 @@ public class InventoryUtility
                 {
                     if (inv.getStackInSlot(slot) != null && inv.getStackInSlot(slot).isItemEqual(stack))
                     {
-                        count += inv.getStackInSlot(slot).stackSize;
+                        count += inv.getStackInSlot(slot).getCount();
                     }
                 }
             }
@@ -1231,7 +1156,7 @@ public class InventoryUtility
                 {
                     if (inv.getStackInSlot(slot) != null && compare.isInstance(inv.getStackInSlot(slot).getItem()))
                     {
-                        count += inv.getStackInSlot(slot).stackSize;
+                        count += inv.getStackInSlot(slot).getCount();
                     }
                 }
             }
@@ -1243,18 +1168,18 @@ public class InventoryUtility
     public static ArrayList getAllItemsInPlayerInventory(EntityPlayer entity)
     {
         ArrayList<ItemStack> itemsToDrop = new ArrayList();
-        for (int slot = 0; slot < entity.inventory.mainInventory.length; slot++)
+        for (int slot = 0; slot < entity.inventory.mainInventory.size(); slot++)
         {
-            if (entity.inventory.mainInventory[slot] != null)
+            if (entity.inventory.mainInventory.get(slot) != null)
             {
-                itemsToDrop.add(entity.inventory.mainInventory[slot]);
+                itemsToDrop.add(entity.inventory.mainInventory.get(slot));
             }
         }
-        for (int slot = 0; slot < entity.inventory.armorInventory.length; slot++)
+        for (int slot = 0; slot < entity.inventory.armorInventory.size(); slot++)
         {
-            if (entity.inventory.armorInventory[slot] != null)
+            if (entity.inventory.armorInventory.get(slot) != null)
             {
-                itemsToDrop.add(entity.inventory.armorInventory[slot]);
+                itemsToDrop.add(entity.inventory.armorInventory.get(slot));
             }
         }
         return itemsToDrop;
@@ -1270,9 +1195,9 @@ public class InventoryUtility
      * @param slot   - slot ID to access
      * @return true if something happened false if nothing happened.
      */
-    public static boolean handleSlot(EntityPlayer player, IInventory inv, int slot)
+    public static boolean handleSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot)
     {
-        return handleSlot(player, inv, slot, -1);
+        return handleSlot(player, inv, hand, slot, -1);
     }
 
     /**
@@ -1285,13 +1210,13 @@ public class InventoryUtility
      * @param slot   - slot ID to access
      * @return true if something happened false if nothing happened.
      */
-    public static boolean handleSlot(EntityPlayer player, IInventory inv, int slot, int items)
+    public static boolean handleSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot, int items)
     {
         if (player != null && inv != null && slot >= 0 && slot < inv.getSizeInventory())
         {
-            if (!addItemToSlot(player, inv, slot, items))
+            if (!addItemToSlot(player, inv, hand, slot, items))
             {
-                return removeItemFromSlot(player, inv, slot, items);
+                return removeItemFromSlot(player, inv, hand, slot, items);
             }
         }
         return false;
@@ -1304,9 +1229,9 @@ public class InventoryUtility
      * @param slot   - slot to place the item into
      * @return true if the item was added, false if nothing happended
      */
-    public static boolean addItemToSlot(EntityPlayer player, IInventory inv, int slot)
+    public static boolean addItemToSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot)
     {
-        return addItemToSlot(player, inv, slot, -1);
+        return addItemToSlot(player, inv, hand, slot, -1);
     }
 
     /**
@@ -1316,32 +1241,32 @@ public class InventoryUtility
      * @param slot   - slot to place the item into
      * @return true if the item was added, false if nothing happended
      */
-    public static boolean addItemToSlot(EntityPlayer player, IInventory inv, int slot, int items)
+    public static boolean addItemToSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot, int items)
     {
         //Check if input is valid
-        if (player.getHeldItem() != null && inv.isItemValidForSlot(slot, player.getHeldItem()))
+        if (player.getHeldItem(hand) != null && inv.isItemValidForSlot(slot, player.getHeldItem(hand)))
         {
             //Only can add items if slot is empty or matches input
-            if (inv.getStackInSlot(slot) == null || stacksMatch(player.getHeldItem(), inv.getStackInSlot(slot)))
+            if (inv.getStackInSlot(slot) == null || stacksMatch(player.getHeldItem(hand), inv.getStackInSlot(slot)))
             {
                 //Find out how much space we have left
-                int roomLeftInSlot = roomLeftInSlotForStack(inv, player.getHeldItem(), slot);
+                int roomLeftInSlot = roomLeftInSlotForStack(inv, player.getHeldItem(hand), slot);
                 //Find out how many items to add to slot
-                int itemsToAdd = Math.min(roomLeftInSlot, Math.min(player.getHeldItem().stackSize, items == -1 ? roomLeftInSlot : items));
+                int itemsToAdd = Math.min(roomLeftInSlot, Math.min(player.getHeldItem(hand).getCount(), items == -1 ? roomLeftInSlot : items));
                 //Add items already in slot since we are going to set the slot
                 if (inv.getStackInSlot(slot) != null)
                 {
-                    itemsToAdd += inv.getStackInSlot(slot).stackSize;
+                    itemsToAdd += inv.getStackInSlot(slot).getCount();
                 }
 
-                inv.setInventorySlotContents(slot, player.getHeldItem().copy());
-                inv.getStackInSlot(slot).stackSize = itemsToAdd;
+                inv.setInventorySlotContents(slot, player.getHeldItem(hand).copy());
+                inv.getStackInSlot(slot).setCount(itemsToAdd);
 
                 //Ignore creative mode
                 if (!player.capabilities.isCreativeMode)
                 {
-                    player.getHeldItem().stackSize -= itemsToAdd;
-                    if (player.getHeldItem().stackSize <= 0)
+                    player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() - itemsToAdd);
+                    if (player.getHeldItem(hand).getCount() <= 0)
                     {
                         player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
                     }
@@ -1365,7 +1290,7 @@ public class InventoryUtility
         if (inv.getStackInSlot(slot) != null)
         {
             int maxSpace = Math.min(inv.getStackInSlot(slot).getMaxStackSize(), inv.getInventoryStackLimit());
-            return maxSpace - inv.getStackInSlot(slot).stackSize;
+            return maxSpace - inv.getStackInSlot(slot).getCount();
         }
         return inv.getInventoryStackLimit();
     }
@@ -1378,7 +1303,7 @@ public class InventoryUtility
      */
     public static int roomLeftInStack(ItemStack stack)
     {
-        return stack.getMaxStackSize() - stack.stackSize;
+        return stack.getMaxStackSize() - stack.getCount();
     }
 
     /**
@@ -1394,7 +1319,7 @@ public class InventoryUtility
         int maxSpace = Math.min(stack.getMaxStackSize(), inv.getInventoryStackLimit());
         if (inv.getStackInSlot(slot) != null)
         {
-            return maxSpace - inv.getStackInSlot(slot).stackSize;
+            return maxSpace - inv.getStackInSlot(slot).getCount();
         }
         return maxSpace;
     }
@@ -1409,9 +1334,9 @@ public class InventoryUtility
      * @param player - player to check, can't be null
      * @return amount of room left
      */
-    public static int spaceInPlayersHand(EntityPlayer player)
+    public static int spaceInPlayersHand(EntityPlayer player, EnumHand hand)
     {
-        return player.getHeldItem() == null ? player.inventory.getInventoryStackLimit() : Math.min(player.inventory.getInventoryStackLimit(), player.getHeldItem().getMaxStackSize()) - player.getHeldItem().stackSize;
+        return player.getHeldItem(hand) == null ? player.inventory.getInventoryStackLimit() : Math.min(player.inventory.getInventoryStackLimit(), player.getHeldItem(hand).getMaxStackSize()) - player.getHeldItem(hand).getCount();
     }
 
     /**
@@ -1423,9 +1348,9 @@ public class InventoryUtility
      * @param slot   - slot being accessed
      * @return true if items were removed, false if nothing happened
      */
-    public static boolean removeItemFromSlot(EntityPlayer player, IInventory inv, int slot)
+    public static boolean removeItemFromSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot)
     {
-        return removeItemFromSlot(player, inv, slot, -1);
+        return removeItemFromSlot(player, inv, hand, slot, -1);
     }
 
     /**
@@ -1438,25 +1363,25 @@ public class InventoryUtility
      * @param items  - number of items being removed
      * @return true if items were removed, false if nothing happened
      */
-    public static boolean removeItemFromSlot(EntityPlayer player, IInventory inv, int slot, int items)
+    public static boolean removeItemFromSlot(EntityPlayer player, IInventory inv, EnumHand hand, int slot, int items)
     {
         if (inv.getStackInSlot(slot) != null && items >= -1 && items != 0)
         {
-            int spaceInHand = spaceInPlayersHand(player);
+            int spaceInHand = spaceInPlayersHand(player, hand);
             int itemsToMove = Math.min(Math.min(spaceInHand, inv.getStackInSlot(slot).getMaxStackSize()), items == -1 ? inv.getInventoryStackLimit() : items);
 
             //Create clone of slot stack, only not used in one use case
             ItemStack stack = inv.getStackInSlot(slot).copy();
-            stack.stackSize = itemsToMove;
+            stack.setCount(itemsToMove);
 
             //Moves items to player
-            if (player.getHeldItem() == null)
+            if (player.getHeldItem(hand) == null)
             {
                 player.inventory.setInventorySlotContents(player.inventory.currentItem, stack);
             }
             else if (spaceInHand > 0)
             {
-                player.getHeldItem().stackSize += itemsToMove;
+                player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() + itemsToMove);
             }
             else if (!player.inventory.addItemStackToInventory(stack))
             {
@@ -1464,13 +1389,13 @@ public class InventoryUtility
             }
 
             //Remove items from slot
-            if (itemsToMove >= inv.getStackInSlot(slot).stackSize)
+            if (itemsToMove >= inv.getStackInSlot(slot).getCount())
             {
                 inv.setInventorySlotContents(slot, null);
             }
             else
             {
-                inv.getStackInSlot(slot).stackSize -= itemsToMove;
+                inv.getStackInSlot(slot).setCount(player.getHeldItem(hand).getCount() + itemsToMove);
             }
 
             player.inventoryContainer.detectAndSendChanges();
@@ -1501,7 +1426,7 @@ public class InventoryUtility
                 if (stack != null && stack.getItem() instanceof ItemArmor)
                 {
                     final ItemArmor.ArmorMaterial mat = ((ItemArmor) stack.getItem()).getArmorMaterial();
-                    if (mat != ItemArmor.ArmorMaterial.CLOTH && mat != ItemArmor.ArmorMaterial.DIAMOND)
+                    if (mat != ItemArmor.ArmorMaterial.LEATHER && mat != ItemArmor.ArmorMaterial.DIAMOND)
                     {
                         c += 1;
                     }
@@ -1511,13 +1436,14 @@ public class InventoryUtility
         else if (entity instanceof EntityCreature)
         {
             //Armor is stored in slots 1 - 4, 0 is held item and is taken care of by EntityLivingBase check
-            for (int i = 1; i <= 4; i++)
+            Iterator<ItemStack> it = entity.getArmorInventoryList().iterator();
+            while (it.hasNext())
             {
-                final ItemStack stack = ((EntityCreature) entity).getEquipmentInSlot(i);
+                final ItemStack stack = it.next();
                 if (stack != null && stack.getItem() instanceof ItemArmor)
                 {
                     final ItemArmor.ArmorMaterial mat = ((ItemArmor) stack.getItem()).getArmorMaterial();
-                    if (mat != ItemArmor.ArmorMaterial.CLOTH && mat != ItemArmor.ArmorMaterial.DIAMOND)
+                    if (mat != ItemArmor.ArmorMaterial.LEATHER && mat != ItemArmor.ArmorMaterial.DIAMOND)
                     {
                         c += 1;
                     }
@@ -1525,32 +1451,47 @@ public class InventoryUtility
             }
         }
 
-        if (entity instanceof EntityLivingBase)
+        if(entity instanceof EntityLiving)
         {
-            if (((EntityLivingBase) entity).getHeldItem() != null)
+            if (isHeldItemMetal((EntityLiving) entity, EnumHand.MAIN_HAND))
             {
-                //TODO make a dictionary of material to item types
-                ItemStack held = ((EntityLivingBase) entity).getHeldItem();
-                Item heldItem = held.getItem();
-                if (heldItem instanceof ItemSword)
+                c += 1;
+            }
+            if (isHeldItemMetal((EntityLiving) entity, EnumHand.OFF_HAND))
+            {
+                c += 1;
+            }
+        }
+
+        return c;
+    }
+
+    public static boolean isHeldItemMetal(EntityLiving entity, EnumHand hand)
+    {
+        //TODO convert to cache\
+        if (entity.getHeldItem(hand) != null)
+        {
+            //TODO make a dictionary of material to item types
+            ItemStack held =  entity.getHeldItem(hand);
+            Item heldItem = held.getItem();
+            if (heldItem instanceof ItemSword)
+            {
+                String mat = ((ItemSword) heldItem).getToolMaterialName();
+                if (mat.equalsIgnoreCase("iron") || mat.equalsIgnoreCase("gold"))
                 {
-                    String mat = ((ItemSword) heldItem).getToolMaterialName();
-                    if (mat.equalsIgnoreCase("iron") || mat.equalsIgnoreCase("gold"))
-                    {
-                        c += 1;
-                    }
+                    return true;
                 }
-                else if (heldItem instanceof ItemTool)
+            }
+            else if (heldItem instanceof ItemTool)
+            {
+                String mat = ((ItemTool) heldItem).getToolMaterialName();
+                if (mat.equalsIgnoreCase("iron") || mat.equalsIgnoreCase("gold"))
                 {
-                    String mat = ((ItemTool) heldItem).getToolMaterialName();
-                    if (mat.equalsIgnoreCase("iron") || mat.equalsIgnoreCase("gold"))
-                    {
-                        c += 1;
-                    }
+                    return true;
                 }
             }
         }
-        return c;
+        return false;
     }
 
     /**

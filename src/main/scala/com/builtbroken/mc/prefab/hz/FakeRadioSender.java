@@ -52,7 +52,7 @@ public class FakeRadioSender implements IRadioWaveSender
     @Override
     public World oldWorld()
     {
-        return player.worldObj;
+        return player.world;
     }
 
     @Override
