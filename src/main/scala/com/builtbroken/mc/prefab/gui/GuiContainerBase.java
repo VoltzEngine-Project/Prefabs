@@ -10,6 +10,7 @@ import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.lib.render.RenderUtility;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
+import com.builtbroken.mc.prefab.gui.slot.ISlotRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -336,7 +337,17 @@ public class GuiContainerBase extends GuiContainer
     //TODO update and docs
     protected void drawSlot(Slot slot)
     {
-        drawSlot(slot.xDisplayPosition - 1, slot.yDisplayPosition - 1); //TODO get slot type from slot
+        drawSlot(slot.xDisplayPosition - 1, slot.yDisplayPosition - 1); //TODO add option to ISlotRender to disable default rendering
+
+        if (slot instanceof ISlotRender)
+        {
+            //Only draw slot background if empty
+            if (!slot.getHasStack())
+            {
+                ((ISlotRender) slot).renderSlotOverlay(this, this.containerWidth + slot.xDisplayPosition - 1, this.containerHeight + slot.yDisplayPosition - 1);
+            }
+            //TODO add foreground rendering for slot
+        }
         if (Engine.runningAsDev && renderSlotDebugIDs)
         {
             this.drawStringCentered("" + slot.getSlotIndex(), guiLeft + slot.xDisplayPosition + 9, guiTop + slot.yDisplayPosition + 9, Color.YELLOW);
