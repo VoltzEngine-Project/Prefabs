@@ -47,14 +47,13 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    public E setWidth(int width)
+    public void setWidth(int width)
     {
         super.setWidth(width);
         if (updatePositionLogic)
         {
             updatePositions();
         }
-        return (E) this;
     }
 
     @Override
@@ -71,13 +70,13 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
-        super.doRender(mc, mouseX, mouseY);
+        super.doRender(mc, mouseX, mouseY, partialTicks);
         for (GuiComponent component : getComponents())
         {
             GL11.glPushMatrix();
-            component.drawButton(mc, mouseX, mouseY);
+            component.drawButton(mc, mouseX, mouseY, partialTicks);
             GL11.glColor4f(1f, 1f, 1f, 1f);
             GL11.glPopMatrix();
         }
@@ -124,21 +123,21 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    public void func_146111_b(int mouseX, int mouseY)
+    public void mouseDragged(Minecraft mc, int mouseX, int mouseY)
     {
-        super.func_146111_b(mouseX, mouseY);
+        super.mouseDragged(mc, mouseX, mouseY);
         for (GuiComponent component : getComponents())
         {
-            component.func_146111_b(mouseX, mouseY);
+            component.mouseReleased(mouseX, mouseY);
         }
     }
 
     @Override
-    public void func_146113_a(SoundHandler handler)
+    public void playPressSound(SoundHandler handler)
     {
         for (GuiComponent component : getComponents())
         {
-            component.func_146113_a(handler);
+            component.playPressSound(handler);
         }
     }
 
@@ -198,8 +197,8 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
             int height = 0;
             for (GuiComponent component : getComponents())
             {
-                int sizeX = (component.x() - xPosition) + component.getWidth();
-                int sizeY = (component.y() - xPosition) + component.getHeight();
+                int sizeX = (component.x() - x) + component.getWidth();
+                int sizeY = (component.y() - x) + component.getHeight();
                 if (sizeX > width)
                 {
                     width = sizeX;

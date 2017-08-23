@@ -33,7 +33,7 @@ public class FakeRadioSender implements IRadioWaveSender
     {
         if (Engine.runningAsDev)
         {
-            //player.addChatComponentMessage(new ChatComponentText("Received message with header " + header + " on band " + hz + "hz with data " + data));
+            //player.addChatComponentMessage(new TextComponentString("Received message with header " + header + " on band " + hz + "hz with data " + data));
         }
     }
 

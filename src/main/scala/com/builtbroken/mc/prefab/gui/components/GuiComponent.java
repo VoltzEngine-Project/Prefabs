@@ -90,7 +90,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
             //Reset color to default
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             preRender(mc, mouseX, mouseY);
-            render(mc, mouseX, mouseY);
+            render(mc, mouseX, mouseY, partialTicks);
             postRender(mc, mouseX, mouseY);
             this.mouseDragged(mc, mouseX, mouseY);
         }
@@ -133,7 +133,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      * @param mouseX
      * @param mouseY
      */
-    protected void render(Minecraft mc, int mouseX, int mouseY)
+    protected void render(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         //Draw background
         mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
@@ -176,7 +176,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         //Main render code
         GL11.glColor4f(1, 1, 1, 1);
         mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
-        doRender(mc, mouseX, mouseY);
+        doRender(mc, mouseX, mouseY, partialTicks);
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      * @param mouseX
      * @param mouseY
      */
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
 
     }

@@ -3,10 +3,10 @@ package com.builtbroken.mc.prefab.entity.damage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.translation.I18n;
 
 /**
  * Extend this class to create more custom damage sources.
@@ -28,7 +28,7 @@ public abstract class DamageSourceAbstract extends DamageSource
 	}
 
 	@Override
-	public Entity getEntity()
+	public Entity getTrueSource()
 	{
 		return damageSource instanceof Entity ? ((Entity) damageSource) : null;
 	}
@@ -39,30 +39,30 @@ public abstract class DamageSourceAbstract extends DamageSource
 	}
 
 	@Override
-	public IChatComponent func_151519_b(EntityLivingBase victum)
+	public ITextComponent getDeathMessage(EntityLivingBase victum)
 	{
         //TODO JUnit test to see if this method outputs the correct data
-		EntityLivingBase attacker = victum.func_94060_bK();
+		EntityLivingBase attacker = victum.getAttackingEntity();
 		String deathTranslation = "death.attack." + this.damageType;
 		String playerKillTranslation = deathTranslation + ".player";
 		String machineKillTranslation = deathTranslation + ".machine";
 		if (damageSource instanceof TileEntity)
 		{
-			if (StatCollector.canTranslate(machineKillTranslation))
+			if (I18n.canTranslate(machineKillTranslation))
 			{
-				return new ChatComponentTranslation(machineKillTranslation, victum.func_145748_c_());
+				return new TextComponentTranslation(machineKillTranslation, victum.getDisplayName());
 			}
 		}
 		else if (attacker != null)
 		{
-			if (StatCollector.canTranslate(playerKillTranslation))
+			if (I18n.canTranslate(playerKillTranslation))
 			{
-				return new ChatComponentTranslation(playerKillTranslation, victum.func_145748_c_(), attacker.func_145748_c_());
+				return new TextComponentTranslation(playerKillTranslation, victum.getDisplayName(), attacker.getDisplayName());
 			}
 		}
-		else if (StatCollector.canTranslate(deathTranslation))
+		else if (I18n.canTranslate(deathTranslation))
 		{
-			return new ChatComponentTranslation(deathTranslation, victum.func_145748_c_());
+			return new TextComponentTranslation(deathTranslation, victum.getDisplayName());
 		}
 		return null;
 	}

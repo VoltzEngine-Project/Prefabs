@@ -2,15 +2,18 @@ package com.builtbroken.mc.prefab.entity;
 
 import com.builtbroken.mc.api.entity.IBullet;
 import com.builtbroken.mc.imp.transform.vector.Pos;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,15 +49,12 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
      * Damage source to do on impact
      */
     //TODO replace with method allowing more complex calculations
-    protected DamageSource impact_damageSource = DamageSource.anvil;
+    protected DamageSource impact_damageSource = DamageSource.ANVIL;
 
     //In ground data
-    public int xTile = -1;
-    public int yTile = -1;
-    public int zTile = -1;
-    public int sideTile = -1;
-    protected Block inBlockID;
-    protected int inData;
+    public BlockPos tilePos;
+    public EnumFacing sideTile = null;
+    protected IBlockState blockInside;
     protected boolean inGround;
 
     //Timers
@@ -64,7 +64,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     public EntityProjectile(World world)
     {
         super(world);
-        this.renderDistanceWeight = 10.0D;
+        //this.renderDistanceWeight = 10.0D;
         this.setSize(0.5F, 0.5F);
     }
 
@@ -73,7 +73,6 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         super(world);
         this.setPosition(x, y, z);
         this.sourceOfProjectile = new Pos(x, y, z);
-        this.yOffset = 0.0F;
     }
 
     public EntityProjectile(World world, EntityLivingBase shooter, EntityLivingBase target, float p_i1755_4_, float p_i1755_5_)
@@ -84,9 +83,9 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
 
         this.posY = shooter.posY + (double) shooter.getEyeHeight() - 0.10000000149011612D;
         double d0 = target.posX - shooter.posX;
-        double d1 = target.boundingBox.minY + (double) (target.height / 3.0F) - this.posY;
+        double d1 = target.getEntityBoundingBox().minY + (double) (target.height / 3.0F) - this.posY;
         double d2 = target.posZ - shooter.posZ;
-        double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
+        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
 
         if (d3 >= 1.0E-7D)
         {
@@ -95,7 +94,6 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
             double d4 = d0 / d3;
             double d5 = d2 / d3;
             this.setLocationAndAngles(shooter.posX + d4, this.posY, shooter.posZ + d5, f2, f3);
-            this.yOffset = 0.0F;
             float f4 = (float) d3 * 0.2F;
             this.setThrowableHeading(d0, d1 + (double) f4, d2, p_i1755_4_, p_i1755_5_);
         }
@@ -114,7 +112,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     public EntityProjectile(World world, double x, double y, double z, float yaw, float pitch, float f, float distanceScale)
     {
         super(world);
-        this.renderDistanceWeight = 10.0D;
+        //this.renderDistanceWeight = 10.0D;
         this.sourceOfProjectile = new Pos(x, y, z);
 
         this.setSize(0.5F, 0.5F);
@@ -123,7 +121,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         this.posY -= 0.10000000149011612D;
         this.posZ -= (double) (MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * 0.16F * distanceScale);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.yOffset = 0.0F;
+        //this.yOffset = 0.0F;
         this.motionX = (double) (-MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI));
         this.motionZ = (double) (MathHelper.cos(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI));
         this.motionY = (double) (-MathHelper.sin(this.rotationPitch / 180.0F * (float) Math.PI));
@@ -144,21 +142,21 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         //Update rotation to match motion
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
-            float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
             this.prevRotationYaw = this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
             this.prevRotationPitch = this.rotationPitch = (float) (Math.atan2(this.motionY, (double) f) * 180.0D / Math.PI);
         }
 
 
         //Get block we are face-palmed into
-        Block block = this.worldObj.getBlock(this.xTile, this.yTile, this.zTile);
+        IBlockState state = this.world.getBlockState(tilePos);
+        Block block = state.getBlock();
 
-        if (block.getMaterial() != Material.air)
+        if (state.getMaterial() != Material.AIR)
         {
-            block.setBlockBoundsBasedOnState(this.worldObj, this.xTile, this.yTile, this.zTile);
-            AxisAlignedBB axisalignedbb = block.getCollisionBoundingBoxFromPool(this.worldObj, this.xTile, this.yTile, this.zTile);
+            AxisAlignedBB axisalignedbb = state.getCollisionBoundingBox(this.world, tilePos);
 
-            if (axisalignedbb != null && axisalignedbb.isVecInside(Vec3.createVectorHelper(this.posX, this.posY, this.posZ)))
+            if (axisalignedbb != Block.NULL_AABB && axisalignedbb.offset(tilePos).contains(new Vec3d(this.posX, this.posY, this.posZ)))
             {
                 this.inGround = true;
             }
@@ -167,10 +165,8 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         //Handle stuck in ground
         if (this.inGround)
         {
-            int j = this.worldObj.getBlockMetadata(this.xTile, this.yTile, this.zTile);
-
             //TODO allow this to be disabled
-            if (block == this.inBlockID && j == this.inData)
+            if (state == blockInside)
             {
                 ++this.ticksInGround;
 
@@ -201,21 +197,21 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
             }
 
             //Do raytrace TODO move to prefab entity for reuse
-            Vec3 rayStart = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            Vec3 rayEnd = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-            MovingObjectPosition rayHit = this.worldObj.func_147447_a(rayStart, rayEnd, false, true, false);
+            Vec3d rayStart = new Vec3d(this.posX, this.posY, this.posZ);
+            Vec3d rayEnd = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            RayTraceResult rayHit = this.world.rayTraceBlocks(rayStart, rayEnd, false, true, false);
 
             //Reset data to do entity ray trace
-            rayStart = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-            rayEnd = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+            rayStart = new Vec3d(this.posX, this.posY, this.posZ);
+            rayEnd = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
             if (rayHit != null)
             {
-                rayEnd = Vec3.createVectorHelper(rayHit.hitVec.xCoord, rayHit.hitVec.yCoord, rayHit.hitVec.zCoord);
+                rayEnd = new Vec3d(rayHit.hitVec.x, rayHit.hitVec.y, rayHit.hitVec.z);
             }
 
             //Handle entity collision boxes
             Entity entity = null;
-            List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+            List list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().offset(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
             double distanceToHit = 0.0D;
             float hitBoxSizeScale;
 
@@ -226,8 +222,8 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
                 if (shouldCollideWith(checkEntity) && (checkEntity != this.shootingEntity || this.ticksInAir >= 5))
                 {
                     hitBoxSizeScale = 0.3F;
-                    AxisAlignedBB hitBox = checkEntity.boundingBox.expand((double) hitBoxSizeScale, (double) hitBoxSizeScale, (double) hitBoxSizeScale);
-                    MovingObjectPosition entityRayHit = hitBox.calculateIntercept(rayStart, rayEnd);
+                    AxisAlignedBB hitBox = checkEntity.getEntityBoundingBox().expand((double) hitBoxSizeScale, (double) hitBoxSizeScale, (double) hitBoxSizeScale);
+                    RayTraceResult entityRayHit = hitBox.calculateIntercept(rayStart, rayEnd);
 
                     if (entityRayHit != null)
                     {
@@ -245,13 +241,13 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
             //If we collided with an entity, set hit to entity
             if (entity != null)
             {
-                rayHit = new MovingObjectPosition(entity);
+                rayHit = new RayTraceResult(entity);
             }
 
-            if (rayHit != null && rayHit.typeOfHit != MovingObjectPosition.MovingObjectType.MISS)
+            if (rayHit != null && rayHit.typeOfHit != RayTraceResult.Type.MISS)
             {
                 //Handle entity hit
-                if (rayHit.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY)
+                if (rayHit.typeOfHit == RayTraceResult.Type.ENTITY)
                 {
                     handleEntityCollision(rayHit, rayHit.entityHit);
                 }
@@ -277,30 +273,27 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         return entity.canBeCollidedWith();
     }
 
-    protected void handleBlockCollision(MovingObjectPosition movingobjectposition)
+    protected void handleBlockCollision(RayTraceResult movingobjectposition)
     {
-        this.xTile = movingobjectposition.blockX;
-        this.yTile = movingobjectposition.blockY;
-        this.zTile = movingobjectposition.blockZ;
+        this.tilePos = movingobjectposition.getBlockPos();
         this.sideTile = movingobjectposition.sideHit;
 
-        this.inBlockID = this.worldObj.getBlock(this.xTile, this.yTile, this.zTile);
-        this.inData = this.worldObj.getBlockMetadata(this.xTile, this.yTile, this.zTile);
+        this.blockInside = this.world.getBlockState(tilePos);
 
-        this.motionX = (double) ((float) (movingobjectposition.hitVec.xCoord - this.posX));
-        this.motionY = (double) ((float) (movingobjectposition.hitVec.yCoord - this.posY));
-        this.motionZ = (double) ((float) (movingobjectposition.hitVec.zCoord - this.posZ));
+        this.motionX = (double) ((float) (movingobjectposition.hitVec.x - this.posX));
+        this.motionY = (double) ((float) (movingobjectposition.hitVec.y - this.posY));
+        this.motionZ = (double) ((float) (movingobjectposition.hitVec.z - this.posZ));
 
-        float velocity = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+        float velocity = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
         this.posX -= this.motionX / (double) velocity * 0.05000000074505806D;
         this.posY -= this.motionY / (double) velocity * 0.05000000074505806D;
         this.posZ -= this.motionZ / (double) velocity * 0.05000000074505806D;
         //TODO this.playSound("random.bowhit", 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
         this.inGround = true;
 
-        if (this.inBlockID.getMaterial() != Material.air)
+        if (this.blockInside != null && this.blockInside.getMaterial() != Material.AIR)
         {
-            this.inBlockID.onEntityCollidedWithBlock(this.worldObj, this.xTile, this.yTile, this.zTile, this);
+            this.blockInside.getBlock().onEntityCollidedWithBlock(this.world, tilePos, blockInside, this);
         }
         onImpactTile(movingobjectposition);
     }
@@ -320,7 +313,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
      *
      * @param hit - exact hit position
      */
-    protected void onImpactTile(MovingObjectPosition hit)
+    protected void onImpactTile(RayTraceResult hit)
     {
         onImpactTile();
     }
@@ -331,29 +324,29 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
      * @param movingobjectposition
      * @param entityHit
      */
-    protected void handleEntityCollision(MovingObjectPosition movingobjectposition, Entity entityHit)
+    protected void handleEntityCollision(RayTraceResult movingobjectposition, Entity entityHit)
     {
         onImpactEntity(entityHit, getSpeed(), movingobjectposition);
     }
 
 
-    protected void onImpactEntity(Entity entityHit, float velocity, MovingObjectPosition hit)
+    protected void onImpactEntity(Entity entityHit, float velocity, RayTraceResult hit)
     {
         onImpactEntity(entityHit, getSpeed());
     }
 
     protected void onImpactEntity(Entity entityHit, float velocity)
     {
-        if (!worldObj.isRemote)
+        if (!world.isRemote)
         {
-            int damage = MathHelper.ceiling_double_int((double) velocity * 2);
+            int damage = MathHelper.ceil((double) velocity * 2);
 
             //If entity takes damage add velocity to entity
             if (impact_damageSource != null && entityHit.attackEntityFrom(impact_damageSource, (float) damage))
             {
                 if (entityHit instanceof EntityLivingBase)
                 {
-                    float vel_horizontal = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                    float vel_horizontal = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
                     if (vel_horizontal > 0.0F)
                     {
                         entityHit.addVelocity(this.motionX * 0.6000000238418579D / (double) vel_horizontal, 0.1D, this.motionZ * 0.6000000238418579D / (double) vel_horizontal);
@@ -370,7 +363,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         this.posX += this.motionX;
         this.posY += this.motionY;
         this.posZ += this.motionZ;
-        float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        float f2 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
         this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
 
         for (this.rotationPitch = (float) (Math.atan2(this.motionY, (double) f2) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
@@ -401,8 +394,8 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         //Set position
         this.setPosition(this.posX, this.posY, this.posZ);
 
-        //Adjust for collision
-        this.func_145775_I();
+        //Adjust for collision      TODO check if works, rewrite code to prevent clip through of block
+        this.doBlockCollisions();
     }
 
     protected void decreaseMotion()
@@ -420,13 +413,13 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     public void setThrowableHeading(double xx, double yy, double zz, float multiplier, float random)
     {
         //Normalize
-        float velocity = MathHelper.sqrt_double(xx * xx + yy * yy + zz * zz);
+        float velocity = MathHelper.sqrt(xx * xx + yy * yy + zz * zz);
         xx /= (double) velocity;
         yy /= (double) velocity;
         zz /= (double) velocity;
 
         //Add randomization to make the arrow miss
-        if(random > 0)
+        if (random > 0)
         {
             xx += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) random;
             yy += this.rand.nextGaussian() * (double) (this.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) random;
@@ -444,7 +437,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         this.motionZ = zz;
 
         //Update rotation
-        float f3 = MathHelper.sqrt_double(xx * xx + zz * zz);
+        float f3 = MathHelper.sqrt(xx * xx + zz * zz);
         this.prevRotationYaw = this.rotationYaw = (float) (Math.atan2(xx, zz) * 180.0D / Math.PI);
         this.prevRotationPitch = this.rotationPitch = (float) (Math.atan2(yy, (double) f3) * 180.0D / Math.PI);
         this.ticksInGround = 0;
@@ -452,10 +445,10 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_)
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
-        this.setPosition(p_70056_1_, p_70056_3_, p_70056_5_);
-        this.setRotation(p_70056_7_, p_70056_8_);
+        this.setPosition(x, y, z);
+        this.setRotation(yaw, pitch);
     }
 
     @Override
@@ -468,7 +461,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
 
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
-            float f = MathHelper.sqrt_double(xx * xx + zz * zz);
+            float f = MathHelper.sqrt(xx * xx + zz * zz);
             this.prevRotationYaw = this.rotationYaw = (float) (Math.atan2(xx, zz) * 180.0D / Math.PI);
             this.prevRotationPitch = this.rotationPitch = (float) (Math.atan2(yy, (double) f) * 180.0D / Math.PI);
             this.prevRotationPitch = this.rotationPitch;
@@ -481,13 +474,20 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt)
     {
-        nbt.setShort("xTile", (short) this.xTile);
-        nbt.setShort("yTile", (short) this.yTile);
-        nbt.setShort("zTile", (short) this.zTile);
-        nbt.setShort("sideTile", (short) this.sideTile);
+        if (tilePos != null)
+        {
+            nbt.setInteger("xTilePos", this.tilePos.getX());
+            nbt.setInteger("yTilePos", this.tilePos.getY());
+            nbt.setInteger("zTilePos", this.tilePos.getZ());
+        }
+        nbt.setByte("sideTilePos", (byte) this.sideTile.ordinal());
+
+        if (blockInside != null)
+        {
+            nbt.setInteger("inTileState", Block.getStateId(blockInside));
+        }
+
         nbt.setShort("life", (short) this.ticksInGround);
-        nbt.setByte("inTile", (byte) Block.getIdFromBlock(this.inBlockID));
-        nbt.setByte("inData", (byte) this.inData);
         nbt.setByte("inGround", (byte) (this.inGround ? 1 : 0));
         if (sourceOfProjectile != null)
         {
@@ -502,13 +502,41 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     @Override
     public void readEntityFromNBT(NBTTagCompound nbt)
     {
-        this.xTile = nbt.getShort("xTile");
-        this.yTile = nbt.getShort("yTile");
-        this.zTile = nbt.getShort("zTile");
-        this.sideTile = nbt.getShort("sideTile");
+        if(nbt.hasKey("xTile"))
+        {
+            //Legacy
+            tilePos = new BlockPos(nbt.getShort("xTile"),nbt.getShort("yTile"),nbt.getShort("zTile"));
+        }
+        else if(nbt.hasKey("xTilePos"))
+        {
+            tilePos = new BlockPos(nbt.getInteger("xTilePos"),nbt.getInteger("yTilePos"),nbt.getInteger("zTilePos"));
+        }
+
+        if(nbt.hasKey("sideTile"))
+        {
+            //Legacy
+            this.sideTile = EnumFacing.getFront(nbt.getShort("sideTile"));
+        }
+        else
+        {
+            this.sideTile = EnumFacing.getFront(nbt.getByte("sideTilePos"));
+        }
         this.ticksInGround = nbt.getShort("life");
-        this.inBlockID = Block.getBlockById(nbt.getByte("inTile") & 255);
-        this.inData = nbt.getByte("inData") & 255;
+        if(nbt.hasKey("inTile"))
+        {
+            //Legacy
+            Block block = Block.getBlockById(nbt.getByte("inTile"));
+            if(block != null)
+            {
+                int meta = nbt.getByte("inData");
+                this.blockInside = block.getStateFromMeta(meta);
+            }
+        }
+        else if(nbt.hasKey("inTileState"))
+        {
+            this.blockInside = Block.getStateById(nbt.getInteger("inTileState"));
+        }
+
         this.inGround = nbt.getByte("inGround") == 1;
         if (nbt.hasKey("sourcePos"))
         {
@@ -522,19 +550,6 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
 
     @Override
     protected boolean canTriggerWalking()
-    {
-        return false;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public float getShadowSize()
-    {
-        return 0.0F;
-    }
-
-    @Override
-    public boolean canAttackWithItem()
     {
         return false;
     }

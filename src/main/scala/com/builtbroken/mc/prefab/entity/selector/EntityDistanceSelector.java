@@ -1,14 +1,13 @@
 package com.builtbroken.mc.prefab.entity.selector;
 
 import com.builtbroken.jlib.data.vector.IPos3D;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 
 /**
  * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
  * Created by Dark(DarkGuardsman, Robert) on 3/31/2016.
  */
-public class EntityDistanceSelector implements IEntitySelector
+public class EntityDistanceSelector extends EntitySelector
 {
     public final boolean damageable;
     public final double distance;
@@ -24,7 +23,7 @@ public class EntityDistanceSelector implements IEntitySelector
     @Override
     public boolean isEntityApplicable(Entity entity)
     {
-        if (!entity.isDead && (!damageable || !entity.isEntityInvulnerable()))
+        if (!entity.isDead)
         {
             return entity.getDistance(center.x(), center.y(), center.z()) <= distance;
         }

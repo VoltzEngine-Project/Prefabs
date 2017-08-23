@@ -27,7 +27,7 @@ public class EntityLivingSelector extends EntitySelector
     @Override
     public boolean isEntityApplicable(Entity entity)
     {
-        if (!entity.isDead && (ignore_can_damage || !entity.isEntityInvulnerable()))
+        if (!entity.isDead)
         {
             if (select_living_base && entity instanceof EntityLivingBase)
             {

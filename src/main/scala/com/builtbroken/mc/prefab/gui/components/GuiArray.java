@@ -70,7 +70,7 @@ public class GuiArray extends GuiComponentContainer<GuiArray>
             buttonEntries = new GuiComponent[entriesShown];
             for (int i = 0; i < buttonEntries.length; i++)
             {
-                buttonEntries[i] = add(callback.newEntry(i, i + 10, xPosition, yPosition));
+                buttonEntries[i] = add(callback.newEntry(i, i + 10, x, y));
                 //Set relative position so it auto updates
                 buttonEntries[i].setRelativePosition(new GuiRelativePos(this, 0, i * getEntryYSpacing()));
             }

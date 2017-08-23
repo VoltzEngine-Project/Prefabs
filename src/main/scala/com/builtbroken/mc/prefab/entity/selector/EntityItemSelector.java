@@ -57,13 +57,13 @@ public class EntityItemSelector extends EntitySelector
     @Override
     public boolean isEntityApplicable(Entity entity)
     {
-        if (entity instanceof EntityItem && ((EntityItem) entity).getEntityItem() != null)
+        if (entity instanceof EntityItem && ((EntityItem) entity).getItem() != null)
         {
             if (wrapper != null)
             {
-                return wrapper.equals(((EntityItem) entity).getEntityItem());
+                return wrapper.equals(((EntityItem) entity).getItem());
             }
-            return items == null || items.contains(new ItemStackWrapper(((EntityItem) entity).getEntityItem()));
+            return items == null || items.contains(new ItemStackWrapper(((EntityItem) entity).getItem()));
         }
         return false;
     }
