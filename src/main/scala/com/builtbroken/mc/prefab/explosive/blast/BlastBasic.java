@@ -11,6 +11,7 @@ import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.core.Engine;
+import com.builtbroken.mc.data.Direction;
 import com.builtbroken.mc.framework.explosive.blast.Blast;
 import com.builtbroken.mc.imp.transform.sorting.Vector3DistanceComparator;
 import com.builtbroken.mc.imp.transform.vector.Location;
@@ -26,7 +27,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
@@ -132,7 +132,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
      * @param side      - side not to expand in, and direction we came from
      * @param iteration - current iteration count from center, use this to stop the iteration if they get too far from center
      */
-    protected void expand(HashMap<IBlastEdit, Float> map, IBlastEdit vec, float energy, EnumFacing side, int iteration)
+    protected void expand(HashMap<IBlastEdit, Float> map, IBlastEdit vec, float energy, Direction side, int iteration)
     {
         //Keep track of iterations
         profile.tilesPathed++;
@@ -163,11 +163,11 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                     {
                         //Get valid sides to iterate threw
                         List<IBlastEdit> sides = new ArrayList();
-                        for (EnumFacing dir : EnumFacing.values())
+                        for (Direction dir : Direction.DIRECTIONS)
                         {
                             if (dir != side)
                             {
-                                IBlastEdit v = new BlockEdit(oldWorld, vec.x() + dir.getFrontOffsetX(), vec.y() + dir.getFrontOffsetY(), vec.z() + dir.getFrontOffsetZ());
+                                IBlastEdit v = new BlockEdit(oldWorld, vec, dir);
                                 v.doDrops();
                                 v.setBlastDirection(dir);
                                 v.logPrevBlock();
@@ -185,7 +185,7 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
                         {
                             float eToSpend = (energyLeft / sides.size()) + (energyLeft % sides.size());
                             energyLeft -= eToSpend;
-                            EnumFacing face = side == null ? getOpposite(editSides.getBlastDirection()) : side;
+                            Direction face = side == null ? getOpposite(editSides.getBlastDirection()) : side;
                             if (!map.containsKey(editSides) || map.get(editSides) < eToSpend)
                             {
                                 editSides.setBlastDirection(face);
@@ -199,24 +199,24 @@ public class BlastBasic<B extends BlastBasic> extends Blast<B>
     }
 
     //TODO move to helper class later, and PR into forge if its not already there
-    private EnumFacing getOpposite(EnumFacing face)
+    private Direction getOpposite(Direction face)
     {
         if (face != null)
         {
             switch (face)
             {
                 case UP:
-                    return EnumFacing.DOWN;
+                    return Direction.DOWN;
                 case DOWN:
-                    return EnumFacing.UP;
+                    return Direction.UP;
                 case NORTH:
-                    return EnumFacing.SOUTH;
+                    return Direction.SOUTH;
                 case SOUTH:
-                    return EnumFacing.NORTH;
+                    return Direction.NORTH;
                 case EAST:
-                    return EnumFacing.WEST;
+                    return Direction.WEST;
                 case WEST:
-                    return EnumFacing.EAST;
+                    return Direction.EAST;
                 default:
                     return null;
             }
