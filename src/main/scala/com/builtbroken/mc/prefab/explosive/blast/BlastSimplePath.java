@@ -6,11 +6,10 @@ import com.builtbroken.mc.api.explosive.IExplosiveDamageable;
 import com.builtbroken.mc.api.explosive.IExplosiveHandler;
 import com.builtbroken.mc.api.tile.node.ITileNodeHost;
 import com.builtbroken.mc.framework.explosive.blast.Blast;
-import com.builtbroken.mc.imp.transform.vector.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -68,9 +67,9 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
         else
         {
             //Temp fix to solve if center is an air block
-            for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
+            for (EnumFacing dir : EnumFacing.values())
             {
-                BlockPos location = new BlockPos(xi() + dir.offsetX, yi() + dir.offsetY, zi() + dir.offsetZ);
+                BlockPos location = new BlockPos(xi() + dir.getFrontOffsetZ(), yi() + dir.getFrontOffsetY(), zi() + dir.getFrontOffsetZ());
                 if (shouldPath(location))
                 {
                     if (recursive)
@@ -196,7 +195,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
 
             for (EnumFacing dir : EnumFacing.values())
             {
-                BlockPos nextNode = new BlockPos(currentNode.xi() + dir.getFrontOffsetX(), currentNode.yi() + dir.getFrontOffsetY(), currentNode.zi() + dir.getFrontOffsetZ());
+                BlockPos nextNode = new BlockPos(currentNode.getX() + dir.getFrontOffsetX(), currentNode.getY() + dir.getFrontOffsetY(), currentNode.getZ() + dir.getFrontOffsetZ());
 
                 //Check if we can path to the node from the current node
                 if (shouldPathTo(currentNode, nextNode, dir))
@@ -213,7 +212,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         IWorldEdit edit = null;
 
                         //Do logic for damageable blocks
-                        TileEntity tileEntity = oldWorld.getTileEntity(nextNode.xi(), nextNode.yi(), nextNode.zi());
+                        TileEntity tileEntity = oldWorld.getTileEntity(nextNode);
                         IExplosiveDamageable damageableTile = null;
                         if (tileEntity instanceof IExplosiveDamageable)
                         {
@@ -225,7 +224,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                         }
                         if (damageableTile != null)
                         {
-                            float distance = (float) blockCenter.distance(nextNode.xi() + 0.5, nextNode.yi() + 0.5, nextNode.zi() + 0.5);
+                            float distance = (float) blockCenter.distance(nextNode.getX() + 0.5, nextNode.getY() + 0.5, nextNode.getZ() + 0.5);
                             float energy = getEnergy(nextNode, distance);
                             float energyCost = damageableTile.getEnergyCostOfTile(explosiveHandler, this, dir, energy, distance);
                             if (energyCost > 0)
@@ -298,7 +297,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
                 for (EnumFacing dir : EnumFacing.values())
                 {
                     //Generated next node
-                    final BlockPos next = new BlockPos(node, dir);
+                    final BlockPos next = node.offset(dir);
                     //Check if we can path to next node from this node
                     if (shouldPathTo(node, next, dir))
                     {
@@ -326,7 +325,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
      */
     public boolean shouldPath(BlockPos location)
     {
-        double distance = blockCenter.distance(location.xi() + 0.5, location.yi() + 0.5, location.zi() + 0.5);
+        double distance = blockCenter.distance(location.getX() + 0.5, location.getY() + 0.5, location.getZ() + 0.5);
         return distance <= size;
     }
 
@@ -351,6 +350,6 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
     @Deprecated
     public boolean shouldPathTo(BlockPos last, BlockPos next)
     {
-        return next.y() >= 0 && next.y() <= 255 && !pathed_locations.contains(next);
+        return next.getY() >= 0 && next.getY() <= 255 && !pathed_locations.contains(next);
     }
 }

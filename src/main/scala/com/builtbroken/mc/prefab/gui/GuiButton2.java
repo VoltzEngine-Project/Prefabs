@@ -39,7 +39,7 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     }
 
     @Override
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void render(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         int hoverState = this.getHoverState(this.hovered);
         this.drawTexturedModalRect(this.x(), this.y(), 0, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());

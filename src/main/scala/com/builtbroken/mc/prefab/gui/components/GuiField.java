@@ -3,7 +3,10 @@ package com.builtbroken.mc.prefab.gui.components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.opengl.GL11;
 
@@ -87,7 +90,7 @@ public class GuiField extends GuiComponent<GuiField>
     public void writeText(String text)
     {
         String s1 = "";
-        String s2 = ChatAllowedCharacters.filerAllowedCharacters(text);
+        String s2 = ChatAllowedCharacters.filterAllowedCharacters(text);
         int i = this.cursorPosition < this.selectionEnd ? this.cursorPosition : this.selectionEnd;
         int j = this.cursorPosition < this.selectionEnd ? this.selectionEnd : this.cursorPosition;
         int k = this.maxStringLength - this.text.length() - (i - this.selectionEnd);
@@ -479,9 +482,9 @@ public class GuiField extends GuiComponent<GuiField>
     }
 
     @Override
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
-        super.doRender(mc, mouseX, mouseY);
+        super.doRender(mc, mouseX, mouseY, partialTicks);
 
         final int textRenderColor = getTextColor();
 
@@ -541,54 +544,53 @@ public class GuiField extends GuiComponent<GuiField>
         if (k != renderedCursorPosition)
         {
             int l1 = l + Minecraft.getMinecraft().fontRenderer.getStringWidth(s.substring(0, k));
-            this.drawCursorVertical(k1, i1 - 1, l1 - 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
+            this.drawSelectionBox(k1, i1 - 1, l1 - 1, i1 + 1 + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
         }
     }
 
     /**
      * draws the vertical line cursor in the textbox
      */
-    private void drawCursorVertical(int p_146188_1_, int p_146188_2_, int p_146188_3_, int p_146188_4_)
+    private void drawSelectionBox(int startX, int startY, int endX, int endY)
     {
-        int i1;
-
-        if (p_146188_1_ < p_146188_3_)
+        if (startX < endX)
         {
-            i1 = p_146188_1_;
-            p_146188_1_ = p_146188_3_;
-            p_146188_3_ = i1;
+            int i = startX;
+            startX = endX;
+            endX = i;
         }
 
-        if (p_146188_2_ < p_146188_4_)
+        if (startY < endY)
         {
-            i1 = p_146188_2_;
-            p_146188_2_ = p_146188_4_;
-            p_146188_4_ = i1;
+            int j = startY;
+            startY = endY;
+            endY = j;
         }
 
-        if (p_146188_3_ > this.x() + this.getWidth())
+        if (endX > this.x + this.width)
         {
-            p_146188_3_ = this.x() + this.getWidth();
+            endX = this.x + this.width;
         }
 
-        if (p_146188_1_ > this.x() + this.getWidth())
+        if (startX > this.x + this.width)
         {
-            p_146188_1_ = this.x() + this.getWidth();
+            startX = this.x + this.width;
         }
 
-        Tessellator tessellator = Tessellator.instance;
-        GL11.glColor4f(0.0F, 0.0F, 255.0F, 255.0F);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_COLOR_LOGIC_OP);
-        GL11.glLogicOp(GL11.GL_OR_REVERSE);
-        tessellator.startDrawingQuads();
-        tessellator.addVertex((double) p_146188_1_, (double) p_146188_4_, 0.0D);
-        tessellator.addVertex((double) p_146188_3_, (double) p_146188_4_, 0.0D);
-        tessellator.addVertex((double) p_146188_3_, (double) p_146188_2_, 0.0D);
-        tessellator.addVertex((double) p_146188_1_, (double) p_146188_2_, 0.0D);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.color(0.0F, 0.0F, 255.0F, 255.0F);
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableColorLogic();
+        GlStateManager.colorLogicOp(GlStateManager.LogicOp.OR_REVERSE);
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.pos((double)startX, (double)endY, 0.0D).endVertex();
+        bufferbuilder.pos((double)endX, (double)endY, 0.0D).endVertex();
+        bufferbuilder.pos((double)endX, (double)startY, 0.0D).endVertex();
+        bufferbuilder.pos((double)startX, (double)startY, 0.0D).endVertex();
         tessellator.draw();
-        GL11.glDisable(GL11.GL_COLOR_LOGIC_OP);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GlStateManager.disableColorLogic();
+        GlStateManager.enableTexture2D();
     }
 
     public void setMaxStringLength(int p_146203_1_)

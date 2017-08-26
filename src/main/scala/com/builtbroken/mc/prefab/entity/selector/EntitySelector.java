@@ -1,7 +1,10 @@
 package com.builtbroken.mc.prefab.entity.selector;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.AxisAlignedBB;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -26,5 +29,25 @@ public abstract class EntitySelector implements Predicate<Entity>
     public void lock()
     {
         this.lock = true;
+    }
+
+    public List<Entity> getEntities(Entity entity, double range)
+    {
+        //Expand entity bounds to get check area
+        AxisAlignedBB bounds = entity.getEntityBoundingBox().expand(range, range, range);
+
+        //Get entities in area
+        List<Entity> list = entity.getEntityWorld().getEntitiesWithinAABB(Entity.class, bounds);
+
+        //Remove entities that do not apply
+        Iterator<Entity> it = list.iterator();
+        while (it.hasNext())
+        {
+            if (!test(it.next()))
+            {
+                it.remove();
+            }
+        }
+        return list;
     }
 }

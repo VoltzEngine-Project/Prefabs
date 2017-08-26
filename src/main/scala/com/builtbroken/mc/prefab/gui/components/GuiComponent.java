@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.io.IOException;
 
 /**
  * Prefab for GUI components to extend
@@ -258,7 +259,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      * click or mouse wheel movement. As
      * left click is already used.
      */
-    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY)
+    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY) throws IOException
     {
         return false;
     }
@@ -288,7 +289,7 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         return getRelativeSize() != null ? getRelativeSize().yi() : height;
     }
 
-    public E setHeight(int height)
+    public E setComponentHeight(int height)
     {
         this.height = height;
         return (E) this;
@@ -297,6 +298,12 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
     public int getWidth()
     {
         return getRelativeSize() != null ? getRelativeSize().xi() : width;
+    }
+
+    public E setComponentWidth(int width)
+    {
+        this.width = width;
+        return (E) this;
     }
 
     public E enable()

@@ -94,9 +94,9 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
     }
 
     @Override
-    protected void doRender(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
-        this.drawTexturedModalRect(this.xPosition, this.yPosition, u + getURenderModifier(), v + getVRenderModifier(), this.getWidth(), this.getHeight());
+        this.drawTexturedModalRect(this.x, this.y, u + getURenderModifier(), v + getVRenderModifier(), this.getWidth(), this.getHeight());
     }
 
     protected int getURenderModifier()
@@ -105,7 +105,7 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
         {
             return getWidth() * 2;
         }
-        else if (field_146123_n) //Hover state
+        else if (hovered) //Hover state
         {
             return getWidth();
         }

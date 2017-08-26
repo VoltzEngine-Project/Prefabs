@@ -6,6 +6,7 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiButton;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,9 +37,9 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    public E setHeight(int height)
+    public E setComponentHeight(int height)
     {
-        super.setHeight(height);
+        super.setComponentHeight(height);
         if (updatePositionLogic)
         {
             updatePositions();
@@ -47,13 +48,14 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
     }
 
     @Override
-    public void setWidth(int width)
+    public E setComponentWidth(int width)
     {
-        super.setWidth(width);
+        super.setComponentWidth(width);
         if (updatePositionLogic)
         {
             updatePositions();
         }
+        return (E) this;
     }
 
     @Override
@@ -101,7 +103,14 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
             {
                 if (component.mousePressed(mc, mouseX, mouseY))
                 {
-                    actionPerformed(component);
+                    try
+                    {
+                        actionPerformed(component);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                     return true;
                 }
             }
@@ -146,7 +155,7 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
      *
      * @param button
      */
-    public void actionPerformed(GuiButton button)
+    public void actionPerformed(GuiButton button) throws IOException
     {
 
     }
@@ -209,8 +218,8 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
                 }
             }
             updatePositionLogic = false;
-            setWidth(width);
-            setHeight(height);
+            setComponentWidth(width);
+            setComponentHeight(height);
             updatePositionLogic = true;
         }
     }

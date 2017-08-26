@@ -21,7 +21,7 @@ public class GuiLeftRightArrowButton extends GuiButton2<GuiLeftRightArrowButton>
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY)
+    protected void doRender(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
         if (this.visible)
         {
@@ -29,13 +29,13 @@ public class GuiLeftRightArrowButton extends GuiButton2<GuiLeftRightArrowButton>
 
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-            this.field_146123_n = mouseX >= this.x() && mouseY >= this.y() && mouseX < this.x() + this.getWidth() && mouseY < this.y() + this.getHeight();
+            this.hovered = mouseX >= this.x() && mouseY >= this.y() && mouseX < this.x() + this.getWidth() && mouseY < this.y() + this.getHeight();
 
 
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            this.drawTexturedModalRect(this.x(), this.y(), 18 + (!left ? 18 : 0), 216 + (field_146123_n ? 9 : 0), 15, 9);
+            this.drawTexturedModalRect(this.x(), this.y(), 18 + (!left ? 18 : 0), 216 + (hovered ? 9 : 0), 15, 9);
             this.mouseDragged(mc, mouseX, mouseY);
         }
     }

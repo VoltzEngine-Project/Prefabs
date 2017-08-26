@@ -15,6 +15,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.io.IOException;
 
 
 /**
@@ -55,7 +56,7 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
         this.height = height;
         this.maxScroll = maxScroll;
         addArrows();
-        setHeight(height);
+        setComponentHeight(height);
     }
 
     public GuiScrollBar(int id, int x, int y, int height, int maxScroll)
@@ -63,7 +64,7 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
         super(id, x, y, barWidth, height, "");
         this.maxScroll = maxScroll;
         addArrows();
-        setHeight(height);
+        setComponentHeight(height);
     }
 
     protected void addArrows()
@@ -73,16 +74,16 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
     }
 
     @Override
-    public GuiScrollBar setHeight(int height)
+    public GuiScrollBar setComponentHeight(int height)
     {
-        super.setHeight(Math.max(height, 40 + GuiButton9px.SIZE * 2)); //Min size is 40 plus button size
+        super.setComponentHeight(Math.max(height, 40 + GuiButton9px.SIZE * 2)); //Min size is 40 plus button size
         middleHeight = height - (getTopHeight() + getBotHeight()) - barWidth * 2; //Mid height is equal to height minus size of caps & buttons
         totalSize = getTopHeight() + middleHeight + getBotHeight();
         return this;
     }
 
     @Override
-    public GuiScrollBar setWidth(int w)
+    public GuiScrollBar setComponentWidth(int w)
     {
         //Right now size change for width is not supported
         //TODO implement size change
@@ -100,7 +101,7 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
         //Render background for scroll bar
         Color color = new Color(144, 144, 144);
         GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, 1.0F);
-        Render2DHelper.renderWithRepeatVertical(xPosition, yPosition + barWidth, barU, barV, barWidth, barHeight, getTopHeight(), getBotHeight(), middleHeight);
+        Render2DHelper.renderWithRepeatVertical(x, y + barWidth, barU, barV, barWidth, barHeight, getTopHeight(), getBotHeight(), middleHeight);
 
         if (maxScroll > 0)
         {
@@ -111,19 +112,19 @@ public class GuiScrollBar extends GuiComponentContainer<GuiScrollBar>
 
             //Calculate slider render position
             float barPercent = (float) (getCurrentScroll() + 1) / (float) maxScroll;
-            int sliderRenderY = Math.max((int) (barPercent * this.totalSize) - barHeight + yPosition, yPosition);
+            int sliderRenderY = Math.max((int) (barPercent * this.totalSize) - barHeight + y, y);
 
             //Set color to red and render scroll bar
             color = new Color(119, 119, 119);
             GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, 1.0F);
 
             //Render slider
-            Render2DHelper.renderWithRepeatVertical(xPosition + 1, sliderRenderY + GuiButton9px.SIZE, sbarU, sbarV, sbarWidth, sbarHeight, 4, 4, barHeight - 8);
+            Render2DHelper.renderWithRepeatVertical(x + 1, sliderRenderY + GuiButton9px.SIZE, sbarU, sbarV, sbarWidth, sbarHeight, 4, 4, barHeight - 8);
         }
     }
 
     @Override
-    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY)
+    public boolean handleMouseInput(Minecraft mc, int mouseX, int mouseY) throws IOException
     {
         if (isMouseInside(mouseX, mouseY))
         {
