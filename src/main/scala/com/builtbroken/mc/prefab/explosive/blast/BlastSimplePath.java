@@ -113,7 +113,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
         return (B) this;
     }
 
-    public final void calculateLayers()
+    public void calculateLayers()
     {
         double volume = 4 / 3 * Math.PI * size * size * size;
         int i = (int) (volume / (double) blocksPerLayer);
@@ -136,7 +136,7 @@ public abstract class BlastSimplePath<B extends BlastSimplePath> extends Blast<B
     @Override
     public boolean shouldContinueAction(int layer)
     {
-        return layer == 0 || !stack.isEmpty();
+        return !killExplosion && (layer == 0 || !stack.isEmpty());
     }
 
 
