@@ -25,13 +25,19 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
      */
     protected int shiftSlotStart = 0;
 
+    /** Trigger to re-calculate inventory status */
     protected boolean recalculateFillStatus = true;
+
+    /** Is the inventory full and can not accept more items */
     protected boolean isFull = false;
 
     /** Map of the inventory */
     protected HashMap<Integer, ItemStack> inventoryMap = new HashMap();
 
+    /** Inventory name */
     public String inventoryName = "container.inventory.basic";
+
+
 
     public BasicInventory(int slots)
     {

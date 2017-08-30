@@ -21,6 +21,7 @@ public class ContainerBase<H extends Object> extends Container
     protected EntityPlayer player;
     protected H host;
 
+    @Deprecated
     public ContainerBase(IInventory inventory)
     {
         this.inventory = inventory;

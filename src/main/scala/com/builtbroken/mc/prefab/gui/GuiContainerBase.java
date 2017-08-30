@@ -828,4 +828,44 @@ public class GuiContainerBase extends GuiContainer
             }
         }
     }
+
+
+    /**
+     * Renders a furnace style fire for displaying fuel time
+     *
+     * @param x           - position width
+     * @param y           - position height
+     * @param burnTime    - current time
+     * @param maxBurnTime - max time
+     */
+    protected void renderFurnaceCookFire(int x, int y, int burnTime, int maxBurnTime)
+    {
+        this.drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 18 * 3, 18, 18);
+        if (burnTime > 0)
+        {
+            int offsetY = (int) Math.floor(burnTime * 18f / (maxBurnTime + 0.0f));
+            if (offsetY > 0)
+            {
+                this.drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y + 17 - offsetY, 18, 18 * 3 - offsetY, 18, 1 + offsetY);
+            }
+        }
+    }
+
+    /**
+     * Renders a furnace style arrow for displaying cook time
+     *
+     * @param x           - position width
+     * @param y           - position height
+     * @param cookTime    - current time
+     * @param maxCookTime - max time
+     */
+    protected void renderFurnaceCookArrow(int x, int y, int cookTime, int maxCookTime)
+    {
+        drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 0, 22, 15);
+        if (cookTime > 0)
+        {
+            float p = cookTime / (maxCookTime + 0.0f);
+            drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 15, (int) Math.floor(22 * p), 15);
+        }
+    }
 }
