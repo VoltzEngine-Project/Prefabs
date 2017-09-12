@@ -840,12 +840,20 @@ public class GuiContainerBase extends GuiContainer
      */
     protected void renderFurnaceCookFire(int x, int y, int burnTime, int maxBurnTime)
     {
+        //Fix for tiles that do not cap value
+        burnTime = Math.min(burnTime, maxBurnTime);
+
+        //Draw background
         this.drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 18 * 3, 18, 18);
+
+        //Only draw flames if burn time is above zero
         if (burnTime > 0)
         {
+            //Calculate offset for texture
             int offsetY = (int) Math.floor(burnTime * 18f / (maxBurnTime + 0.0f));
             if (offsetY > 0)
             {
+                //Draw fire
                 this.drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y + 17 - offsetY, 18, 18 * 3 - offsetY, 18, 1 + offsetY);
             }
         }
@@ -861,10 +869,19 @@ public class GuiContainerBase extends GuiContainer
      */
     protected void renderFurnaceCookArrow(int x, int y, int cookTime, int maxCookTime)
     {
+        //Fix for tiles that do not cap value
+        cookTime = Math.min(cookTime, maxCookTime);
+
+        //Draw background
         drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 0, 22, 15);
+
+        //Only draw arrow if time is above zero
         if (cookTime > 0)
         {
+            //Calculate scale
             float p = cookTime / (maxCookTime + 0.0f);
+
+            //Draw arrow
             drawTexturedModalRect(this.containerWidth + x, this.containerHeight + y, 18, 15, (int) Math.floor(22 * p), 15);
         }
     }
