@@ -8,9 +8,9 @@ import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.vector.Location;
 import com.builtbroken.mc.imp.transform.vector.Pos;
+import com.builtbroken.mc.lib.data.item.ItemStackWrapper;
 import com.builtbroken.mc.lib.helper.DummyPlayer;
 import com.builtbroken.mc.lib.helper.NBTUtility;
-import com.builtbroken.mc.lib.data.item.ItemStackWrapper;
 import com.google.common.collect.Table;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.common.registry.GameData;
@@ -31,6 +31,7 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
@@ -251,6 +252,61 @@ public class InventoryUtility
             is.stackSize = 1;
         }
         return is;
+    }
+
+    /**
+     * Gets the mod id for the stack
+     *
+     * @param stack
+     * @return
+     */
+    public static String getModID(ItemStack stack)
+    {
+        if (stack != null && stack.getItem() != null)
+        {
+            String regName = Item.itemRegistry.getNameForObject(stack.getItem());
+            if (regName != null)
+            {
+                return regName.split(":")[0];
+            }
+        }
+        return "null";
+    }
+
+    /**
+     * Gets the display name to use when showing an item
+     * <p>
+     * Will attempt to use the stacks disply name, then unlocalized, and
+     * finally item localzied name. If these fail it will default to unlocalzied name of the item
+     *
+     * @param stack
+     * @return
+     */
+    public static String getDisplayName(ItemStack stack)
+    {
+        if (stack != null)
+        {
+            if (stack.getItem() != null)
+            {
+                final String regName = Item.itemRegistry.getNameForObject(stack.getItem());
+                final String name = regName.split(":")[1];
+
+                for (String value : new String[]{stack.getDisplayName(), stack.getUnlocalizedName(), name, StatCollector.translateToLocal(stack.getItem().getUnlocalizedName()) + " #" + stack.getItemDamage()})
+                {
+                    if (value != null)
+                    {
+                        value = value.trim();
+                        if (!value.isEmpty() && !value.toLowerCase().startsWith("null"))
+                        {
+                            return value;
+                        }
+                    }
+                }
+                return stack.getItem().getUnlocalizedName() + "@" + stack.getItemDamage();
+            }
+            return "null item";
+        }
+        return "null";
     }
 
     /**
