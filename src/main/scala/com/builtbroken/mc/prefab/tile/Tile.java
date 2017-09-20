@@ -159,7 +159,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     }
 
     @Override
-    public String uniqueContentID()
+    public String getUniqueID()
     {
         return name;
     }
