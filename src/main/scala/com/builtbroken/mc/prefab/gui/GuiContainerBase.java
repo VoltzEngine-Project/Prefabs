@@ -31,6 +31,7 @@ import org.lwjgl.opengl.GL12;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class GuiContainerBase extends GuiContainer
@@ -38,7 +39,7 @@ public class GuiContainerBase extends GuiContainer
     protected static int energyType = 0;
     public ResourceLocation baseTexture;
 
-    public String tooltip = "";
+    public String currentToolTip = "";
 
     protected HashMap<Rectangle, String> tooltips = new HashMap();
     protected ArrayList<GuiTextField> fields = new ArrayList();
@@ -103,6 +104,49 @@ public class GuiContainerBase extends GuiContainer
     {
         buttonList.add(button);
         return button;
+    }
+
+    /**
+     * Called to add a tooltip to the GUI
+     *
+     * @param triggerArea - area to show tip inside
+     * @param text        - text to display
+     */
+    protected void addToolTip(Rectangle triggerArea, String text)
+    {
+        addToolTip(triggerArea, text, false);
+    }
+
+    /**
+     * Called to add a tooltip translation to the GUI
+     *
+     * @param triggerArea - area to show tip inside
+     * @param translation - translation key to get text
+     */
+    protected void addToolTipWithTranslation(Rectangle triggerArea, String translation)
+    {
+        addToolTip(triggerArea, translation, true);
+    }
+
+    /**
+     * Adds a tooltip to the GUI
+     *
+     * @param triggerArea - area to show tip inside
+     * @param text        - text to display
+     * @param translate   - should the text be translated
+     */
+    protected void addToolTip(Rectangle triggerArea, String text, boolean translate)
+    {
+        String actual_text = text.trim();
+        if(translate)
+        {
+            String translation = LanguageUtility.getLocal(actual_text);
+            if(translation != null && !translation.isEmpty())
+            {
+                actual_text = translation.trim();
+            }
+        }
+        tooltips.put(triggerArea, actual_text);
     }
 
     protected void drawString(String str, int x, int y, int color)
@@ -178,22 +222,24 @@ public class GuiContainerBase extends GuiContainer
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
+        //TODO rework to be object based
+        //TODO rework to be attached to components rather than free floating
         for (Entry<Rectangle, String> entry : this.tooltips.entrySet())
         {
             if (entry.getKey().isWithin(new Point(mouseX - this.guiLeft, mouseY - this.guiTop)))
             {
-                this.tooltip = entry.getValue();
+                this.currentToolTip = entry.getValue();
                 break;
             }
         }
 
-        if (this.tooltip != null && this.tooltip != "")
+        if (this.currentToolTip != null && this.currentToolTip != "")
         {
-            java.util.List<String> lines = LanguageUtility.splitByLine(tooltip, LanguageUtility.toolTipLineLength);
+            List<String> lines = LanguageUtility.splitByLine(currentToolTip, LanguageUtility.toolTipLineLength);
             this.drawTooltip(mouseX - this.guiLeft, mouseY - this.guiTop, lines.toArray(new String[lines.size()])); //TODO find a way to not have to convert to array to improve render time
         }
 
-        this.tooltip = "";
+        this.currentToolTip = "";
     }
 
     @Override
@@ -323,7 +369,7 @@ public class GuiContainerBase extends GuiContainer
         {
             if (new Rectangle(x, y, (int) (text.length() * 4.8), 12).isWithin(new Point(mouseX, mouseY)))
             {
-                this.tooltip = tooltip;
+                this.currentToolTip = tooltip;
             }
         }
     }
