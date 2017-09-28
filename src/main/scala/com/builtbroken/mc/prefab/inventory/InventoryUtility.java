@@ -37,10 +37,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Series of helper classes for dealing with any kind of inventory
@@ -137,6 +134,11 @@ public class InventoryUtility
             mapItems();
         }
         return MOD_TO_ITEMS.get(modid);
+    }
+
+    public static Map<String, List<Item>> getModToItems()
+    {
+        return MOD_TO_ITEMS;
     }
 
     /**
