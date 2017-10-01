@@ -12,4 +12,11 @@ public class DamageBleeding extends DamageSourceAbstract
         setDamageBypassesArmor();
         setDamageIsAbsolute();
     }
+
+    public DamageBleeding(Object source)
+    {
+        super("Bleeding", source);
+        setDamageBypassesArmor();
+        setDamageIsAbsolute();
+    }
 }
