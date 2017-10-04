@@ -171,8 +171,17 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     }
 
     @Override
-    public String modID()
+    public String getMod()
     {
+        Block block = getBlockType();
+        if (block != null)
+        {
+            String regName = Block.blockRegistry.getNameForObject(block);
+            if (regName != null && regName.contains(":"))
+            {
+                return regName.split(":")[0];
+            }
+        }
         return "null";
     }
 
