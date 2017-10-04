@@ -9,21 +9,31 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+/**
+ * Prefab for GUI containers to use
+ *
+ * @see <a href="https://github.com/BuiltBrokenModding/VoltzEngine/blob/development/license.md">License</a> for what you can and can't do with the code.
+ * Created by Dark(DarkGuardsman, Robert)
+ */
 public class ContainerBase<H extends Object> extends Container
 {
     protected int slotCount = 0;
-    protected int xInventoryDisplacement = 8;
-    protected int yInventoryDisplacement = 135;
-    protected int yHotBarDisplacement = 193;
+    protected int xInventoryDisplacement = 8; //TODO ?
+    protected int yInventoryDisplacement = 135; //TODO ?
+    protected int yHotBarDisplacement = 193; //TODO ?
 
-
-    protected IInventory inventory;
-    protected EntityPlayer player;
-    protected H host;
+    /** Inventory for this container, can be null */
+    public final IInventory inventory;
+    /** Player accessing this GUI, can be null in rare cases */
+    public final EntityPlayer player;
+    /** Object hosting the container, can be null in rare cases */
+    public final H host;
 
     @Deprecated
     public ContainerBase(IInventory inventory)
     {
+        this.host = null;
+        this.player = null;
         this.inventory = inventory;
         this.slotCount = inventory.getSizeInventory();
     }
@@ -31,8 +41,9 @@ public class ContainerBase<H extends Object> extends Container
     @Deprecated
     public ContainerBase(EntityPlayer player, IInventory inventory)
     {
-        this(inventory);
-
+        this.host = null;
+        this.inventory = inventory;
+        this.slotCount = inventory.getSizeInventory();
         this.player = player;
         if (inventory instanceof IPlayerUsing)
         {
@@ -42,6 +53,10 @@ public class ContainerBase<H extends Object> extends Container
 
     public ContainerBase(EntityPlayer player, H node)
     {
+        //Assign host
+        host = node;
+
+        //handle inventory
         if (node instanceof IInventory)
         {
             inventory = (IInventory) node;
@@ -54,7 +69,12 @@ public class ContainerBase<H extends Object> extends Container
         {
             inventory = ((IInventory) node);
         }
+        else
+        {
+            throw new RuntimeException("ContainerBase >> GUI host  '" + node + "' failed to provide an inventory for the container to use");
+        }
 
+        //Handle player
         this.player = player;
         if (node instanceof IPlayerUsing)
         {
