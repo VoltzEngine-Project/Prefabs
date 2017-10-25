@@ -241,9 +241,15 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         }
         if (getPlayersUsing().size() > 0)
         {
-            doUpdateGuiUsers();
+            try
+            {
+                doUpdateGuiUsers();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
-
     }
 
     @Override
