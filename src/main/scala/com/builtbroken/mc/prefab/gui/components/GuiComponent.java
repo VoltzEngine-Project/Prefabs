@@ -63,9 +63,9 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      * @param width  - how wide the component is (X axis)
      * @param height - how tall the component is (Y axis)
      */
-    public GuiComponent(int id, int x, int y, int width, int height, String key)
+    public GuiComponent(int id, int x, int y, int width, int height, String displayString)
     {
-        super(id, x, y, width, height, key);
+        super(id, x, y, width, height, displayString);
     }
 
     /**

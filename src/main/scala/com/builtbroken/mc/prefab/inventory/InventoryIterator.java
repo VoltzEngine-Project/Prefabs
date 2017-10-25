@@ -50,15 +50,33 @@ public class InventoryIterator implements Iterator<ItemStack>, Iterable<ItemStac
     @Override
     public boolean hasNext()
     {
-        //Ensure the slot index moves forward automatically
-        if (nonNullSlots && inventory.getStackInSlot(nextSlot()) == null)
+        try
         {
-            while (nextSlot() < inventory.getSizeInventory() && inventory.getStackInSlot(nextSlot()) == null)
+            //Ensure the slot index moves forward automatically
+            if (nonNullSlots && isNextSlotUnderInventorySize() && isNextSlotNull())
             {
-                nextSlot += 1;
+                while (isNextSlotUnderInventorySize() && isNextSlotNull())
+                {
+                    nextSlot += 1;
+                }
             }
+            return isNextSlotUnderInventorySize() && (!nonNullSlots || !isNextSlotNull());
         }
-        return nextSlot() < inventory.getSizeInventory() && (!nonNullSlots || inventory.getStackInSlot(nextSlot()) != null);
+        catch (Exception e) //Error check for bad inventory implementations
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isNextSlotUnderInventorySize()
+    {
+        return nextSlot() < inventory.getSizeInventory();
+    }
+
+    public boolean isNextSlotNull()
+    {
+        return inventory.getStackInSlot(nextSlot()) == null;
     }
 
     @Override
