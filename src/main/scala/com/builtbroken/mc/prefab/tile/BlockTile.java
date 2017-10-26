@@ -163,6 +163,12 @@ public class BlockTile extends BlockContainer
     }
 
     @Override
+    public void harvestBlock(World p_149636_1_, EntityPlayer p_149636_2_, int p_149636_3_, int p_149636_4_, int p_149636_5_, int p_149636_6_)
+    {
+        //Handled by break event
+    }
+
+    @Override
     public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z, boolean willHarvest)
     {
         Tile tile = inject(world, x, y, z);
@@ -417,6 +423,7 @@ public class BlockTile extends BlockContainer
         return value;
     }
 
+    @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
     {
         Tile tile = inject(world, x, y, z);

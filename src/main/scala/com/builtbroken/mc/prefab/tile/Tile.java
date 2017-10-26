@@ -451,7 +451,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         ArrayList<ItemStack> drops = new ArrayList<>();
         if (getBlockType() != null)
         {
-            drops.add(new ItemStack(getBlockType(), quantityDropped(metadata, fortune), metadataDropped(metadata, fortune)));
+            drops.add(toItemStack());
         }
         return drops;
     }
