@@ -1,11 +1,13 @@
 package com.builtbroken.mc.prefab.tile;
 
 import com.builtbroken.jlib.data.Colors;
+import com.builtbroken.mc.api.tile.provider.IInventoryProvider;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.imp.transform.region.Cube;
 import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
+import com.builtbroken.mc.prefab.inventory.InventoryIterator;
 import com.builtbroken.mc.prefab.inventory.InventoryUtility;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -16,6 +18,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -157,8 +160,34 @@ public class BlockTile extends BlockContainer
     public void breakBlock(World world, int x, int y, int z, Block block, int par6)
     {
         Tile tile = inject(world, x, y, z);
+
+        //Drop inventory
+        IInventory inventory = null;
+        if (tile instanceof IInventory)
+        {
+            inventory = (IInventory) tile;
+        }
+        else if (tile instanceof IInventoryProvider)
+        {
+            inventory = ((IInventoryProvider) tile).getInventory();
+        }
+
+        if(inventory != null)
+        {
+            InventoryIterator inventoryIterator = new InventoryIterator(inventory, true);
+            while(inventoryIterator.hasNext())
+            {
+                ItemStack stack = inventoryIterator.next();
+                InventoryUtility.dropItemStack(world, x + 0.5, y + 0.5, z + 0.5, stack, 0 ,0);
+                inventory.setInventorySlotContents(inventoryIterator.slot(), null);
+            }
+        }
+
+        //Ask tile to do remove action
         tile.onRemove(block, par6);
         eject();
+
+        //Super, removes tile
         super.breakBlock(world, x, y, z, block, par6);
     }
 
