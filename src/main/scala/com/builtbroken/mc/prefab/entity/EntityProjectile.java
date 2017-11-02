@@ -274,7 +274,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     protected boolean shouldCollideWith(Entity entity)
     {
         //TODO add listener support
-        return entity.canBeCollidedWith();
+        return entity.canBeCollidedWith() && entity != riddenByEntity;
     }
 
     protected void handleBlockCollision(MovingObjectPosition movingobjectposition)
