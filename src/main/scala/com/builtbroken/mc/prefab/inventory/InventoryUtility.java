@@ -312,6 +312,32 @@ public class InventoryUtility
     }
 
     /**
+     * Gets the registry name for the item
+     *
+     * @param item
+     * @return
+     */
+    public static String getRegistryName(ItemStack item)
+    {
+        return item != null ? getRegistryName(item.getItem()) : null;
+    }
+
+    /**
+     * Gets the registry name for the item
+     *
+     * @param item
+     * @return
+     */
+    public static String getRegistryName(Item item)
+    {
+        if (item != null)
+        {
+            return Item.itemRegistry.getNameForObject(item);
+        }
+        return null;
+    }
+
+    /**
      * Called to map recipes to items and
      * itemstacks. Used for varies purposes,
      * such as, quicker filter checks, crafting,
