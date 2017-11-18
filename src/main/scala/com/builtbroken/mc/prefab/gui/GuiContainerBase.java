@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class GuiContainerBase extends GuiContainer
+public class GuiContainerBase<H> extends GuiContainer
 {
     protected static int energyType = 0;
     public ResourceLocation baseTexture;
@@ -54,6 +54,15 @@ public class GuiContainerBase extends GuiContainer
     /** Debug toogle to render text for the ID and inventory ID for a slot */
     public boolean renderSlotDebugIDs = false;
 
+    /** Object that is the host of the GUI */
+    protected H host;
+
+    public GuiContainerBase(Container container, H host)
+    {
+        this(container);
+        this.host = host;
+    }
+
     public GuiContainerBase(Container container)
     {
         super(container);
@@ -63,7 +72,6 @@ public class GuiContainerBase extends GuiContainer
     public GuiContainerBase()
     {
         this(new ContainerDummy());
-        this.baseTexture = SharedAssets.GUI_MC_BASE;
     }
 
     @Override
@@ -138,10 +146,10 @@ public class GuiContainerBase extends GuiContainer
     protected void addToolTip(Rectangle triggerArea, String text, boolean translate)
     {
         String actual_text = text.trim();
-        if(translate)
+        if (translate)
         {
             String translation = LanguageUtility.getLocal(actual_text);
-            if(translation != null && !translation.isEmpty())
+            if (translation != null && !translation.isEmpty())
             {
                 actual_text = translation.trim();
             }
@@ -378,6 +386,14 @@ public class GuiContainerBase extends GuiContainer
     protected void drawTextWithTooltip(String textName, int x, int y, int mouseX, int mouseY)
     {
         this.drawTextWithTooltip(textName, "%1", x, y, mouseX, mouseY);
+    }
+
+    protected void drawContainerSlots()
+    {
+        for (Object object : inventorySlots.inventorySlots)
+        {
+            drawSlot((Slot) object);
+        }
     }
 
     //TODO update and docs
