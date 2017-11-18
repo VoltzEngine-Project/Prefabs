@@ -38,7 +38,7 @@ public class ExternalInventory extends BasicInventory implements IExternalInvent
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1)
+    public int[] getAccessibleSlotsFromSide(int var1) //TODO add a way to get per side
     {
         if (openSlots == null || openSlots.length != this.getSizeInventory())
         {
