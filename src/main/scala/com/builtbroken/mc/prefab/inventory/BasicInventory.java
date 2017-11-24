@@ -37,6 +37,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     /** Inventory name */
     public String inventoryName = "container.inventory.basic";
 
+    public boolean isLoading = false;
 
 
     public BasicInventory(int slots)
@@ -130,7 +131,10 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
             if (!InventoryUtility.stacksMatchExact(pre_stack, getStackInSlot(slot)))
             {
                 recalculateFillStatus = true;
-                onInventoryChanged(slot, pre_stack, getStackInSlot(slot));
+                if (!isLoading)
+                {
+                    onInventoryChanged(slot, pre_stack, getStackInSlot(slot));
+                }
             }
         }
         else
@@ -207,6 +211,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     @Override
     public void load(NBTTagCompound nbt)
     {
+        isLoading = true;
         this.inventoryMap.clear();
 
         NBTTagList nbtList = nbt.getTagList("Items", 10);
@@ -223,6 +228,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         }
 
         nbt.setTag("Items", nbtList);
+        isLoading = false;
     }
 
     @Override
