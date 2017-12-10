@@ -316,7 +316,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         }
         else if (object instanceof BasicInventory)
         {
-            return ((BasicInventory) object).slots == slots && ((BasicInventory) object).inventoryMap == inventoryMap;
+            return ((BasicInventory) object).getSizeInventory() == getSizeInventory() && ((BasicInventory) object).inventoryMap == inventoryMap; //TODO check if this is needed
         }
         return false;
     }
