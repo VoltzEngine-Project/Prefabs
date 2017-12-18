@@ -338,6 +338,21 @@ public class InventoryUtility
     }
 
     /**
+     * Gets the registry name for the block
+     *
+     * @param block
+     * @return
+     */
+    public static String getRegistryName(Block block)
+    {
+        if (block != null)
+        {
+            return Block.blockRegistry.getNameForObject(block);
+        }
+        return null;
+    }
+
+    /**
      * Called to map recipes to items and
      * itemstacks. Used for varies purposes,
      * such as, quicker filter checks, crafting,
