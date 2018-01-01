@@ -1155,6 +1155,27 @@ public class InventoryUtility
         return stackA == null && stackB == null;
     }
 
+    public static boolean itemsMatch(ItemStack stackA, ItemStack stackB)
+    {
+        if (stackA != null && stackB != null)
+        {
+            return stackA.isItemEqual(stackB);
+        }
+        return stackA == null && stackB == null;
+    }
+
+    public static boolean itemsMatch(Item item, ItemStack... stacks)
+    {
+        for(ItemStack stack : stacks)
+        {
+            if(stack == null || item != stack.getItem())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Checks if two stacks match each other using item, meta, and nbt to compare. If
      * this fails then it attempts to use the object's OreDictionary name to match.
