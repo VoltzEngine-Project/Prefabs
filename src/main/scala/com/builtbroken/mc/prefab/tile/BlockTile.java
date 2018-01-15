@@ -172,13 +172,13 @@ public class BlockTile extends BlockContainer
             inventory = ((IInventoryProvider) tile).getInventory();
         }
 
-        if(inventory != null)
+        if (inventory != null)
         {
             InventoryIterator inventoryIterator = new InventoryIterator(inventory, true);
-            while(inventoryIterator.hasNext())
+            while (inventoryIterator.hasNext())
             {
                 ItemStack stack = inventoryIterator.next();
-                InventoryUtility.dropItemStack(world, x + 0.5, y + 0.5, z + 0.5, stack, 0 ,0);
+                InventoryUtility.dropItemStack(world, x + 0.5, y + 0.5, z + 0.5, stack, 0, 0);
                 inventory.setInventorySlotContents(inventoryIterator.slot(), null);
             }
         }
@@ -187,14 +187,15 @@ public class BlockTile extends BlockContainer
         tile.onRemove(block, par6);
         eject();
 
-        //Super, removes tile
-        super.breakBlock(world, x, y, z, block, par6);
+        //Super, removes tile so ignore
+        //super.breakBlock(world, x, y, z, block, par6);
     }
 
     @Override
-    public void harvestBlock(World p_149636_1_, EntityPlayer p_149636_2_, int p_149636_3_, int p_149636_4_, int p_149636_5_, int p_149636_6_)
+    public void harvestBlock(World world, EntityPlayer player, int x, int y, int z, int meta)
     {
-        //Handled by break event
+        super.harvestBlock(world, player, x, y, z, meta);
+        world.removeTileEntity(x, y, z);
     }
 
     @Override

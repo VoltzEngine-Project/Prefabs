@@ -1,7 +1,6 @@
 package com.builtbroken.mc.prefab.tile;
 
 import com.builtbroken.mc.prefab.inventory.InventoryUtility;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -22,7 +21,6 @@ public class TileEvents
 {
     public static final TileEvents instance = new TileEvents();
 
-    @SubscribeEvent
     public void onBreakEvent(BlockEvent.BreakEvent event)
     {
         TileEntity tile = event.world.getTileEntity(event.x, event.y, event.z);
