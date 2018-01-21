@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.hz;
 
+import com.builtbroken.mc.api.abstraction.world.IWorld;
 import com.builtbroken.mc.api.map.radio.IRadioWaveReceiver;
 import com.builtbroken.mc.api.map.radio.IRadioWaveSender;
 import com.builtbroken.mc.core.Engine;
@@ -7,7 +8,6 @@ import com.builtbroken.mc.imp.transform.region.Cube;
 import com.builtbroken.mc.lib.world.map.radio.RadioRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 
 /**
  * Wrapper used by items to act as a radio wave sender
@@ -40,19 +40,13 @@ public class FakeRadioSender implements IRadioWaveSender
     @Override
     public void sendRadioMessage(float hz, String header, Object... data)
     {
-        RadioRegistry.popMessage(oldWorld(), this, hz, header, data);
+        RadioRegistry.popMessage(world().unwrap(), this, hz, header, data);
     }
 
     @Override
     public Cube getRadioSenderRange()
     {
         return cube;
-    }
-
-    @Override
-    public World oldWorld()
-    {
-        return player.world;
     }
 
     @Override
@@ -71,5 +65,11 @@ public class FakeRadioSender implements IRadioWaveSender
     public double z()
     {
         return player.posZ;
+    }
+
+    @Override
+    public IWorld world()
+    {
+        return Engine.getWorld(player.world.provider.getDimension());
     }
 }
