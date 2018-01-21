@@ -7,6 +7,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -52,10 +53,10 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
     protected DamageSource impact_damageSource = DamageSource.ANVIL;
 
     //In ground data
-    public BlockPos tilePos;
-    public EnumFacing sideTile = null;
-    protected IBlockState blockInside;
-    protected boolean inGround;
+    public BlockPos tilePos = new BlockPos(0, 0, 0);
+    public EnumFacing sideTile = EnumFacing.UP;
+    protected IBlockState blockInside = Blocks.AIR.getDefaultState();
+    protected boolean inGround = false;
 
     //Timers
     protected int ticksInGround;
