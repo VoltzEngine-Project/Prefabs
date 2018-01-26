@@ -56,9 +56,9 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
     {
         if (slot >= 0 && slot < getSizeInventory())
         {
-            return this.inventoryMap.containsKey(slot) ? this.inventoryMap.get(slot) : null;
+            return this.inventoryMap.containsKey(slot) ? this.inventoryMap.get(slot) : ItemStack.EMPTY;
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
             if (this.getStackInSlot(slot).getCount() <= ammount)
             {
                 var3 = this.getStackInSlot(slot);
-                setInventorySlotContents(slot, null);
+                setInventorySlotContents(slot, ItemStack.EMPTY);
                 markDirty();
                 return var3;
             }
@@ -81,7 +81,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
 
                 if (this.getStackInSlot(slot).getCount() == 0)
                 {
-                    setInventorySlotContents(slot, null);
+                    setInventorySlotContents(slot, ItemStack.EMPTY);
                 }
 
                 markDirty();
@@ -90,7 +90,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         }
         else
         {
-            return null;
+            return ItemStack.EMPTY;
         }
     }
 
@@ -100,10 +100,10 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         ItemStack stack = getStackInSlot(index);
         if (stack != null)
         {
-            setInventorySlotContents(0, null);
+            setInventorySlotContents(0, ItemStack.EMPTY);
             return stack;
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
         if (slot >= 0 && slot < getSizeInventory())
         {
             ItemStack pre_stack = getStackInSlot(slot) != null ? getStackInSlot(slot).copy() : null;
-            if (insertStack != null)
+            if (insertStack != ItemStack.EMPTY)
             {
                 inventoryMap.put(slot, insertStack);
             }
@@ -255,7 +255,7 @@ public class BasicInventory implements ISave, IInventory, Iterable<Map.Entry<Int
 
         for (int i = shiftSlotStart; i < this.getSizeInventory() + shiftSlotStart; ++i)
         {
-            if (this.getStackInSlot(i + shiftSlotStart) != null)
+            if (!this.getStackInSlot(i + shiftSlotStart).isEmpty())
             {
                 NBTTagCompound var4 = new NBTTagCompound();
                 var4.setByte("Slot", (byte) i);
