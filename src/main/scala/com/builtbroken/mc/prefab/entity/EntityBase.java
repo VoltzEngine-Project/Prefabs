@@ -1,12 +1,12 @@
 package com.builtbroken.mc.prefab.entity;
 
 import com.builtbroken.mc.api.IWorldPosition;
+import com.builtbroken.mc.api.data.IPacket;
 import com.builtbroken.mc.api.data.SensorType;
 import com.builtbroken.mc.api.entity.IEntity;
 import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.IPacketIDReceiver;
 import com.builtbroken.mc.core.network.packet.PacketEntity;
-import com.builtbroken.mc.core.network.packet.PacketType;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.helper.DamageUtility;
 import io.netty.buffer.ByteBuf;
@@ -123,7 +123,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
     }
 
     @Override
-    public boolean read(ByteBuf buf, int id, EntityPlayer player, PacketType type)
+    public boolean read(ByteBuf buf, int id, EntityPlayer player, IPacket type)
     {
         if (world.isRemote)
         {
