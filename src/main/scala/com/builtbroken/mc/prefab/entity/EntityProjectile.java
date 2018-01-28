@@ -96,7 +96,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
             double d5 = d2 / d3;
             this.setLocationAndAngles(shooter.posX + d4, this.posY, shooter.posZ + d5, f2, f3);
             float f4 = (float) d3 * 0.2F;
-            this.setThrowableHeading(d0, d1 + (double) f4, d2, p_i1755_4_, p_i1755_5_);
+            this.shoot(d0, d1 + (double) f4, d2, p_i1755_4_, p_i1755_5_);
         }
     }
 
@@ -126,7 +126,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
         this.motionX = (double) (-MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI));
         this.motionZ = (double) (MathHelper.cos(this.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float) Math.PI));
         this.motionY = (double) (-MathHelper.sin(this.rotationPitch / 180.0F * (float) Math.PI));
-        this.setThrowableHeading(this.motionX, this.motionY, this.motionZ, f * 1.5F, 1.0F);
+        this.shoot(this.motionX, this.motionY, this.motionZ, f * 1.5F, 1.0F);
     }
 
     @Override
@@ -411,7 +411,7 @@ public abstract class EntityProjectile extends EntityBase implements IBullet
 
 
     @Override
-    public void setThrowableHeading(double xx, double yy, double zz, float multiplier, float random)
+    public void shoot(double xx, double yy, double zz, float multiplier, float random)
     {
         //Normalize
         float velocity = MathHelper.sqrt(xx * xx + yy * yy + zz * zz);
