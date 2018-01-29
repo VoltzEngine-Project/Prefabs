@@ -196,6 +196,7 @@ public class BlockTile extends BlockContainer
     {
         super.harvestBlock(world, player, x, y, z, meta);
         world.removeTileEntity(x, y, z);
+        world.setBlockToAir(x, y, z);
     }
 
     @Override

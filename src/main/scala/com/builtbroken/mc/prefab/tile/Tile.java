@@ -972,7 +972,7 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      */
     public boolean removeByPlayer(EntityPlayer player, boolean willHarvest)
     {
-        return oldWorld().setBlockToAir(xi(), yi(), zi());
+        return willHarvest ? true : oldWorld().setBlockToAir(xi(), yi(), zi());
     }
 
     /**
