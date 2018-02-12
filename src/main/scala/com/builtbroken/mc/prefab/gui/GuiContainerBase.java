@@ -11,11 +11,12 @@ import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.lib.render.RenderUtility;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import com.builtbroken.mc.prefab.gui.slot.ISlotRender;
+import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -230,6 +231,35 @@ public class GuiContainerBase<H> extends GuiContainer
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
+
+    }
+
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float p_73863_3_)
+    {
+        super.drawScreen(mouseX, mouseY, p_73863_3_);
+
+        ///============================================================
+        ///================Render Fields===============================
+        ///============================================================
+        if (fields != null && fields.size() > 0)
+        {
+            GL11.glDisable(GL11.GL_LIGHTING);
+            GL11.glDisable(GL11.GL_BLEND);
+            for (GuiTextField field : fields)
+            {
+                field.drawTextBox();
+            }
+        }
+
+        ///============================================================
+        ///===============Render tooltips===============================
+        ///============================================================
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        RenderHelper.disableStandardItemLighting();
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+
         //TODO rework to be object based
         //TODO rework to be attached to components rather than free floating
         for (Entry<Rectangle, String> entry : this.tooltips.entrySet())
@@ -243,26 +273,15 @@ public class GuiContainerBase<H> extends GuiContainer
 
         if (this.currentToolTip != null && this.currentToolTip != "")
         {
-            List<String> lines = LanguageUtility.splitByLine(currentToolTip, LanguageUtility.toolTipLineLength);
-            this.drawTooltip(mouseX - this.guiLeft, mouseY - this.guiTop, lines.toArray(new String[lines.size()])); //TODO find a way to not have to convert to array to improve render time
+            this.drawTooltip(mouseX, mouseY, currentToolTip.split(";"));
         }
 
         this.currentToolTip = "";
-    }
 
-    @Override
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
-    {
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
-        if (fields != null && fields.size() > 0)
-        {
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_BLEND);
-            for (GuiTextField field : fields)
-            {
-                field.drawTextBox();
-            }
-        }
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        RenderHelper.enableStandardItemLighting();
+        ///============================================================
     }
 
     @Override
@@ -770,73 +789,15 @@ public class GuiContainerBase<H> extends GuiContainer
         fontRendererObj.drawString(display, x, y, 4210752);
     }
 
-    //TODO update and docs
-    public void drawTooltip(int x, int y, String... toolTips)
+    public void drawTooltip(int x, int y, String... tooltips)
     {
-        if (!GuiScreen.isShiftKeyDown())
-        {
-            if (toolTips != null)
-            {
-                GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-                GL11.glDisable(GL11.GL_DEPTH_TEST);
+        drawTooltip(x, y, Lists.newArrayList(tooltips));
+    }
 
-                int var5 = 0;
-                int var6;
-                int var7;
-
-                for (var6 = 0; var6 < toolTips.length; ++var6)
-                {
-                    var7 = fontRendererObj.getStringWidth(toolTips[var6]);
-
-                    if (var7 > var5)
-                    {
-                        var5 = var7;
-                    }
-                }
-
-                var6 = x + 12;
-                var7 = y - 12;
-
-                int var9 = 8;
-
-                if (toolTips.length > 1)
-                {
-                    var9 += 2 + (toolTips.length - 1) * 10;
-                }
-
-                if (this.guiTop + var7 + var9 + 6 > this.height)
-                {
-                    var7 = this.height - var9 - this.guiTop - 6;
-                }
-
-                this.zLevel = 300;
-                int var10 = -267386864;
-                this.drawGradientRect(var6 - 3, var7 - 4, var6 + var5 + 3, var7 - 3, var10, var10);
-                this.drawGradientRect(var6 - 3, var7 + var9 + 3, var6 + var5 + 3, var7 + var9 + 4, var10, var10);
-                this.drawGradientRect(var6 - 3, var7 - 3, var6 + var5 + 3, var7 + var9 + 3, var10, var10);
-                this.drawGradientRect(var6 - 4, var7 - 3, var6 - 3, var7 + var9 + 3, var10, var10);
-                this.drawGradientRect(var6 + var5 + 3, var7 - 3, var6 + var5 + 4, var7 + var9 + 3, var10, var10);
-                int var11 = 1347420415;
-                int var12 = (var11 & 16711422) >> 1 | var11 & -16777216;
-                this.drawGradientRect(var6 - 3, var7 - 3 + 1, var6 - 3 + 1, var7 + var9 + 3 - 1, var11, var12);
-                this.drawGradientRect(var6 + var5 + 2, var7 - 3 + 1, var6 + var5 + 3, var7 + var9 + 3 - 1, var11, var12);
-                this.drawGradientRect(var6 - 3, var7 - 3, var6 + var5 + 3, var7 - 3 + 1, var11, var11);
-                this.drawGradientRect(var6 - 3, var7 + var9 + 2, var6 + var5 + 3, var7 + var9 + 3, var12, var12);
-
-                for (int var13 = 0; var13 < toolTips.length; ++var13)
-                {
-                    String var14 = toolTips[var13];
-
-                    fontRendererObj.drawStringWithShadow(var14, var6, var7, -1);
-                    var7 += 10;
-                }
-
-                this.zLevel = 0;
-
-                GL11.glEnable(GL11.GL_DEPTH_TEST);
-                GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            }
-        }
+    //TODO update and docs
+    public void drawTooltip(int x, int y, List<String> tooltips)
+    {
+        drawHoveringText(tooltips, x, y, fontRendererObj);
     }
 
     /**
