@@ -83,6 +83,11 @@ public class GuiButton9px<E extends GuiButton9px> extends GuiImageButton<E>
         return new GuiButton9px(id, x, y, 14, 0);
     }
 
+    public static GuiButton9px newQuestionButton(int id, int x, int y)
+    {
+        return new GuiButton9px(id, x, y, 16, 0);
+    }
+
     public static GuiButton9px newNodeButton(int id, int x, int y)
     {
         return new GuiButton9px(id, x, y, 15, 0);
