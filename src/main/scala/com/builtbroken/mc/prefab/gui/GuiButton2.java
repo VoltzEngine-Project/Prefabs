@@ -6,6 +6,8 @@ import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.function.Function;
+
 /**
  * Wrapper/Utility version of the default MC button
  * Is also used a prefab for buttons with more features
@@ -16,6 +18,8 @@ import net.minecraft.util.ResourceLocation;
 public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
 {
     public static final Point DEFAULT_SIZE = new Point(200, 20);
+
+    protected Function<E, Boolean> onMousePressFunction;
 
     public GuiButton2(int id, IPos2D point, String key)
     {
@@ -36,6 +40,26 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     public GuiButton2(int id, int x, int y, int width, int height, String key)
     {
         super(id, x, y, width, height, key);
+    }
+
+    @Override
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
+    {
+        if (super.mousePressed(mc, mouseX, mouseY))
+        {
+            if (onMousePressFunction != null)
+            {
+                return !onMousePressFunction.apply((E) this);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public E setOnMousePressFunction(Function<E, Boolean> onMousePressFunction)
+    {
+        this.onMousePressFunction = onMousePressFunction;
+        return (E) this;
     }
 
     @Override
