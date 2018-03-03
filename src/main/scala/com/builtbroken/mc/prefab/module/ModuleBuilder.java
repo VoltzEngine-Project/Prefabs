@@ -14,6 +14,7 @@ import java.util.Set;
 /**
  * Created by robert on 12/28/2014.
  */
+@Deprecated //Will be reworked at some point
 public class ModuleBuilder<C extends IModule>
 {
     /** Common ID used to save modules to NBT */
@@ -21,7 +22,7 @@ public class ModuleBuilder<C extends IModule>
     /** Map of builder names to module set builders. */
     public static final HashMap<String, ModuleBuilder> MODULE_BUILDERS = new HashMap();
 
-    HashBiMap<String, Class<C>> idToCLassMap = HashBiMap.create();
+    HashBiMap<String, Class<? extends C>> idToCLassMap = HashBiMap.create();
     HashMap<String, List<String>> modToModules = new HashMap();
 
     /**
@@ -32,7 +33,7 @@ public class ModuleBuilder<C extends IModule>
      * @param clazz  - class of the module, must have a constructor that takes an {@link ItemStack}
      * @return true if the module registers correctly
      */
-    public boolean register(String mod_id, String name, Class<C> clazz)
+    public boolean register(String mod_id, String name, Class<? extends C> clazz)
     {
         //Value checks to prevent other modders from making mistakes
         if (clazz == null)
@@ -122,6 +123,7 @@ public class ModuleBuilder<C extends IModule>
      */
     public C build(ItemStack stack)
     {
+        //TODO trash this section, module building should be handled by the item using IModuleItem#getModule(ItemStack)
         if (stack != null && stack.getTagCompound() != null && stack.getTagCompound().hasKey(SAVE_ID))
         {
             String id = stack.getTagCompound().getString(SAVE_ID);
