@@ -22,6 +22,7 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     {
         this.setItem(item != null ? item.copy() : null);
         this.name = name;
+        load();
     }
 
     @Override
