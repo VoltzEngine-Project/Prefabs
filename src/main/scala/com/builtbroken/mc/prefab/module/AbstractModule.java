@@ -22,7 +22,6 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     {
         this.setItem(item != null ? item.copy() : null);
         this.name = name;
-        load();
     }
 
     @Override
@@ -50,7 +49,7 @@ public abstract class AbstractModule implements IModule, IModuleHasMass
     /** Loads from an ItemStack's NBT, can be used to clone modules */
     public void load(ItemStack stack)
     {
-        if (stack.getTagCompound() != null)
+        if (stack != null && stack.getTagCompound() != null)
         {
             load(stack.getTagCompound());
         }
