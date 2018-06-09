@@ -511,6 +511,7 @@ public class BlockTile extends BlockContainer
     @Override
     public void setBlockBoundsForItemRender()
     {
+        eject();
         Cube cube = staticTile.getBlockBounds();
         if (cube != null)
         {
