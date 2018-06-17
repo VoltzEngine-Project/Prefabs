@@ -30,7 +30,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
 {
     /** Primary inventory container for this machine, all {@link IInventory} and {@link ISidedInventory} calls are wrapped to this object */
     protected I inventory_module;
-    protected EnergyBuffer energyBuffer;
+    protected IEnergyBuffer energyBuffer;
 
     /**
      * Default constructor
@@ -115,7 +115,7 @@ public abstract class TileModuleMachine<I extends IInventory> extends TileModule
     //==================================
 
     @Override
-    public EnergyBuffer getEnergyBuffer(ForgeDirection side)
+    public IEnergyBuffer getEnergyBuffer(ForgeDirection side)
     {
         if (energyBuffer == null && getEnergyBufferSize() > 0)
         {
