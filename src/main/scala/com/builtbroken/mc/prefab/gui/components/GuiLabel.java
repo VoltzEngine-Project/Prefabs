@@ -1,7 +1,6 @@
 package com.builtbroken.mc.prefab.gui.components;
 
 import net.minecraft.client.Minecraft;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Version of {@link GuiField} that can not be edited
@@ -46,15 +45,13 @@ public class GuiLabel extends GuiComponent<GuiLabel>
     @Override
     protected void preRender(Minecraft mc, int mouseX, int mouseY)
     {
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_BLEND);
+
     }
 
     @Override
     protected void postRender(Minecraft mc, int mouseX, int mouseY)
     {
-        GL11.glEnable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_BLEND);
+
     }
 
     @Override

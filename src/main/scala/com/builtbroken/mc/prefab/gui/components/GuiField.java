@@ -457,15 +457,15 @@ public class GuiField extends GuiComponent<GuiField>
     @Override
     protected void preRender(Minecraft mc, int mouseX, int mouseY)
     {
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_BLEND);
+        //GL11.glDisable(GL11.GL_LIGHTING);
+        //GL11.glDisable(GL11.GL_BLEND);
     }
 
     @Override
     protected void postRender(Minecraft mc, int mouseX, int mouseY)
     {
-        GL11.glEnable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_BLEND);
+        //GL11.glEnable(GL11.GL_LIGHTING);
+        //GL11.glEnable(GL11.GL_BLEND);
     }
 
     @Override
@@ -475,6 +475,9 @@ public class GuiField extends GuiComponent<GuiField>
         {
             drawRect(this.x() - 1, this.y() - 1, this.x() + this.getWidth() + 1, this.y() + this.getHeight() + 1, -6250336);
             drawRect(this.x(), this.y(), this.x() + this.getWidth(), this.y() + this.getHeight(), -16777216);
+
+            //Reset color
+            GL11.glColor4f(1f, 1f, 1f, 1f);
         }
     }
 

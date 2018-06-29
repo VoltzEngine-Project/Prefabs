@@ -4,6 +4,7 @@ import com.builtbroken.mc.client.SharedAssets;
 import com.builtbroken.mc.prefab.gui.GuiButton2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 /**
  * Simple button that uses images instead of text
@@ -68,6 +69,19 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
     }
 
     /**
+     * Creates a new trash can button
+     *
+     * @param id
+     * @param x
+     * @param y
+     * @return
+     */
+    public static GuiImageButton newTrashCanButton(int id, int x, int y)
+    {
+        return new GuiImageButton(id, x, y, 18, 18, 54, 198);
+    }
+
+    /**
      * Creates a new button with a width and height of 18 pixels
      *
      * @param id  - button id
@@ -96,7 +110,12 @@ public class GuiImageButton<E extends GuiImageButton> extends GuiButton2<E>
     @Override
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
+        if(!isEnabled())
+        {
+            GL11.glColor4f(0.2f, 0.2f, 0.2f, 1f);
+        }
         this.drawTexturedModalRect(this.xPosition, this.yPosition, u + getURenderModifier(), v + getVRenderModifier(), this.getWidth(), this.getHeight());
+        GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
     protected int getURenderModifier()

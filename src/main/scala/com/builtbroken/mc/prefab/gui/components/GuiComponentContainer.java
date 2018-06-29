@@ -76,11 +76,16 @@ public class GuiComponentContainer<E extends GuiComponentContainer> extends GuiC
         super.doRender(mc, mouseX, mouseY);
         for (GuiComponent component : getComponents())
         {
+            //Reset color
+            GL11.glColor4f(1f, 1f, 1f, 1f);
+
             GL11.glPushMatrix();
             component.drawButton(mc, mouseX, mouseY);
-            GL11.glColor4f(1f, 1f, 1f, 1f);
             GL11.glPopMatrix();
         }
+
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
     @Override

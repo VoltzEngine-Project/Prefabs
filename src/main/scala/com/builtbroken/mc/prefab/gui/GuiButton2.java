@@ -5,6 +5,7 @@ import com.builtbroken.mc.imp.transform.vector.Point;
 import com.builtbroken.mc.prefab.gui.components.GuiComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 import java.util.function.Function;
 
@@ -65,7 +66,11 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
     @Override
     protected void doRender(Minecraft mc, int mouseX, int mouseY)
     {
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
         int hoverState = this.getHoverState(this.field_146123_n);
+
         this.drawTexturedModalRect(this.x(), this.y(), 0, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
         this.drawTexturedModalRect(this.x() + this.getWidth() / 2, this.y(), 200 - this.getWidth() / 2, 46 + hoverState * 20, this.getWidth() / 2, this.getHeight());
 
@@ -84,6 +89,9 @@ public class GuiButton2<E extends GuiButton2> extends GuiComponent<E>
             color = 16777120;
         }
         this.drawCenteredString(mc.fontRenderer, this.displayString, this.x() + this.getWidth() / 2, this.y() + (this.getHeight() - 8) / 2, color);
+
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
     @Override

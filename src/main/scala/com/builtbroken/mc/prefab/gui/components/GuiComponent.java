@@ -7,7 +7,6 @@ import com.builtbroken.mc.prefab.gui.GuiButton2;
 import com.builtbroken.mc.prefab.gui.screen.GuiScreenBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -89,10 +88,14 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         {
             //Reset color to default
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
             preRender(mc, mouseX, mouseY);
             render(mc, mouseX, mouseY);
             postRender(mc, mouseX, mouseY);
             this.mouseDragged(mc, mouseX, mouseY);
+
+            //Reset color
+            GL11.glColor4f(1f, 1f, 1f, 1f);
         }
     }
 
@@ -108,9 +111,9 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         //Set up blinding for render
         if (enableBlinding)
         {
-            GL11.glEnable(GL11.GL_BLEND);
-            OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            //GL11.glEnable(GL11.GL_BLEND);
+            //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+            //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 
@@ -135,6 +138,9 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      */
     protected void render(Minecraft mc, int mouseX, int mouseY)
     {
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
         //Draw background
         mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
         drawBackground(mc, mouseX, mouseY);
@@ -177,6 +183,9 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
         GL11.glColor4f(1, 1, 1, 1);
         mc.getTextureManager().bindTexture(getTexture() != null ? getTexture() : SharedAssets.GREY_TEXTURE_40pAlpha);
         doRender(mc, mouseX, mouseY);
+
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
     /**
@@ -200,12 +209,23 @@ public abstract class GuiComponent<E extends GuiComponent> extends GuiButton
      */
     protected void drawBackground(Minecraft mc, int mouseX, int mouseY)
     {
+        //Set color
         Color color = getBackgroundColor();
         if (color != null)
         {
             GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         }
+        else
+        {
+            //Reset color
+            GL11.glColor4f(1f, 1f, 1f, 1f);
+        }
+
+        //Draw
         this.drawTexturedModalRect(this.x(), this.y(), getU(), getV(), this.getWidth(), this.getHeight());
+
+        //Reset color
+        GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
     protected Color getBackgroundColor()
