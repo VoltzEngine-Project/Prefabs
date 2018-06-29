@@ -78,6 +78,10 @@ import java.util.*;
 @Deprecated
 public abstract class Tile extends TileEntityBase implements IWorldPosition, IPlayerUsing, IRegistryInit, ITile
 {
+    private static final String NBT_TILE_OWNER_NAME = "tileOwnerUsername";
+    private static final String NBT_TILE_OWNER_UUID_M = "tileOwnerMostSigBit";
+    private static final String NBT_TILE_OWNER_UUID_L = "tileOwnerLeastSigBit";
+
     //Static block vars, never use in your tile
     /** STATIC BLOCK, block for this tile. Will not be initialized in each tile */
     public BlockTile block = null;
@@ -289,13 +293,13 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
     public void readFromNBT(NBTTagCompound nbt)
     {
         super.readFromNBT(nbt);
-        if (nbt.hasKey("tileOwnerMostSigBit") && nbt.hasKey("tileOwnerLeastSigBit"))
+        if (nbt.hasKey(NBT_TILE_OWNER_UUID_M) && nbt.hasKey(NBT_TILE_OWNER_UUID_L))
         {
-            this.owner = new UUID(nbt.getLong("tileOwnerMostSigBit"), nbt.getLong("tileOwnerLeastSigBit"));
+            this.owner = new UUID(nbt.getLong(NBT_TILE_OWNER_UUID_M), nbt.getLong(NBT_TILE_OWNER_UUID_L));
         }
-        if (nbt.hasKey("tileOwnerUsername"))
+        if (nbt.hasKey(NBT_TILE_OWNER_NAME))
         {
-            this.username = nbt.getString("tileOwnerUsername");
+            this.username = nbt.getString(NBT_TILE_OWNER_NAME);
         }
     }
 
@@ -305,12 +309,12 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
         super.writeToNBT(nbt);
         if (owner != null)
         {
-            nbt.setLong("tileOwnerMostSigBit", this.owner.getMostSignificantBits());
-            nbt.setLong("tileOwnerLeastSigBit", this.owner.getLeastSignificantBits());
+            nbt.setLong(NBT_TILE_OWNER_UUID_M, this.owner.getMostSignificantBits());
+            nbt.setLong(NBT_TILE_OWNER_UUID_L, this.owner.getLeastSignificantBits());
         }
         if (username != null && !username.isEmpty())
         {
-            nbt.setString("tileOwnerUsername", this.username);
+            nbt.setString(NBT_TILE_OWNER_NAME, this.username);
         }
     }
 
@@ -1316,11 +1320,11 @@ public abstract class Tile extends TileEntityBase implements IWorldPosition, IPl
      * The Tessellator will need to be started if it is to be used.
      *
      * @param pos   The position of this block space relative to the renderer, same as x, y, z passed to TESR.
-     * @param frame The partial interpolation frame value for animations between ticks
+     * @param deltaFrame The partial interpolation frame value for animations between ticks
      * @param pass  The render pass, 1 or 0
      */
     @SideOnly(Side.CLIENT)
-    public void renderDynamic(Pos pos, float frame, int pass)
+    public void renderDynamic(Pos pos, float deltaFrame, int pass)
     {
         TileEntitySpecialRenderer tesr = getSpecialRenderer();
 
