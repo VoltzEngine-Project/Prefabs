@@ -1,8 +1,9 @@
 package com.builtbroken.mc.prefab.tile;
 
+import com.builtbroken.jlib.data.network.IByteBufWriter;
 import com.builtbroken.mc.api.IWorldPosition;
-import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.api.data.IPacket;
+import com.builtbroken.mc.core.Engine;
 import com.builtbroken.mc.core.network.packet.PacketTile;
 import com.builtbroken.mc.core.network.packet.PacketType;
 import com.builtbroken.mc.imp.transform.vector.Location;
@@ -17,7 +18,7 @@ import java.awt.*;
  * Created by robert on 1/12/2015.
  */
 @Deprecated
-public class TileEnt extends Tile
+public class TileEnt extends Tile implements IByteBufWriter
 {
     protected static int DESCRIPTION_PACKET_ID = -1;
 
@@ -107,18 +108,15 @@ public class TileEnt extends Tile
     }
 
     @Override
+    public ByteBuf writeBytes(ByteBuf buf)
+    {
+        writeDescPacket(buf);
+        return buf;
+    }
+
+    @Override
     public IPacket getDescPacket()
     {
-        try
-        {
-            PacketTile packet = new PacketTile(this, DESCRIPTION_PACKET_ID);
-            writeDescPacket(packet.data());
-            return packet;
-        }
-        catch (Exception e)
-        {
-            Engine.logger().error("Failed to write description packet for " + this + "  ", e);
-        }
-        return null;
+        return new PacketTile(this, DESCRIPTION_PACKET_ID, this);
     }
 }

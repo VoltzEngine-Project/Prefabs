@@ -1,5 +1,6 @@
 package com.builtbroken.mc.prefab.entity;
 
+import com.builtbroken.jlib.data.network.IByteBufWriter;
 import com.builtbroken.mc.api.IWorldPosition;
 import com.builtbroken.mc.api.data.SensorType;
 import com.builtbroken.mc.api.entity.IEntity;
@@ -22,8 +23,10 @@ import net.minecraft.world.World;
  * Base entity class to be shared by most entities
  * Created by robert on 1/24/2015.
  */
-public abstract class EntityBase extends Entity implements IPacketIDReceiver, IEntity
+public abstract class EntityBase extends Entity implements IPacketIDReceiver, IEntity, IByteBufWriter
 {
+    private static final int PACKET_DESC = -1;
+
     /** Does the entity have HP to take damage. */
     protected boolean hasHealth = false;
 
@@ -122,7 +125,7 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
         if (worldObj.isRemote)
         {
             //Updates client if cargo changes
-            if (id == -1)
+            if (id == PACKET_DESC)
             {
                 readDescData(buf);
                 return true;
@@ -136,9 +139,15 @@ public abstract class EntityBase extends Entity implements IPacketIDReceiver, IE
      */
     protected void sentDescriptionPacket()
     {
-        final PacketEntity entity = new PacketEntity(this, -1);
-        writeDescData(entity.data());
+        final PacketEntity entity = new PacketEntity(this).add(PACKET_DESC).add(this);
         Engine.packetHandler.sendToAllAround(entity, (IWorldPosition) this, 64);
+    }
+
+    @Override
+    public ByteBuf writeBytes(ByteBuf buf)
+    {
+        writeDescData(buf);
+        return buf;
     }
 
     /**
